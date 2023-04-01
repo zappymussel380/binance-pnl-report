@@ -1,6 +1,6 @@
 package no.strazdins.file;
 
-import no.strazdins.Report;
+import no.strazdins.process.Report;
 
 /**
  * Writes report to a CSV file.

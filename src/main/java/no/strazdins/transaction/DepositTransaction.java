@@ -1,5 +1,10 @@
-package no.strazdins.data;
+package no.strazdins.transaction;
 
+import no.strazdins.data.ExtraInfoEntry;
+import no.strazdins.data.ExtraInfoType;
+import no.strazdins.data.Operation;
+import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.Converter;
 
 /**
@@ -26,5 +31,19 @@ public class DepositTransaction extends Transaction {
     String date = Converter.utcTimeToDateString(utcTime);
     String hint = "<" + getChange().getAsset() + " price in home currency on " + date + ">";
     return new ExtraInfoEntry(utcTime, ExtraInfoType.ASSET_PRICE, hint);
+  }
+
+  @Override
+  public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
+    WalletSnapshot newSnapshot = new WalletSnapshot(walletSnapshot);
+    String obtainPrice = extraInfo.value();
+    RawAccountChange depositOperation = getFirstChangeOfType(Operation.DEPOSIT);
+    String depositAmount = depositOperation.getAmount();
+    String asset = depositOperation.getAsset();
+    walletSnapshot.addAsset(asset, depositAmount, obtainPrice);
+    // TODO - recalculate:
+    // - wallet.asset.amount
+    // - wallet.asset.averageObtainPrice
+    return newSnapshot;
   }
 }

@@ -1,4 +1,4 @@
-package no.strazdins;
+package no.strazdins.process;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -6,10 +6,9 @@ import java.util.List;
 import no.strazdins.data.ExtraInfo;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.RawAccountChange;
-import no.strazdins.data.Transaction;
-import no.strazdins.file.TransactionFileReader;
-import no.strazdins.process.ExtraInfoHandler;
 import no.strazdins.file.ReportFileWriter;
+import no.strazdins.file.TransactionFileReader;
+import no.strazdins.transaction.Transaction;
 
 
 /**

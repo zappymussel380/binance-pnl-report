@@ -67,7 +67,6 @@ TransactionTypeEnum: (BuyOrder, SellOrder, CoinDeposit, CoinWithdrawal,
 // Snapshot of the whole wallet after a specific transaction. 
 // Contains a list of CurrencyBalanceSnapshot objects
 WalletSnapshot:
-    timestamp: long
     transaction: Transaction
     currencySnapshots: List<CurrencyBalanceSnapshot>
     

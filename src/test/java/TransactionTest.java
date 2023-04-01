@@ -1,4 +1,6 @@
 import no.strazdins.data.*;
+import no.strazdins.transaction.DepositTransaction;
+import no.strazdins.transaction.Transaction;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;

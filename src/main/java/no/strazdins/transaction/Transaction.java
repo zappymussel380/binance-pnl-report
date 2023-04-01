@@ -1,11 +1,15 @@
-package no.strazdins.data;
-
-import no.strazdins.tool.Converter;
+package no.strazdins.transaction;
 
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import no.strazdins.data.ExtraInfoEntry;
+import no.strazdins.data.Operation;
+import no.strazdins.data.OperationMultiSet;
+import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.WalletSnapshot;
+import no.strazdins.tool.Converter;
 
 /**
  * Contains one financial asset transaction, consisting of several AccountChanges.
@@ -92,5 +96,27 @@ public class Transaction {
    */
   public ExtraInfoEntry getNecessaryExtraInfo() {
     return null;
+  }
+
+  /**
+   * Get timestamp of the transaction, as a UTC timestamp.
+   *
+   * @return UTC timestamp of the transaction, containing milliseconds.
+   */
+  public long getUtcTime() {
+    return utcTime;
+  }
+
+  /**
+   * Consider the current wallet snapshot, and return a new wallet snapshot which is the result
+   * of processing this transaction.
+   * The logic must be implemented in the child classes.
+   *
+   * @param walletSnapshot The current wallet snapshot before the transaction
+   * @param extraInfo      Extra info provided by the user, if any
+   * @return The new wallet snapshot after processing this transaction
+   */
+  public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
+    throw new UnsupportedOperationException();
   }
 }

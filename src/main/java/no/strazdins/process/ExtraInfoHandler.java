@@ -2,12 +2,12 @@ package no.strazdins.process;
 
 import java.io.IOException;
 import java.util.List;
-import no.strazdins.tool.Converter;
 import no.strazdins.data.ExtraInfo;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.ExtraInfoType;
-import no.strazdins.data.Transaction;
 import no.strazdins.file.CsvFileParser;
+import no.strazdins.tool.Converter;
+import no.strazdins.transaction.Transaction;
 
 /**
  * Handles extra information provided by the user (as an external CSV file).

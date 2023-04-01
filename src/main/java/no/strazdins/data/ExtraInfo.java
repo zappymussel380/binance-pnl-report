@@ -10,6 +10,7 @@ import java.util.TreeMap;
  * Extra user-provided information.
  */
 public class ExtraInfo {
+  // Mapping timestamp to a list of extra info entries
   private final Map<Long, List<ExtraInfoEntry>> entries = new TreeMap<>();
   // Copy of all the entries
   private final List<ExtraInfoEntry> allEntries = new LinkedList<>();
@@ -62,5 +63,16 @@ public class ExtraInfo {
           && existingEntry.type().equals(e.type());
     }
     return found;
+  }
+
+  /**
+   * Get stored extra info for a given time moment.
+   *
+   * @param utcTime UTC timestamp of the time moment in question, including milliseconds.
+   * @return The stored ExtraInfo record, or null if none found.
+   */
+  public ExtraInfoEntry getAtTime(long utcTime) {
+    List<ExtraInfoEntry> entryList = entries.get(utcTime);
+    return entryList != null ? entryList.get(0) : null;
   }
 }

@@ -3,10 +3,10 @@ package no.strazdins.file;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import no.strazdins.tool.Converter;
 import no.strazdins.data.AccountType;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
+import no.strazdins.tool.Converter;
 
 
 /**
