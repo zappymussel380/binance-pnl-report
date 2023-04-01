@@ -17,7 +17,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
