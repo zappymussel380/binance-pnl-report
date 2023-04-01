@@ -3,7 +3,7 @@ import no.strazdins.data.Decimal;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AssetBalanceTest {
+class AssetBalanceTest {
   @Test
   void testAdd() {
     AssetBalance b = new AssetBalance(new Decimal("8"), new Decimal("10"));

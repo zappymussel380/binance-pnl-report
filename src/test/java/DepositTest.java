@@ -10,7 +10,7 @@ import no.strazdins.transaction.Transaction;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DepositTest {
+class DepositTest {
 
   @Test
   void testDeposit() {

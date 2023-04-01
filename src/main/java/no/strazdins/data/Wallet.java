@@ -11,6 +11,21 @@ import java.util.Objects;
 public class Wallet {
   private final Map<String, AssetBalance> assets = new HashMap<>();
 
+  public Wallet() {
+
+  }
+
+  /**
+   * A copy-constructor - creates a deep-copy of w.
+   *
+   * @param w The original wallet to be copied
+   */
+  public Wallet(Wallet w) {
+    for (Map.Entry<String, AssetBalance> entry : w.assets.entrySet()) {
+      assets.put(entry.getKey(), new AssetBalance(entry.getValue()));
+    }
+  }
+
   /**
    * Add an asset to the wallet.
    *
@@ -34,19 +49,6 @@ public class Wallet {
    */
   public int getAssetCount() {
     return assets.size();
-  }
-
-  /**
-   * Create a clone of this wallet - create duplicates of all the data, a deep copy.
-   *
-   * @return A clone of this object
-   */
-  public Wallet clone() {
-    Wallet w = new Wallet();
-    for (Map.Entry<String, AssetBalance> entry : assets.entrySet()) {
-      w.assets.put(entry.getKey(), entry.getValue().clone());
-    }
-    return w;
   }
 
   @Override

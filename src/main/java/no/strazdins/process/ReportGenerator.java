@@ -48,7 +48,7 @@ public class ReportGenerator {
     ExtraInfo missingInfo = extraInfoHandler.detectMissingInfo(transactions);
     if (missingInfo.isEmpty()) {
       Report report = generateReport(transactions, extraInfoHandler.getUserProvidedInfo());
-      ReportFileWriter.writeReportToFile(report, outputFilePath);
+      ReportFileWriter.writeReportToFile(report, outputFilePath, homeCurrency);
     } else {
       printMissingInfoRequirement(missingInfo);
     }

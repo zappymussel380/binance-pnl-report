@@ -40,7 +40,7 @@ public class WalletSnapshot {
    */
   public WalletSnapshot prepareForTransaction(Transaction transaction) {
     WalletSnapshot ws = new WalletSnapshot(transaction, new Decimal(pnl));
-    ws.wallet = this.wallet.clone();
+    ws.wallet = new Wallet(this.wallet);
     return ws;
   }
 
@@ -60,5 +60,37 @@ public class WalletSnapshot {
 
   public Decimal getPnl() {
     return pnl;
+  }
+
+  /**
+   * Get Unix timestamp when the snapshot was created.
+   *
+   * @return Unix timestamp, including milliseconds
+   */
+  public long getTimestamp() {
+    return transaction.getUtcTime();
+  }
+
+  public Transaction getTransaction() {
+    return transaction;
+  }
+
+  /**
+   * Get the amount of the base currency accumulated in the wallet so far.
+   *
+   * @return The amount of the base currency (main currency of this transaction) accumulated
+   */
+  public Decimal getBaseCurrencyAmountInWallet() {
+    return wallet.getAssetAmount(transaction.getBaseCurrency());
+  }
+
+  /**
+   * Get the average purchase price (obtain price) of the main currency of this transaction.
+   * The price is calculated over all the transactions so far.
+   *
+   * @return The average obtain-price of the main asset of this transaction
+   */
+  public Decimal getAvgBaseObtainPrice() {
+    return wallet.getAvgObtainPrice(transaction.getBaseCurrency());
   }
 }

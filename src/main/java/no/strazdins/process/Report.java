@@ -1,5 +1,6 @@
 package no.strazdins.process;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import no.strazdins.data.ExtraInfo;
@@ -10,7 +11,7 @@ import no.strazdins.transaction.Transaction;
 /**
  * Profit-and-loss report.
  */
-public class Report {
+public class Report implements Iterable<WalletSnapshot> {
   private final ExtraInfo extraInfo;
   private final List<WalletSnapshot> walletSnapshots = new LinkedList<>();
   private WalletSnapshot currentWalletSnapshot;
@@ -27,5 +28,10 @@ public class Report {
 
   private ExtraInfoEntry getExtraInfo(Transaction transaction) {
     return extraInfo.getAtTime(transaction.getUtcTime());
+  }
+
+  @Override
+  public Iterator<WalletSnapshot> iterator() {
+    return walletSnapshots.iterator();
   }
 }

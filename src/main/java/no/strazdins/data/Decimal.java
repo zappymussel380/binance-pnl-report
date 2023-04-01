@@ -3,6 +3,7 @@ package no.strazdins.data;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.Objects;
 
 /**
  * Use this class for storing prices and other decimal numbers without losing
@@ -254,6 +255,11 @@ public class Decimal implements Comparable<Decimal> {
   }
 
   @Override
+  public int hashCode() {
+    return Objects.hash(number);
+  }
+
+  @Override
   public String toString() {
     return number.toString();
   }
@@ -291,11 +297,11 @@ public class Decimal implements Comparable<Decimal> {
    * Create an array of Decimals from an array of Strings.
    *
    * @param d Array of Decimal string values
-   * @return Array of corresponding Decimal objects
+   * @return Array of corresponding Decimal objects, or an empty array if d is null
    */
   public static Decimal[] createArray(String[] d) {
     if (d == null) {
-      return null;
+      return new Decimal[]{};
     }
     Decimal[] res = new Decimal[d.length];
     for (int i = 0; i < d.length; ++i) {

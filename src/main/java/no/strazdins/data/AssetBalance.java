@@ -5,13 +5,18 @@ import java.util.Objects;
 /**
  * Holds tha amount and obtain-price for one specific asset in the wallet.
  */
-public class AssetBalance implements Cloneable {
+public class AssetBalance {
   private Decimal amount;
   private Decimal obtainPrice;
 
   public AssetBalance(Decimal amount, Decimal obtainPrice) {
     this.amount = amount;
     this.obtainPrice = obtainPrice;
+  }
+
+  public AssetBalance(AssetBalance ab) {
+    this.amount = ab.amount;
+    this.obtainPrice = ab.obtainPrice;
   }
 
   /**
@@ -71,7 +76,4 @@ public class AssetBalance implements Cloneable {
     return Objects.hash(amount, obtainPrice);
   }
 
-  public AssetBalance clone() {
-    return new AssetBalance(amount, obtainPrice);
-  }
 }

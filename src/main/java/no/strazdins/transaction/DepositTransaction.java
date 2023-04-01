@@ -44,12 +44,17 @@ public class DepositTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
+    baseObtainPriceInHc = new Decimal(extraInfo.value());
+    RawAccountChange depositOperation = getChange();
+    baseCurrency = depositOperation.getAsset();
+    baseCurrencyAmount = depositOperation.getAmount();
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
-    Decimal obtainPrice = new Decimal(extraInfo.value());
-    RawAccountChange depositOperation = getFirstChangeOfType(Operation.DEPOSIT);
-    Decimal depositAmount = depositOperation.getAmount();
-    String asset = depositOperation.getAsset();
-    newSnapshot.addAsset(asset, depositAmount, obtainPrice);
+    newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, baseObtainPriceInHc);
     return newSnapshot;
+  }
+
+  @Override
+  public String getType() {
+    return "Deposit";
   }
 }

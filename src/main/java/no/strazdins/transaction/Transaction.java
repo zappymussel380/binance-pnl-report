@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
 import no.strazdins.data.OperationMultiSet;
@@ -18,6 +19,19 @@ import no.strazdins.tool.Converter;
 public class Transaction {
   Map<Operation, List<RawAccountChange>> atomicAccountChanges = new EnumMap<>(Operation.class);
   protected final long utcTime;
+
+  // These values must be set inside the child classes
+  protected String baseCurrency;
+  protected Decimal baseCurrencyAmount = Decimal.ZERO;
+  // Base currency obtaining price in Home Currency
+  protected Decimal baseObtainPriceInHc = Decimal.ZERO;
+  protected String quoteCurrency;
+  protected Decimal fee = Decimal.ZERO;
+  protected String feeCurrency;
+  protected Decimal feeInHomeCurrency = Decimal.ZERO;
+
+  protected Decimal pnl = Decimal.ZERO;
+
 
   /**
    * Create a new transaction.
@@ -118,5 +132,87 @@ public class Transaction {
    */
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
     throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Get the type of the transaction.
+   *
+   * @return A human-readable type of the transaction. Override this in the child classes.
+   */
+  public String getType() {
+    return "Unknown";
+  }
+
+  /**
+   * Get the base currency of the transaction. Override this in the child classes.
+   *
+   * @return The base currency.
+   */
+  public String getBaseCurrency() {
+    return baseCurrency;
+  }
+
+  /**
+   * Get the quote currency of the transaction. Override this in the child classes.
+   *
+   * @return The quote currency
+   */
+  public String getQuoteCurrency() {
+    return quoteCurrency;
+  }
+
+
+  /**
+   * Get the amount of base currency of the transaction. Override this in the child classes.
+   *
+   * @return The amount of base currency
+   */
+  public Decimal getBaseCurrencyAmount() {
+    return baseCurrencyAmount;
+  }
+
+  /**
+   * Get the fee paid in this transaction. Override this in the child classes.
+   *
+   * @return The fee, in the fee-currency
+   */
+  public Decimal getFee() {
+    return fee;
+  }
+
+  /**
+   * Get the nominal currency of the fee. Override this in the child classes.
+   *
+   * @return The currency in which the fee was paid.
+   */
+  public String getFeeCurrency() {
+    return feeCurrency;
+  }
+
+  /**
+   * Get the amount of fee, converted to the Home Currency. Override this in the child classes.
+   *
+   * @return The fee converted to the Home Currency
+   */
+  public Decimal getFeeInHomeCurrency() {
+    return feeInHomeCurrency;
+  }
+
+  /**
+   * Get obtain-price of the base currency, calculated in the Home Currency.
+   *
+   * @return The obtain-price of the main asset, in Home Currency
+   */
+  public Decimal getObtainPrice() {
+    return baseObtainPriceInHc;
+  }
+
+  /**
+   * Get Profit & Loss (PNL) of this single transaction.
+   *
+   * @return The PNL, in Home currency
+   */
+  public Decimal getPnl() {
+    return pnl;
   }
 }

@@ -3,13 +3,13 @@ import no.strazdins.data.Wallet;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WalletTest {
+class WalletTest {
   @Test
   void testCloning() {
     Wallet w1 = new Wallet();
     w1.addAsset("BTC", Decimal.ONE, new Decimal("24000"));
 
-    Wallet w2 = w1.clone();
+    Wallet w2 = new Wallet(w1);
     assertEquals(w1, w2);
 
     w2.addAsset("BTC", new Decimal("1.2"), new Decimal("30000"));

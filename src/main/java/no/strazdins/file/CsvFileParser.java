@@ -2,7 +2,6 @@ package no.strazdins.file;
 
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -25,7 +24,7 @@ public class CsvFileParser {
    */
   public CsvFileParser(String inputFilePath) throws IOException {
     try {
-      reader = new BufferedReader(new FileReader(new File(inputFilePath)));
+      reader = new BufferedReader(new FileReader(inputFilePath));
     } catch (FileNotFoundException e) {
       throw new IOException("File not found: " + inputFilePath);
     }

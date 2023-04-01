@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for Decimal class
  */
-public class DecimalTest {
+class DecimalTest {
 
   @Test
   void testCreate() {
@@ -146,7 +146,7 @@ public class DecimalTest {
 
   @Test
   void testCreateArray() {
-    assertNull(Decimal.createArray(null));
+    assertEquals(0, Decimal.createArray(null).length);
     Decimal[] d = Decimal.createArray(new String[0]);
     assertNotNull(d);
     assertEquals(0, d.length);
