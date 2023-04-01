@@ -1,12 +1,12 @@
-import org.compilers.*;
+import org.compilers.data.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TransactionTest {
+class TransactionTest {
 
   @Test
-  public void testClarifyTransactionType() {
+  void testClarifyTransactionType() {
     long time = System.currentTimeMillis();
     Transaction t = new Transaction(time);
     assertNull(t.clarifyTransactionType());

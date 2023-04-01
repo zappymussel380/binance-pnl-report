@@ -1,4 +1,6 @@
-package org.compilers;
+package org.compilers.data;
+
+import org.compilers.tool.Converter;
 
 /**
  * A transaction of depositing a crypto to the Binance account.

@@ -3,6 +3,13 @@ package org.compilers;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import org.compilers.data.ExtraInfo;
+import org.compilers.data.ExtraInfoEntry;
+import org.compilers.data.RawAccountChange;
+import org.compilers.data.Transaction;
+import org.compilers.file.TransactionFileReader;
+import org.compilers.process.ExtraInfoHandler;
+
 
 /**
  * Logic for generation of the PNL report.
@@ -36,40 +43,21 @@ public class ReportGenerator {
    * the output file.
    */
   public void createReport() throws IOException {
-    List<RawAccountChange> accountChanges = readAccountChanges(inputFilePath);
-    List<Transaction> rawTransactions = groupTransactionsByTimestamp(accountChanges);
-    List<Transaction> transactions = clarifyTransactionTypes(rawTransactions);
-    ExtraInfo necessaryUserInfo = detectNecessaryExtraInfo(transactions);
-    ExtraInfo providedUserInfo = readUserProvidedExtraInfo();
-    ExtraInfo missingInfo = detectMissingInfo(necessaryUserInfo, providedUserInfo);
+    List<Transaction> transactions = readTransactions();
+    ExtraInfoHandler extraInfoHandler = new ExtraInfoHandler(extraFilePath);
+    ExtraInfo missingInfo = extraInfoHandler.detectMissingInfo(transactions);
     if (missingInfo.isEmpty()) {
-      Report report = generateReport(transactions);
+      Report report = generateReport(transactions, extraInfoHandler.getUserProvidedInfo());
       writeReportToFile(report, outputFilePath);
     } else {
       printMissingInfoRequirement(missingInfo);
     }
   }
 
-  private static List<RawAccountChange> readAccountChanges(String inputFilePath)
-      throws IOException {
-    CsvFileParser csvParser = new CsvFileParser(inputFilePath);
-
-    String[] headerRow = csvParser.readNextRow();
-    checkHeaderRowFormat(headerRow);
-
-    List<RawAccountChange> accountChanges = new LinkedList<>();
-    RawAccountChange previousChange = null;
-    while (csvParser.hasMoreRows()) {
-      String[] row = csvParser.readNextRow();
-      RawAccountChange change = createAccountChangeFromCsvRow(row);
-      if (previousChange != null && previousChange.getUtcTime() > change.getUtcTime()) {
-        throw new IOException("Decreasing timestamp detected: " + previousChange + " -> " + change);
-      }
-      accountChanges.add(change);
-      previousChange = change;
-    }
-
-    return accountChanges;
+  private List<Transaction> readTransactions() throws IOException {
+    List<RawAccountChange> accountChanges = TransactionFileReader.readAccountChanges(inputFilePath);
+    List<Transaction> rawTransactions = groupTransactionsByTimestamp(accountChanges);
+    return clarifyTransactionTypes(rawTransactions);
   }
 
   private List<Transaction> groupTransactionsByTimestamp(List<RawAccountChange> accountChanges) {
@@ -105,42 +93,15 @@ public class ReportGenerator {
     return transactions;
   }
 
-  private ExtraInfo detectNecessaryExtraInfo(List<Transaction> transactions) {
-    ExtraInfo necessaryInfo = new ExtraInfo();
-    for (Transaction t : transactions) {
-      ExtraInfoEntry necessaryExtraInfo = t.getNecessaryExtraInfo();
-      if (necessaryExtraInfo != null) {
-        necessaryInfo.add(necessaryExtraInfo);
-      }
-    }
-    return necessaryInfo;
+
+  private Report generateReport(List<Transaction> transactions, ExtraInfo extraUserInfo) {
+    // TODO
+    throw new UnsupportedOperationException();
   }
 
-  private ExtraInfo detectMissingInfo(ExtraInfo necessaryInfo, ExtraInfo providedInfo) {
-    ExtraInfo missingInfo = new ExtraInfo();
-    for (ExtraInfoEntry necessaryEntry : necessaryInfo.getAllEntries()) {
-      if (!providedInfo.contains(necessaryEntry)) {
-        missingInfo.add(necessaryEntry);
-      }
-    }
-    return missingInfo;
-  }
-
-  private ExtraInfo readUserProvidedExtraInfo() throws IOException {
-    CsvFileParser csvParser = new CsvFileParser(extraFilePath);
-
-    ExtraInfo extraInfo = new ExtraInfo();
-
-    while (csvParser.hasMoreRows()) {
-      extraInfo.add(createExtraInfoEntryFromCsvRow(csvParser.readNextRow()));
-    }
-
-    return extraInfo;
-  }
-
-  private ExtraInfoEntry createExtraInfoEntryFromCsvRow(String[] csvRow) throws IOException {
-    return new ExtraInfoEntry(parseLong(csvRow[0]), ExtraInfoType.fromString(csvRow[1]),
-        parseDecimalString(csvRow[2]));
+  private void writeReportToFile(Report report, String outputFilePath) {
+    // TODO
+    throw new UnsupportedOperationException();
   }
 
   private void printMissingInfoRequirement(ExtraInfo missingInfo) {
@@ -151,57 +112,4 @@ public class ReportGenerator {
     }
   }
 
-  private static void checkHeaderRowFormat(String[] headerRow) throws IOException {
-    if (headerRow.length != 7 || !"User_ID".equals(headerRow[0])
-        || !"UTC_Time".equals(headerRow[1])
-        || !"Account".equals(headerRow[2])
-        || !"Operation".equals(headerRow[3])
-        || !"Coin".equals(headerRow[4])
-        || !"Change".equals(headerRow[5])
-        || !"Remark".equals(headerRow[6])) {
-      throw new IOException("Invalid header row format: " + String.join(",", headerRow));
-    }
-  }
-
-  private static RawAccountChange createAccountChangeFromCsvRow(String[] row) throws IOException {
-    if (row.length != 7) {
-      throw new IOException("Invalid row format: " + String.join(",", row));
-    }
-    long utcTimestamp = Converter.stringToUtcTimestamp(row[1]);
-    AccountType accountType = AccountType.fromString(row[2]);
-    Operation operation = Operation.fromString(row[3]);
-    String asset = row[4];
-    String change = parseDecimalString(row[5]);
-    String remark = row[6];
-    return new RawAccountChange(utcTimestamp, accountType, operation, asset, change, remark);
-  }
-
-
-  private static String parseDecimalString(String s) throws IOException {
-    try {
-      Double.parseDouble(s);
-      return s;
-    } catch (NumberFormatException e) {
-      throw new IOException("Invalid number format: " + s);
-    }
-  }
-
-  private static Long parseLong(String s) throws IOException {
-    try {
-      return Long.parseLong(s);
-    } catch (NumberFormatException e) {
-      throw new IOException("Invalid number format: " + s);
-    }
-  }
-
-
-  private Report generateReport(List<Transaction> transactions) {
-    // TODO
-    throw new UnsupportedOperationException();
-  }
-
-  private void writeReportToFile(Report report, String outputFilePath) {
-    // TODO
-    throw new UnsupportedOperationException();
-  }
 }

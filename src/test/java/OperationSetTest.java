@@ -1,11 +1,11 @@
-import org.compilers.Operation;
-import org.compilers.OperationMultiSet;
+import org.compilers.data.Operation;
+import org.compilers.data.OperationMultiSet;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class OperationSetTest {
+class OperationSetTest {
   @Test
-  public void testAdd() {
+  void testAdd() {
     OperationMultiSet operationMultiSet = new OperationMultiSet();
     assertEquals(0, operationMultiSet.getOperationCount(Operation.DEPOSIT));
 
@@ -23,7 +23,7 @@ public class OperationSetTest {
   }
 
   @Test
-  public void testEquality() {
+  void testEquality() {
     OperationMultiSet s1 = new OperationMultiSet();
     OperationMultiSet s2 = new OperationMultiSet();
     assertEquals(s1, s2);

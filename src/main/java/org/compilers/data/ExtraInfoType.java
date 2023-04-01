@@ -1,4 +1,4 @@
-package org.compilers;
+package org.compilers.data;
 
 import java.io.IOException;
 
