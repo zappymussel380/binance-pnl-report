@@ -25,12 +25,13 @@ public class Transaction {
   protected Decimal baseCurrencyAmount = Decimal.ZERO;
   // Base currency obtaining price in Home Currency
   protected Decimal baseObtainPriceInHc = Decimal.ZERO;
-  protected String quoteCurrency;
+  protected String quoteCurrency = "";
   protected Decimal fee = Decimal.ZERO;
-  protected String feeCurrency;
+  protected String feeCurrency = "";
   protected Decimal feeInHomeCurrency = Decimal.ZERO;
 
   protected Decimal pnl = Decimal.ZERO;
+  private Decimal quoteAmount = Decimal.ZERO;
 
 
   /**
@@ -137,14 +138,14 @@ public class Transaction {
   /**
    * Get the type of the transaction.
    *
-   * @return A human-readable type of the transaction. Override this in the child classes.
+   * @return A human-readable type of the transaction.
    */
   public String getType() {
     return "Unknown";
   }
 
   /**
-   * Get the base currency of the transaction. Override this in the child classes.
+   * Get the base currency of the transaction.
    *
    * @return The base currency.
    */
@@ -153,7 +154,7 @@ public class Transaction {
   }
 
   /**
-   * Get the quote currency of the transaction. Override this in the child classes.
+   * Get the quote currency of the transaction.
    *
    * @return The quote currency
    */
@@ -163,7 +164,7 @@ public class Transaction {
 
 
   /**
-   * Get the amount of base currency of the transaction. Override this in the child classes.
+   * Get the amount of base currency of the transaction.
    *
    * @return The amount of base currency
    */
@@ -172,7 +173,7 @@ public class Transaction {
   }
 
   /**
-   * Get the fee paid in this transaction. Override this in the child classes.
+   * Get the fee paid in this transaction.
    *
    * @return The fee, in the fee-currency
    */
@@ -181,7 +182,7 @@ public class Transaction {
   }
 
   /**
-   * Get the nominal currency of the fee. Override this in the child classes.
+   * Get the nominal currency of the fee.
    *
    * @return The currency in which the fee was paid.
    */
@@ -190,7 +191,7 @@ public class Transaction {
   }
 
   /**
-   * Get the amount of fee, converted to the Home Currency. Override this in the child classes.
+   * Get the amount of fee, converted to the Home Currency.
    *
    * @return The fee converted to the Home Currency
    */
@@ -214,5 +215,14 @@ public class Transaction {
    */
   public Decimal getPnl() {
     return pnl;
+  }
+
+  /**
+   * Get the amount of quote currency change in this transaction.
+   *
+   * @return The amount of quote currency change in this transaction
+   */
+  public Decimal getQuoteAmount() {
+    return quoteAmount;
   }
 }
