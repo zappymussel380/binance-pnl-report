@@ -1,4 +1,4 @@
-package org.compilers;
+package no.strazdins;
 
 import java.io.IOException;
 

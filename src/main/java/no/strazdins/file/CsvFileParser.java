@@ -1,4 +1,4 @@
-package org.compilers.file;
+package no.strazdins.file;
 
 
 import java.io.BufferedReader;

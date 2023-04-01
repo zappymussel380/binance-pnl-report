@@ -1,12 +1,12 @@
-package org.compilers.file;
+package no.strazdins.file;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import org.compilers.data.AccountType;
-import org.compilers.data.Operation;
-import org.compilers.data.RawAccountChange;
-import org.compilers.tool.Converter;
+import no.strazdins.tool.Converter;
+import no.strazdins.data.AccountType;
+import no.strazdins.data.Operation;
+import no.strazdins.data.RawAccountChange;
 
 
 /**

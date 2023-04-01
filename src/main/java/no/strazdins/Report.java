@@ -1,8 +1,8 @@
-package org.compilers;
+package no.strazdins;
 
-import org.compilers.data.ExtraInfo;
-import org.compilers.data.Transaction;
-import org.compilers.data.Wallet;
+import no.strazdins.data.ExtraInfo;
+import no.strazdins.data.Transaction;
+import no.strazdins.data.Wallet;
 
 /**
  * Profit-and-loss report.

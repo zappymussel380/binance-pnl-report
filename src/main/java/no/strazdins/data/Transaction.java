@@ -1,6 +1,6 @@
-package org.compilers.data;
+package no.strazdins.data;
 
-import static org.compilers.tool.Converter.utcTimeToString;
+import no.strazdins.tool.Converter;
 
 import java.util.EnumMap;
 import java.util.LinkedList;
@@ -44,7 +44,7 @@ public class Transaction {
 
   @Override
   public String toString() {
-    return "Transaction@" + utcTimeToString(utcTime);
+    return "Transaction@" + Converter.utcTimeToString(utcTime);
   }
 
   /**

@@ -1,6 +1,6 @@
-package org.compilers.file;
+package no.strazdins.file;
 
-import org.compilers.Report;
+import no.strazdins.Report;
 
 /**
  * Writes report to a CSV file.

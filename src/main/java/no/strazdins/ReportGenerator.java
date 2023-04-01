@@ -1,15 +1,15 @@
-package org.compilers;
+package no.strazdins;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import org.compilers.data.ExtraInfo;
-import org.compilers.data.ExtraInfoEntry;
-import org.compilers.data.RawAccountChange;
-import org.compilers.data.Transaction;
-import org.compilers.file.ReportFileWriter;
-import org.compilers.file.TransactionFileReader;
-import org.compilers.process.ExtraInfoHandler;
+import no.strazdins.data.ExtraInfo;
+import no.strazdins.data.ExtraInfoEntry;
+import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.Transaction;
+import no.strazdins.file.TransactionFileReader;
+import no.strazdins.process.ExtraInfoHandler;
+import no.strazdins.file.ReportFileWriter;
 
 
 /**

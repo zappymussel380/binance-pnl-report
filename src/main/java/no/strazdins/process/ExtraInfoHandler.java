@@ -1,13 +1,13 @@
-package org.compilers.process;
+package no.strazdins.process;
 
 import java.io.IOException;
 import java.util.List;
-import org.compilers.data.ExtraInfo;
-import org.compilers.data.ExtraInfoEntry;
-import org.compilers.data.ExtraInfoType;
-import org.compilers.data.Transaction;
-import org.compilers.file.CsvFileParser;
-import org.compilers.tool.Converter;
+import no.strazdins.tool.Converter;
+import no.strazdins.data.ExtraInfo;
+import no.strazdins.data.ExtraInfoEntry;
+import no.strazdins.data.ExtraInfoType;
+import no.strazdins.data.Transaction;
+import no.strazdins.file.CsvFileParser;
 
 /**
  * Handles extra information provided by the user (as an external CSV file).

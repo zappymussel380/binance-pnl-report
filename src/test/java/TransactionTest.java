@@ -1,4 +1,4 @@
-import org.compilers.data.*;
+import no.strazdins.data.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;

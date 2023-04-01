@@ -37,7 +37,7 @@ The CSV file with extra information must contain the following columns:
 1. Unix timestamp, including milliseconds. This timestamp must match the timestamp of the
    transaction to which you want to attach this extra information.
 2. The type of the extra information,
-   see [ExtraInfoType](src/main/java/org/compilers/data/ExtraInfoType.java)
+   see [ExtraInfoType](src/main/java/no/strazdins/data/ExtraInfoType.java)
 3. The value of the transaction. The meaning of it depends on the extra info type. For example, 
    a price at which the currency was purchased (measured in the Home currency).
 

@@ -1,4 +1,4 @@
-package org.compilers.data;
+package no.strazdins.data;
 
 import java.util.EnumMap;
 import java.util.Map;

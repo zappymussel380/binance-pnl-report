@@ -1,6 +1,6 @@
-package org.compilers.data;
+package no.strazdins.data;
 
-import static org.compilers.tool.Converter.utcTimeToString;
+import no.strazdins.tool.Converter;
 
 /**
  * One single, atomic account change (part of a larger transaction).
@@ -64,7 +64,7 @@ public class RawAccountChange {
   @Override
   public String toString() {
     return "RawAccountChange{"
-        + "utcTime=" + utcTimeToString(utcTime)
+        + "utcTime=" + Converter.utcTimeToString(utcTime)
         + ", account=" + account
         + ", operation=" + operation
         + ", asset='" + asset + '\''

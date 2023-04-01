@@ -1,6 +1,6 @@
-package org.compilers.data;
+package no.strazdins.data;
 
-import org.compilers.tool.Converter;
+import no.strazdins.tool.Converter;
 
 /**
  * A transaction of depositing a crypto to the Binance account.
