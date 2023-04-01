@@ -1,4 +1,4 @@
-package org.compilers.tool;
+package no.strazdins.tool;
 
 import java.io.IOException;
 import java.text.ParseException;

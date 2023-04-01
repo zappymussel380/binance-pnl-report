@@ -1,4 +1,4 @@
-package org.compilers.data;
+package no.strazdins.data;
 
 /**
  * Represents one unit of extra information for a financial transaction, provided by the user.

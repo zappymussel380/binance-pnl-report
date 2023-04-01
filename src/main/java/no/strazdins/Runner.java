@@ -1,6 +1,7 @@
-package org.compilers;
+package no.strazdins;
 
 import java.io.IOException;
+import no.strazdins.process.ReportGenerator;
 
 /**
  * The main application runner - handles command-line arguments, calls the necessary logic.

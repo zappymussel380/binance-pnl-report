@@ -1,7 +1,8 @@
-import org.compilers.data.Operation;
-import org.compilers.data.OperationMultiSet;
+import no.strazdins.data.Operation;
+import no.strazdins.data.OperationMultiSet;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class OperationSetTest {
   @Test

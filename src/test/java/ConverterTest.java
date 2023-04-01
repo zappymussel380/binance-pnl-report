@@ -1,4 +1,4 @@
-import org.compilers.tool.Converter;
+import no.strazdins.tool.Converter;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
