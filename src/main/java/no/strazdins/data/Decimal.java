@@ -16,6 +16,9 @@ public class Decimal implements Comparable<Decimal> {
   private static final RoundingMode DEFAULT_ROUNDING = RoundingMode.HALF_UP;
   private static final MathContext DEFAULT_PRECISION
       = new MathContext(DEFAULT_SCALE, DEFAULT_ROUNDING);
+  // This is used for as a temporary scale for division
+  private static final MathContext DIV_PRECISION
+      = new MathContext(DEFAULT_SCALE * 4, DEFAULT_ROUNDING);
 
   public static final Decimal ZERO = new Decimal("0");
   public static final Decimal ONE = new Decimal("1");
@@ -29,11 +32,44 @@ public class Decimal implements Comparable<Decimal> {
    * @param number Decimal String. For example "12.345"
    */
   public Decimal(String number) {
-    this.number = new BigDecimal(number, DEFAULT_PRECISION);
+    this.number = new BigDecimal(number).setScale(DEFAULT_SCALE, DEFAULT_ROUNDING);
   }
 
   public Decimal(BigDecimal bd) {
     this.number = bd.setScale(DEFAULT_SCALE, DEFAULT_ROUNDING);
+  }
+
+  /**
+   * Create a copy of d
+   *
+   * @param d The number to copy
+   */
+  public Decimal(Decimal d) {
+    this.number = d.number;
+  }
+
+  public static int getIntDigitCount(String decimalNumber) {
+    String positiveDec = removeMinusSign(decimalNumber);
+    if (positiveDec == null) return 0;
+    int dotPos = positiveDec.indexOf('.');
+    return dotPos >= 0 ? dotPos : positiveDec.length();
+  }
+
+  public static String removeMinusSign(String d) {
+    if (d == null) return null;
+    int minusSignPosition = d.indexOf('-');
+    if (minusSignPosition > 0) {
+      throw new IllegalArgumentException("Invalid decimal number: " + d);
+    }
+    if (minusSignPosition == 0) {
+      minusSignPosition = d.indexOf('-', 1);
+      if (minusSignPosition >= 1) {
+        throw new IllegalArgumentException("Can't have multiple minus signs: " + d);
+      }
+      return d.substring(1);
+    } else {
+      return d;
+    }
   }
 
   /**
@@ -64,7 +100,7 @@ public class Decimal implements Comparable<Decimal> {
    * @return A new decimal: original - d
    */
   public Decimal subtract(Decimal d) {
-    return new Decimal(this.number.subtract(d.number));
+    return new Decimal(this.number.subtract(d.number, DEFAULT_PRECISION));
   }
 
   /**
@@ -106,7 +142,7 @@ public class Decimal implements Comparable<Decimal> {
    * @return A new decimal: original / d
    */
   public Decimal divide(Decimal d) {
-    return new Decimal(number.divide(d.number, DEFAULT_PRECISION));
+    return new Decimal(number.divide(d.number, DIV_PRECISION));
   }
 
   /**

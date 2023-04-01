@@ -6,7 +6,15 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for Decimal class
  */
 public class DecimalTest {
-  private static final double DELTA = 0.0000001;
+
+  @Test
+  void testCreate() {
+    assertEquals("1213.63895888", new Decimal("1213.63895888").getNiceString());
+    assertEquals("1", new Decimal("1").getNiceString());
+    assertEquals("12", new Decimal("12").getNiceString());
+    assertEquals("123456789", new Decimal("123456789").getNiceString());
+    assertEquals("1213", new Decimal("1213.0").getNiceString());
+  }
 
   @Test
   void testPositive() {
@@ -17,7 +25,7 @@ public class DecimalTest {
     assertFalse(new Decimal("-999999999999999999").isPositive());
 
     assertTrue(new Decimal("1").isPositive());
-    assertTrue(new Decimal("0.00000000001").isPositive());
+    assertTrue(new Decimal("0.00000001").isPositive());
     assertTrue(new Decimal("999999999999999999").isPositive());
   }
 
@@ -42,6 +50,13 @@ public class DecimalTest {
     assertTrue(new Decimal("0").isZero());
     assertTrue(new Decimal("0.00000").isZero());
     assertTrue(new Decimal("-0.0000").isZero());
+  }
+
+  @Test
+  void testEquality() {
+    assertEquals(new Decimal("13.63895880"), new Decimal("13.63895880"));
+    assertEquals(new Decimal("13.63895880"), new Decimal("13.6389588"));
+    assertEquals(new Decimal("13.6389588"), new Decimal("13.6389588"));
   }
 
   @Test
@@ -73,6 +88,8 @@ public class DecimalTest {
     assertEquals(Decimal.ZERO, d);
     d = d.multiply(new Decimal("-0.2"));
     assertEquals(Decimal.ZERO, d);
+    assertEquals(new Decimal("22.52711091"),
+        new Decimal("13.6389588").multiply(new Decimal("1.6516738")));
   }
 
   @Test
@@ -83,6 +100,9 @@ public class DecimalTest {
     assertEquals(d.negate(), d.divide("-1"));
     assertEquals(Decimal.ONE.negate(), d.divide("-5"));
     assertEquals(new Decimal("0.0005"), d.divide("10000"));
+
+    assertEquals(new Decimal("653.44092084"),
+        new Decimal("8912.25365379").divide(new Decimal("13.63895858")));
   }
 
   @Test
@@ -94,6 +114,11 @@ public class DecimalTest {
     assertEquals(new Decimal("4.0"), d);
     assertEquals(d, d.add("0"));
     assertEquals(Decimal.ZERO, d.add(d.negate()));
+
+    assertEquals(new Decimal("13.63895895"),
+        new Decimal( "1.65167382").add(new Decimal("11.98728513")));
+    assertEquals(new Decimal("133.99999999"),
+        new Decimal( "111.77777777").add(new Decimal("22.22222222")));
   }
 
   @Test
@@ -106,6 +131,8 @@ public class DecimalTest {
     assertEquals(d, d.subtract("0"));
     assertEquals(d, d.subtract(Decimal.ZERO));
     assertEquals(Decimal.ZERO, d.subtract(d));
+    assertEquals(new Decimal("1.6516738"),
+        new Decimal("13.6389588").subtract(new Decimal("11.987285")));
   }
 
   @Test
@@ -150,11 +177,48 @@ public class DecimalTest {
     assertEquals("0", new Decimal("-0").getNiceString());
     assertEquals("0", new Decimal("-0.00000").getNiceString());
     assertEquals("0", new Decimal("0.00000000000").getNiceString());
-    assertEquals("0.0000000001", new Decimal("0.0000000001").getNiceString());
+    assertEquals("0.00000001", new Decimal("0.00000001").getNiceString());
     assertEquals("0.1", new Decimal("0.1000000000").getNiceString());
     assertEquals("0.00708", new Decimal("0.007080000000").getNiceString());
     assertEquals("-3.28", new Decimal("-3.28").getNiceString());
     assertEquals("-3.28", new Decimal("-3.28000").getNiceString());
     assertEquals("500", new Decimal("500").getNiceString());
+  }
+
+  @Test
+  void testIntDigitCount() {
+    assertEquals(0, Decimal.getIntDigitCount(null));
+    assertEquals(0, Decimal.getIntDigitCount(""));
+    assertEquals(0, Decimal.getIntDigitCount(".2"));
+    assertEquals(0, Decimal.getIntDigitCount(".2"));
+    assertEquals(1, Decimal.getIntDigitCount("1"));
+    assertEquals(2, Decimal.getIntDigitCount("82"));
+    assertEquals(6, Decimal.getIntDigitCount("666888"));
+    assertEquals(1, Decimal.getIntDigitCount("1.88"));
+    assertEquals(1, Decimal.getIntDigitCount("1."));
+    assertEquals(2, Decimal.getIntDigitCount("-15"));
+    assertEquals(2, Decimal.getIntDigitCount("-15.8"));
+    assertEquals(2, Decimal.getIntDigitCount("82.667"));
+    assertEquals(6, Decimal.getIntDigitCount("666888.88866655"));
+  }
+
+  @Test
+  void testRemoveMinusSign() {
+    assertEquals("0", Decimal.removeMinusSign("0"));
+    assertEquals("12", Decimal.removeMinusSign("12"));
+    assertEquals("12345678", Decimal.removeMinusSign("12345678"));
+    assertEquals("8", Decimal.removeMinusSign("-8"));
+    assertEquals("0.78", Decimal.removeMinusSign("-0.78"));
+    assertEquals(".89", Decimal.removeMinusSign("-.89"));
+    try {
+      Decimal.removeMinusSign("--8");
+      assertFalse(true);
+    } catch (IllegalArgumentException e) {
+    }
+    try {
+      Decimal.removeMinusSign(" -8");
+      assertFalse(true);
+    } catch (IllegalArgumentException e) {
+    }
   }
 }
