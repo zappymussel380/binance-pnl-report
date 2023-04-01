@@ -24,6 +24,7 @@ public class Runner {
       ReportGenerator reportGenerator = new ReportGenerator(inputFilePath, outputFilePath,
           homeCurrency, extraFilePath);
       reportGenerator.createReport();
+      System.out.println("Report successfully generated, saved in the file " + outputFilePath);
     } catch (IOException e) {
       System.out.println("Report generation failed: " + e.getMessage());
     }
