@@ -7,6 +7,7 @@ import org.compilers.data.ExtraInfo;
 import org.compilers.data.ExtraInfoEntry;
 import org.compilers.data.RawAccountChange;
 import org.compilers.data.Transaction;
+import org.compilers.file.ReportFileWriter;
 import org.compilers.file.TransactionFileReader;
 import org.compilers.process.ExtraInfoHandler;
 
@@ -48,7 +49,7 @@ public class ReportGenerator {
     ExtraInfo missingInfo = extraInfoHandler.detectMissingInfo(transactions);
     if (missingInfo.isEmpty()) {
       Report report = generateReport(transactions, extraInfoHandler.getUserProvidedInfo());
-      writeReportToFile(report, outputFilePath);
+      ReportFileWriter.writeReportToFile(report, outputFilePath);
     } else {
       printMissingInfoRequirement(missingInfo);
     }
@@ -95,20 +96,19 @@ public class ReportGenerator {
 
 
   private Report generateReport(List<Transaction> transactions, ExtraInfo extraUserInfo) {
-    // TODO
-    throw new UnsupportedOperationException();
+    Report report = new Report(extraUserInfo);
+    for (Transaction transaction : transactions) {
+      report.process(transaction);
+    }
+    return report;
   }
 
-  private void writeReportToFile(Report report, String outputFilePath) {
-    // TODO
-    throw new UnsupportedOperationException();
-  }
 
   private void printMissingInfoRequirement(ExtraInfo missingInfo) {
     System.out.println("Provide the necessary information in the extra-info file `"
         + extraFilePath + "`: ");
     for (ExtraInfoEntry mi : missingInfo.getAllEntries()) {
-      System.out.println(mi.utcTimestamp() + "," + mi.type() + "," + mi.hint());
+      System.out.println(mi.utcTimestamp() + "," + mi.type() + "," + mi.value());
     }
   }
 
