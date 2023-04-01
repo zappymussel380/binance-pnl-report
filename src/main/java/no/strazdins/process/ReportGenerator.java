@@ -88,6 +88,8 @@ public class ReportGenerator {
       Transaction transaction = rawTransaction.clarifyTransactionType();
       if (transaction != null) {
         transactions.add(transaction);
+      } else {
+        // !!! throw new IllegalStateException("Unknown transaction: " + rawTransaction);
       }
     }
     return transactions;

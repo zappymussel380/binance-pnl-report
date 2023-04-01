@@ -53,7 +53,7 @@ public class Transaction {
    *
    * @param change An atomic account change
    */
-  public void append(RawAccountChange change) {
+  public final void append(RawAccountChange change) {
     if (!atomicAccountChanges.containsKey(change.getOperation())) {
       atomicAccountChanges.put(change.getOperation(), new LinkedList<>());
     }
@@ -72,12 +72,42 @@ public class Transaction {
    *
    * @return A transaction with specific type, with the same atomic operations
    */
-  public Transaction clarifyTransactionType() {
+  public final Transaction clarifyTransactionType() {
     if (consistsOf(Operation.DEPOSIT)) {
       return new DepositTransaction(this);
+    } else if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)) {
+      if (looksLikeReversedBuy()) {
+        return new SellTransaction(this);
+      } else {
+        return new BuyTransaction(this);
+      }
     }
     // TODO - implement other transaction types
     return null;
+  }
+
+  protected boolean looksLikeReversedBuy() {
+    RawAccountChange bought = getFirstChangeOfType(Operation.BUY);
+    if (isTypicalQuoteCurrency(bought.getAsset())) {
+      // Sold in Coin/USDT or similar market
+      return true;
+    } else {
+      RawAccountChange sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+      if (isTypicalQuoteCurrency(sold.getAsset())) {
+        // Bought in Coin/USDT or similar market
+        return false;
+      } else if (bought.getAsset().equals("BTC")) {
+        // Bought in BTC/USDT or similar market
+        return false;
+      } else {
+        throw new IllegalArgumentException("Can't understand the operation, bought: "
+            + bought + ", sold: " + sold);
+      }
+    }
+  }
+
+  private boolean isTypicalQuoteCurrency(String asset) {
+    return asset.equals("USDT") || asset.equals("BUSD") || asset.equals("TUSD");
   }
 
   private boolean consistsOf(Operation... operations) {
@@ -98,7 +128,7 @@ public class Transaction {
    * @param operation Operation type
    * @return The first change or null if no change of this type is found.
    */
-  protected RawAccountChange getFirstChangeOfType(Operation operation) {
+  protected final RawAccountChange getFirstChangeOfType(Operation operation) {
     List<RawAccountChange> changes = atomicAccountChanges.get(operation);
     return changes != null && !changes.isEmpty() ? changes.get(0) : null;
   }
@@ -118,7 +148,7 @@ public class Transaction {
    *
    * @return UTC timestamp of the transaction, containing milliseconds.
    */
-  public long getUtcTime() {
+  public final long getUtcTime() {
     return utcTime;
   }
 
@@ -149,7 +179,7 @@ public class Transaction {
    *
    * @return The base currency.
    */
-  public String getBaseCurrency() {
+  public final String getBaseCurrency() {
     return baseCurrency;
   }
 
@@ -158,7 +188,7 @@ public class Transaction {
    *
    * @return The quote currency
    */
-  public String getQuoteCurrency() {
+  public final String getQuoteCurrency() {
     return quoteCurrency;
   }
 
@@ -168,7 +198,7 @@ public class Transaction {
    *
    * @return The amount of base currency
    */
-  public Decimal getBaseCurrencyAmount() {
+  public final Decimal getBaseCurrencyAmount() {
     return baseCurrencyAmount;
   }
 
@@ -177,7 +207,7 @@ public class Transaction {
    *
    * @return The fee, in the fee-currency
    */
-  public Decimal getFee() {
+  public final Decimal getFee() {
     return fee;
   }
 
@@ -186,7 +216,7 @@ public class Transaction {
    *
    * @return The currency in which the fee was paid.
    */
-  public String getFeeCurrency() {
+  public final String getFeeCurrency() {
     return feeCurrency;
   }
 
@@ -195,7 +225,7 @@ public class Transaction {
    *
    * @return The fee converted to the Home Currency
    */
-  public Decimal getFeeInHomeCurrency() {
+  public final Decimal getFeeInHomeCurrency() {
     return feeInHomeCurrency;
   }
 
@@ -204,7 +234,7 @@ public class Transaction {
    *
    * @return The obtain-price of the main asset, in Home Currency
    */
-  public Decimal getObtainPrice() {
+  public final Decimal getObtainPrice() {
     return baseObtainPriceInHc;
   }
 
@@ -213,7 +243,7 @@ public class Transaction {
    *
    * @return The PNL, in Home currency
    */
-  public Decimal getPnl() {
+  public final Decimal getPnl() {
     return pnl;
   }
 
@@ -222,7 +252,7 @@ public class Transaction {
    *
    * @return The amount of quote currency change in this transaction
    */
-  public Decimal getQuoteAmount() {
+  public final Decimal getQuoteAmount() {
     return quoteAmount;
   }
 }
