@@ -1,5 +1,6 @@
 package no.strazdins.transaction;
 
+import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.ExtraInfoType;
 import no.strazdins.data.Operation;
@@ -11,8 +12,16 @@ import no.strazdins.tool.Converter;
  * A transaction of depositing a crypto to the Binance account.
  */
 public class DepositTransaction extends Transaction {
+  /**
+   * Create a deposit transaction.
+   *
+   * @param t the base transaction data to use
+   */
   public DepositTransaction(Transaction t) {
     super(t);
+    if (getFirstChangeOfType(Operation.DEPOSIT) == null) {
+      throw new IllegalStateException("Can't create a deposit without a deposit operation!");
+    }
   }
 
   @Override
@@ -35,15 +44,12 @@ public class DepositTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    WalletSnapshot newSnapshot = new WalletSnapshot(walletSnapshot);
-    String obtainPrice = extraInfo.value();
+    WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
+    Decimal obtainPrice = new Decimal(extraInfo.value());
     RawAccountChange depositOperation = getFirstChangeOfType(Operation.DEPOSIT);
-    String depositAmount = depositOperation.getAmount();
+    Decimal depositAmount = depositOperation.getAmount();
     String asset = depositOperation.getAsset();
-    walletSnapshot.addAsset(asset, depositAmount, obtainPrice);
-    // TODO - recalculate:
-    // - wallet.asset.amount
-    // - wallet.asset.averageObtainPrice
+    newSnapshot.addAsset(asset, depositAmount, obtainPrice);
     return newSnapshot;
   }
 }

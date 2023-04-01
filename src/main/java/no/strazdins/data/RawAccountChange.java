@@ -10,7 +10,7 @@ public class RawAccountChange {
   private final AccountType account;
   private final Operation operation;
   private final String asset;
-  private final String changeAmount;
+  private final Decimal changeAmount;
   private final String remark;
 
   /**
@@ -25,7 +25,7 @@ public class RawAccountChange {
    * @param remark       A comment
    */
   public RawAccountChange(long utcTime, AccountType account, Operation operation,
-                          String asset, String changeAmount, String remark) {
+                          String asset, Decimal changeAmount, String remark) {
     this.utcTime = utcTime;
     this.account = account;
     this.operation = operation;
@@ -78,7 +78,7 @@ public class RawAccountChange {
    *
    * @return The amount of the asset. A decimal formatted as a string. Can be negative.
    */
-  public String getAmount() {
+  public Decimal getAmount() {
     return changeAmount;
   }
 }

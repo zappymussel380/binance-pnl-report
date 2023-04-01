@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import no.strazdins.data.AccountType;
+import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.tool.Converter;
@@ -69,7 +70,7 @@ public class TransactionFileReader {
     AccountType accountType = AccountType.fromString(row[2]);
     Operation operation = Operation.fromString(row[3]);
     String asset = row[4];
-    String change = Converter.parseDecimalString(row[5]);
+    Decimal change = new Decimal(Converter.parseDecimalString(row[5]));
     String remark = row[6];
     return new RawAccountChange(utcTimestamp, accountType, operation, asset, change, remark);
   }

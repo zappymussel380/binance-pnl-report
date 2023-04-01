@@ -3,19 +3,62 @@ package no.strazdins.data;
 import no.strazdins.transaction.Transaction;
 
 /**
- * Snapshot of the wallet at a specific time moment, after processing a given transaction.
- *
- * @param transaction The transaction after which the snapshot was taken
- * @param wallet      The wallet containing all the assets
- * @param pnl         Profit & Loss (PNL) - the current running total PNL for all
- *                    transactions so far
+ * A snapshot of the wallet.
  */
-public record WalletSnapshot(Transaction transaction, Wallet wallet, String pnl) {
-  public WalletSnapshot(WalletSnapshot walletSnapshot) {
-    this(walletSnapshot.transaction, walletSnapshot.wallet, walletSnapshot.pnl);
+public class WalletSnapshot {
+  private Transaction transaction;
+  private Wallet wallet;
+  private Decimal pnl;
+
+  /**
+   * Create a wallet snapshot.
+   *
+   * @param transaction The transaction after which this snapshot is created
+   * @param pnl         Total running Profit & Loss (PNL) accumulated so far
+   */
+  public WalletSnapshot(Transaction transaction, Decimal pnl) {
+    this.transaction = transaction;
+    this.wallet = new Wallet();
+    this.pnl = pnl;
   }
 
-  public void addAsset(String asset, String depositAmount, String obtainPrice) {
+  /**
+   * Create a snapshot of an empty wallet.
+   *
+   * @return An empty-wallet snapshot
+   */
+  public static WalletSnapshot createEmpty() {
+    return new WalletSnapshot(null, Decimal.ZERO);
+  }
+
+  /**
+   * Create a new wallet transaction which has the same data as this, and is ready to be
+   * used as a template for "snapshot after transaction t".
+   *
+   * @param transaction The transaction for which the new snapshot will be created
+   * @return A snapshot - copy of the current one, with the given transaction
+   */
+  public WalletSnapshot prepareForTransaction(Transaction transaction) {
+    WalletSnapshot ws = new WalletSnapshot(transaction, new Decimal(pnl));
+    ws.wallet = this.wallet.clone();
+    return ws;
+  }
+
+  public void addAsset(String asset, Decimal depositAmount, Decimal obtainPrice) {
     wallet.addAsset(asset, depositAmount, obtainPrice);
+  }
+
+  @Override
+  public String toString() {
+    return wallet.getAssetCount() + " assets, PNL=" + pnl.getNiceString()
+        + (transaction != null ? (" after " + transaction) : "");
+  }
+
+  public Wallet getWallet() {
+    return wallet;
+  }
+
+  public Decimal getPnl() {
+    return pnl;
   }
 }

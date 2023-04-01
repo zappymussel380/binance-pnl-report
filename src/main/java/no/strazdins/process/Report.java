@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import no.strazdins.data.ExtraInfo;
 import no.strazdins.data.ExtraInfoEntry;
-import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.transaction.Transaction;
 
@@ -18,11 +17,7 @@ public class Report {
 
   public Report(ExtraInfo extraInfo) {
     this.extraInfo = extraInfo;
-    this.currentWalletSnapshot = createEmptyWalletSnapshot();
-  }
-
-  private static WalletSnapshot createEmptyWalletSnapshot() {
-    return new WalletSnapshot(null, new Wallet(), "0");
+    this.currentWalletSnapshot = WalletSnapshot.createEmpty();
   }
 
   public void process(Transaction transaction) {

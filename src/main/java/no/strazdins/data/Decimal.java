@@ -40,7 +40,7 @@ public class Decimal implements Comparable<Decimal> {
   }
 
   /**
-   * Create a copy of d
+   * Create a copy of d.
    *
    * @param d The number to copy
    */
@@ -48,15 +48,33 @@ public class Decimal implements Comparable<Decimal> {
     this.number = d.number;
   }
 
-  public static int getIntDigitCount(String decimalNumber) {
+  /**
+   * Get number of integer digits (the digits before the decimal separator '.')
+   *
+   * @param decimalNumber The number to check, in decimal string representation
+   * @return The number of integer digits in it or 0 if it is empty.
+   * @throws IllegalArgumentException When the number format is incorrect
+   */
+  protected static int getIntDigitCount(String decimalNumber) {
     String positiveDec = removeMinusSign(decimalNumber);
-    if (positiveDec == null) return 0;
+    if (positiveDec == null) {
+      return 0;
+    }
     int dotPos = positiveDec.indexOf('.');
     return dotPos >= 0 ? dotPos : positiveDec.length();
   }
 
-  public static String removeMinusSign(String d) {
-    if (d == null) return null;
+  /**
+   * Remove the minus sign from a number.
+   *
+   * @param d The number, formatted as a decimal string
+   * @return The same number with minus sign removed
+   * @throws IllegalArgumentException When the number format is incorrect
+   */
+  protected static String removeMinusSign(String d) throws IllegalArgumentException {
+    if (d == null) {
+      return null;
+    }
     int minusSignPosition = d.indexOf('-');
     if (minusSignPosition > 0) {
       throw new IllegalArgumentException("Invalid decimal number: " + d);

@@ -13,7 +13,8 @@ class TransactionTest {
     Transaction t = new Transaction(time);
     assertNull(t.clarifyTransactionType());
 
-    t.append(new RawAccountChange(time, AccountType.SPOT, Operation.DEPOSIT, "BTC", "1.0", ""));
+    t.append(new RawAccountChange(time, AccountType.SPOT, Operation.DEPOSIT, "BTC",
+        Decimal.ONE, ""));
 
     assertInstanceOf(DepositTransaction.class, t.clarifyTransactionType());
   }
