@@ -29,3 +29,18 @@ arguments:
 2. Path to a CSV file where the report will be written
 3. Home currency
 4. Path to the CSV file with extra information
+
+## Extra information CSV
+
+The CSV file with extra information must contain the following columns:
+
+1. Unix timestamp, including milliseconds. This timestamp must match the timestamp of the
+   transaction to which you want to attach this extra information.
+2. The type of the extra information,
+   see [ExtraInfoType](src/main/java/org/compilers/data/ExtraInfoType.java)
+3. The value of the transaction. The meaning of it depends on the extra info type. For example, 
+   a price at which the currency was purchased (measured in the Home currency).
+
+## Report generation logic
+
+See [report-logic.md](report-logic.md).

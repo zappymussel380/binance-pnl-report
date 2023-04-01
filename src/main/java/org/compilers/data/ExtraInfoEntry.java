@@ -5,7 +5,8 @@ package org.compilers.data;
  *
  * @param utcTimestamp UTC timestamp, including milliseconds.
  * @param type         The type of the information
- * @param hint         Hint given to the user (in case this information is missing)
+ * @param value        A numeric value, formatted as a decimal-string. The meaning of the value
+ *                     depends on the type. For example: the exchange rate.
  */
-public record ExtraInfoEntry(long utcTimestamp, ExtraInfoType type, String hint) {
+public record ExtraInfoEntry(long utcTimestamp, ExtraInfoType type, String value) {
 }
