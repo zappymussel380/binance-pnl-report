@@ -1,4 +1,5 @@
-import no.strazdins.data.Decimal;
+package no.strazdins.data;
+
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
