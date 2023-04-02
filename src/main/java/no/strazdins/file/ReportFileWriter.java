@@ -24,7 +24,7 @@ public class ReportFileWriter {
    * @param outputFilePath Path to a CSV file where to store the result
    * @param homeCurrency   The Home currency in which the profit and obtain prices are calculated
    */
-  public static void writeReportToFile(Report report, String outputFilePath, String homeCurrency)
+  public static void writeReportToFile(Report report, String outputFilePath)
       throws IOException {
     String[] header = new String[]{
         "Unix timestamp", "UTC time",
@@ -32,9 +32,9 @@ public class ReportFileWriter {
         "Amount", "Quote currency",
         "Quote amount",
         "Fee", "Fee currency",
-        "Fee in " + homeCurrency, "Obtain price in " + homeCurrency,
-        "PNL in " + homeCurrency, "Amount in Wallet",
-        "Avg obtain price in " + homeCurrency, "Running PNL in " + homeCurrency
+        "Fee in USDT", "Obtain price in USDT",
+        "Transaction PNL in USDT", "Amount in Wallet",
+        "Avg obtain price in USDT", "Running PNL in USDT"
     };
     CsvFileWriter writer = new CsvFileWriter(outputFilePath, header);
     for (WalletSnapshot snapshot : report) {
@@ -47,7 +47,7 @@ public class ReportFileWriter {
           t.getQuoteAmount().getNiceString(),
           t.getFee().getNiceString(), t.getFeeCurrency(),
           t.getFeeInUsdt().getNiceString(), t.getObtainPrice().getNiceString(),
-          t.getRunningPnl().getNiceString(),
+          t.getPnl().getNiceString(),
           snapshot.getBaseCurrencyAmountInWallet().getNiceString(),
           snapshot.getAvgBaseObtainPrice().getNiceString(), snapshot.getPnl().getNiceString()
       });
