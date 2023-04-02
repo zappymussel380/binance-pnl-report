@@ -46,8 +46,9 @@ public class ReportFileWriter {
           t.getBaseCurrencyAmount().getNiceString(), t.getQuoteCurrency(),
           t.getQuoteAmount().getNiceString(),
           t.getFee().getNiceString(), t.getFeeCurrency(),
-          t.getFeeInHomeCurrency().getNiceString(), t.getObtainPrice().getNiceString(),
-          t.getPnl().getNiceString(), snapshot.getBaseCurrencyAmountInWallet().getNiceString(),
+          t.getFeeInUsdt().getNiceString(), t.getObtainPrice().getNiceString(),
+          t.getRunningPnl().getNiceString(),
+          snapshot.getBaseCurrencyAmountInWallet().getNiceString(),
           snapshot.getAvgBaseObtainPrice().getNiceString(), snapshot.getPnl().getNiceString()
       });
     }

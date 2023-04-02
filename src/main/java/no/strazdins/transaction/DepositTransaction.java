@@ -13,6 +13,7 @@ import no.strazdins.tool.Converter;
  */
 public class DepositTransaction extends Transaction {
   RawAccountChange deposit;
+
   /**
    * Create a deposit transaction.
    *
@@ -41,11 +42,11 @@ public class DepositTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    baseObtainPriceInHc = new Decimal(extraInfo.value());
+    baseObtainPriceInUsdt = new Decimal(extraInfo.value());
     baseCurrency = deposit.getAsset();
     baseCurrencyAmount = deposit.getAmount();
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
-    newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, baseObtainPriceInHc);
+    newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, baseObtainPriceInUsdt);
     return newSnapshot;
   }
 

@@ -43,6 +43,30 @@ public class Wallet {
   }
 
   /**
+   * Remove given amount of the given asset from the wallet.
+   *
+   * @param asset  The asset to remove (decrease it's amount)
+   * @param amount The amount of the asset to reduce
+   * @throws IllegalStateException If there is no enough asset in the wallet
+   */
+  public void decreaseAsset(String asset, Decimal amount) throws IllegalStateException {
+    AssetBalance assetBalance = assets.get(asset);
+    if (assetBalance == null) {
+      throw new IllegalStateException("Can't decrease asset " + asset
+          + " - no asset in the wallet");
+    } else if (assetBalance.getAmount().isLessThan(amount)) {
+      throw new IllegalStateException("Can't decrease " + asset + " by " + amount.getNiceString()
+          + " units, only " + assetBalance.getAmount() + " units in the wallet");
+    }
+
+    assetBalance.decrease(amount);
+    if (assetBalance.getAmount().isZero()) {
+      assets.remove(asset);
+    }
+  }
+
+
+  /**
    * Get the number of assets held in the wallet.
    *
    * @return The number of assets in the wallet
@@ -89,4 +113,5 @@ public class Wallet {
     AssetBalance b = assets.get(asset);
     return b != null ? b.getObtainPrice() : Decimal.ZERO;
   }
+
 }

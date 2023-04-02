@@ -9,6 +9,7 @@ import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
 import no.strazdins.data.OperationMultiSet;
 import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.Converter;
 
@@ -17,6 +18,9 @@ import no.strazdins.tool.Converter;
  * For example, purchasing a cryptocurrency may consist of three changes: buy + sell + fee.
  */
 public class Transaction {
+  // All PNL is calculated in this currency
+  public static final String QUOTE_CURR = "USDT";
+
   Map<Operation, List<RawAccountChange>> atomicAccountChanges = new EnumMap<>(Operation.class);
   protected final long utcTime;
 
@@ -24,14 +28,14 @@ public class Transaction {
   protected String baseCurrency;
   protected Decimal baseCurrencyAmount = Decimal.ZERO;
   // Base currency obtaining price in Home Currency
-  protected Decimal baseObtainPriceInHc = Decimal.ZERO;
+  protected Decimal baseObtainPriceInUsdt = Decimal.ZERO;
   protected String quoteCurrency = "";
   protected Decimal fee = Decimal.ZERO;
   protected String feeCurrency = "";
-  protected Decimal feeInHomeCurrency = Decimal.ZERO;
+  protected Decimal feeInUsdt = Decimal.ZERO;
 
-  protected Decimal pnl = Decimal.ZERO;
-  private Decimal quoteAmount = Decimal.ZERO;
+  protected Decimal runningPnl = Decimal.ZERO;
+  protected Decimal quoteAmount = Decimal.ZERO;
 
 
   /**
@@ -76,9 +80,9 @@ public class Transaction {
     if (consistsOf(Operation.DEPOSIT)) {
       return new DepositTransaction(this);
     } else if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)) {
-      if (looksLikeReversedBuy()) {
+      if (isSell()) {
         return new SellTransaction(this);
-      } else {
+      } else if (isBuy()) {
         return new BuyTransaction(this);
       }
     }
@@ -86,28 +90,14 @@ public class Transaction {
     return null;
   }
 
-  protected boolean looksLikeReversedBuy() {
+  protected boolean isSell() {
     RawAccountChange bought = getFirstChangeOfType(Operation.BUY);
-    if (isTypicalQuoteCurrency(bought.getAsset())) {
-      // Sold in Coin/USDT or similar market
-      return true;
-    } else {
-      RawAccountChange sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
-      if (isTypicalQuoteCurrency(sold.getAsset())) {
-        // Bought in Coin/USDT or similar market
-        return false;
-      } else if (bought.getAsset().equals("BTC")) {
-        // Bought in BTC/USDT or similar market
-        return false;
-      } else {
-        throw new IllegalArgumentException("Can't understand the operation, bought: "
-            + bought + ", sold: " + sold);
-      }
-    }
+    return bought != null && bought.getAsset().equals("USDT");
   }
 
-  private boolean isTypicalQuoteCurrency(String asset) {
-    return asset.equals("USDT") || asset.equals("BUSD") || asset.equals("TUSD");
+  protected boolean isBuy() {
+    RawAccountChange sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    return sold != null && sold.getAsset().equals("USDT");
   }
 
   private boolean consistsOf(Operation... operations) {
@@ -221,30 +211,30 @@ public class Transaction {
   }
 
   /**
-   * Get the amount of fee, converted to the Home Currency.
+   * Get the amount of fee, in USDT. Note: the value will be negative!
    *
-   * @return The fee converted to the Home Currency
+   * @return The fee amount, converted to the USDT currency
    */
-  public final Decimal getFeeInHomeCurrency() {
-    return feeInHomeCurrency;
+  public final Decimal getFeeInUsdt() {
+    return feeInUsdt;
   }
 
   /**
-   * Get obtain-price of the base currency, calculated in the Home Currency.
+   * Get obtain-price of the base currency, calculated in USDT.
    *
-   * @return The obtain-price of the main asset, in Home Currency
+   * @return The obtain-price of the main asset, in USDT
    */
   public final Decimal getObtainPrice() {
-    return baseObtainPriceInHc;
+    return baseObtainPriceInUsdt;
   }
 
   /**
    * Get Profit & Loss (PNL) of this single transaction.
    *
-   * @return The PNL, in Home currency
+   * @return The PNL, in USDT
    */
-  public final Decimal getPnl() {
-    return pnl;
+  public final Decimal getRunningPnl() {
+    return runningPnl;
   }
 
   /**
@@ -254,5 +244,22 @@ public class Transaction {
    */
   public final Decimal getQuoteAmount() {
     return quoteAmount;
+  }
+
+  /**
+   * Find out the fee in USDT, store it.
+   *
+   * @throws IllegalStateException When no fee raw-account-change is found
+   */
+  protected void calculateFeeInUsdt(Wallet wallet) throws IllegalStateException {
+    RawAccountChange feeOp = getFirstChangeOfType(Operation.FEE);
+    if (feeOp == null) {
+      throw new IllegalStateException("Could not find fee operation!");
+    }
+    if (feeOp.getAsset().equals("USDT")) {
+      feeInUsdt = feeOp.getAmount();
+    } else {
+      feeInUsdt = feeOp.getAmount().multiply(wallet.getAvgObtainPrice(feeOp.getAsset()));
+    }
   }
 }

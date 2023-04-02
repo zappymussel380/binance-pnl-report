@@ -44,9 +44,20 @@ public class WalletSnapshot {
     return ws;
   }
 
-  public void addAsset(String asset, Decimal depositAmount, Decimal obtainPrice) {
-    wallet.addAsset(asset, depositAmount, obtainPrice);
+  public void addAsset(String asset, Decimal amount, Decimal obtainPrice) {
+    wallet.addAsset(asset, amount, obtainPrice);
   }
+
+  /**
+   * Decrease the amount of given asset in the wallet.
+   *
+   * @param asset  The asset to decrease
+   * @param amount The decrease amount
+   */
+  public void decreaseAsset(String asset, Decimal amount) {
+    wallet.decreaseAsset(asset, amount);
+  }
+
 
   @Override
   public String toString() {

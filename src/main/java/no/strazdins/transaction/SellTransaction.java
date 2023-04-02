@@ -1,17 +1,23 @@
 package no.strazdins.transaction;
 
+import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.Converter;
 
 /**
- * A Sell transaction.
+ * A Sell transaction. Note: only transactions where USDT was obtained are
+ * considered sell-transactions. For example, selling LTC in the market LTC/BTC is considered
+ * a buy transaction. The reason: for each sell transaction we update the PNL. In the LTC/BTC
+ * market we can't find any profit. We get profit or loss only when we get sell a currency for USDT.
  */
 public class SellTransaction extends Transaction {
   private RawAccountChange base;
   private RawAccountChange quote;
+  private RawAccountChange feeOp;
 
   public SellTransaction(Transaction transaction) {
     super(transaction);
@@ -19,12 +25,15 @@ public class SellTransaction extends Transaction {
   }
 
   private void initBaseAndQuote() {
-    if (looksLikeReversedBuy()) {
-      base = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
-      quote = getFirstChangeOfType(Operation.BUY);
-    } else {
-      base = getFirstChangeOfType(Operation.BUY);
-      quote = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    base = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    quote = getFirstChangeOfType(Operation.BUY);
+    feeOp = getFirstChangeOfType(Operation.FEE);
+    if (base == null || quote == null || feeOp == null) {
+      throw new IllegalStateException("Can't create a sell when some ops are missing!");
+    }
+    if (!quote.getAsset().equals(QUOTE_CURR)) {
+      throw new IllegalStateException("Sell transactions must have "
+          + QUOTE_CURR + " quote currency!");
     }
   }
 
@@ -36,12 +45,31 @@ public class SellTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    // TODO
-    throw new UnsupportedOperationException();
+    WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
+    Wallet w = newSnapshot.getWallet();
+    calculateFeeInUsdt(w);
+    newSnapshot.addAsset(QUOTE_CURR, quote.getAmount(), Decimal.ONE);
+    newSnapshot.decreaseAsset(base.getAsset(), base.getAmount().negate());
+    newSnapshot.decreaseAsset(feeOp.getAsset(), feeOp.getAmount().negate());
+    Decimal receivedUsdt = quote.getAmount().add(feeInUsdt); // Fee is negative
+    Decimal investedUsdt = base.getAmount().negate().multiply(w.getAvgObtainPrice(base.getAsset()));
+    Decimal transactionPnl = receivedUsdt.subtract(investedUsdt);
+    runningPnl = runningPnl.add(transactionPnl);
+
+    baseCurrency = base.getAsset();
+    baseCurrencyAmount = base.getAmount();
+    baseObtainPriceInUsdt = w.getAvgObtainPrice(base.getAsset());
+    fee = feeOp.getAmount();
+    feeCurrency = feeOp.getAsset();
+    quoteCurrency = "USDT";
+    quoteAmount = quote.getAmount();
+
+    return newSnapshot;
   }
 
   @Override
   public String getType() {
     return "Sell";
   }
+
 }

@@ -23,4 +23,26 @@ class WalletTest {
     assertEquals(Decimal.ZERO, w1.getAssetAmount("LTC"));
     assertEquals("3", w2.getAssetAmount("LTC").getNiceString());
   }
+
+  @Test
+  void testAddDecrease() {
+    Wallet w = new Wallet();
+    assertEquals(Decimal.ZERO, w.getAssetAmount("BTC"));
+    w.addAsset("BTC", new Decimal("1.23"), new Decimal("20000"));
+    assertEquals(new Decimal("1.23"), w.getAssetAmount("BTC"));
+    assertEquals(new Decimal("20000"), w.getAvgObtainPrice("BTC"));
+
+    w.addAsset("BTC", new Decimal("1.77"), new Decimal("10000"));
+    assertEquals(new Decimal("3"), w.getAssetAmount("BTC"));
+    assertEquals(new Decimal("14100"), w.getAvgObtainPrice("BTC"));
+
+    w.decreaseAsset("BTC", new Decimal("1.88"));
+    assertEquals(new Decimal("1.12"), w.getAssetAmount("BTC"));
+    assertEquals(new Decimal("14100"), w.getAvgObtainPrice("BTC"));
+
+    w.decreaseAsset("BTC", new Decimal("1.12"));
+    assertEquals(Decimal.ZERO, w.getAssetAmount("BTC"));
+    assertEquals(0, w.getAssetCount());
+    assertEquals(Decimal.ZERO, w.getAvgObtainPrice("BTC"));
+  }
 }
