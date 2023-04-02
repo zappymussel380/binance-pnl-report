@@ -34,7 +34,7 @@ public class Transaction {
   protected String feeCurrency = "";
   protected Decimal feeInUsdt = Decimal.ZERO;
 
-  protected Decimal runningPnl = Decimal.ZERO;
+  protected Decimal pnl = Decimal.ZERO;
   protected Decimal quoteAmount = Decimal.ZERO;
 
 
@@ -233,8 +233,8 @@ public class Transaction {
    *
    * @return The PNL, in USDT
    */
-  public final Decimal getRunningPnl() {
-    return runningPnl;
+  public final Decimal getPnl() {
+    return pnl;
   }
 
   /**

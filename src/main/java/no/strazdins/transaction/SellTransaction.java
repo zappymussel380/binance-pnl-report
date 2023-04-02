@@ -53,8 +53,8 @@ public class SellTransaction extends Transaction {
     newSnapshot.decreaseAsset(feeOp.getAsset(), feeOp.getAmount().negate());
     Decimal receivedUsdt = quote.getAmount().add(feeInUsdt); // Fee is negative
     Decimal investedUsdt = base.getAmount().negate().multiply(w.getAvgObtainPrice(base.getAsset()));
-    Decimal transactionPnl = receivedUsdt.subtract(investedUsdt);
-    runningPnl = runningPnl.add(transactionPnl);
+    pnl = receivedUsdt.subtract(investedUsdt);
+    newSnapshot.addPnl(pnl);
 
     baseCurrency = base.getAsset();
     baseCurrencyAmount = base.getAmount();
