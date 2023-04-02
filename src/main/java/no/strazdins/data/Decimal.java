@@ -119,7 +119,7 @@ public class Decimal implements Comparable<Decimal> {
    * @return A new decimal: original - d
    */
   public Decimal subtract(Decimal d) {
-    return new Decimal(this.number.subtract(d.number, DEFAULT_PRECISION));
+    return new Decimal(this.number.subtract(d.number));
   }
 
   /**

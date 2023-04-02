@@ -134,6 +134,7 @@ class DecimalTest {
     assertEquals(Decimal.ZERO, d.subtract(d));
     assertEquals(new Decimal("1.6516738"),
         new Decimal("13.6389588").subtract(new Decimal("11.987285")));
+    assertEquals(new Decimal("119.29632526"), new Decimal("119.41574100").subtract("0.11941574"));
   }
 
   @Test
