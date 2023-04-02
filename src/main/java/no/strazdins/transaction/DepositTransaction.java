@@ -12,6 +12,7 @@ import no.strazdins.tool.Converter;
  * A transaction of depositing a crypto to the Binance account.
  */
 public class DepositTransaction extends Transaction {
+  RawAccountChange deposit;
   /**
    * Create a deposit transaction.
    *
@@ -19,35 +20,30 @@ public class DepositTransaction extends Transaction {
    */
   public DepositTransaction(Transaction t) {
     super(t);
-    if (getFirstChangeOfType(Operation.DEPOSIT) == null) {
-      throw new IllegalStateException("Can't create a deposit without a deposit operation!");
+    deposit = getFirstChangeOfType(Operation.DEPOSIT);
+    if (deposit == null) {
+      throw new IllegalStateException("Can't create a deposit transaction without a deposit op!");
     }
   }
 
   @Override
   public String toString() {
-    RawAccountChange change = getChange();
-    return "Deposit " + change.getAmount() + " " + change.getAsset()
+    return "Deposit " + deposit.getAmount() + " " + deposit.getAsset()
         + " @ " + Converter.utcTimeToString(utcTime);
-  }
-
-  private RawAccountChange getChange() {
-    return getFirstChangeOfType(Operation.DEPOSIT);
   }
 
   @Override
   public ExtraInfoEntry getNecessaryExtraInfo() {
     String date = Converter.utcTimeToDateString(utcTime);
-    String hint = "<" + getChange().getAsset() + " price in home currency on " + date + ">";
+    String hint = "<" + deposit.getAsset() + " price in home currency on " + date + ">";
     return new ExtraInfoEntry(utcTime, ExtraInfoType.ASSET_PRICE, hint);
   }
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
     baseObtainPriceInHc = new Decimal(extraInfo.value());
-    RawAccountChange depositOperation = getChange();
-    baseCurrency = depositOperation.getAsset();
-    baseCurrencyAmount = depositOperation.getAmount();
+    baseCurrency = deposit.getAsset();
+    baseCurrencyAmount = deposit.getAmount();
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, baseObtainPriceInHc);
     return newSnapshot;
