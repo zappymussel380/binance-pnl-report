@@ -5,7 +5,7 @@ import no.strazdins.transaction.Transaction;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SellTest {
+class SellTest {
   @Test
   void testSell() {
     long currentTime = System.currentTimeMillis();
@@ -52,8 +52,5 @@ public class SellTest {
     assertEquals(new Decimal("72.22"), ws4.getWallet().getAvgObtainPrice("LTC"));
     assertEquals(new Decimal("119.29632526"), ws4.getWallet().getAssetAmount("USDT"));
     assertEquals(Decimal.ONE, ws4.getWallet().getAvgObtainPrice("USDT"));
-
-    // TODO - split into two sells, PNL must be right in each step
-
   }
 }

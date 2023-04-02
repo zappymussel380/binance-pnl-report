@@ -22,7 +22,6 @@ public class ReportFileWriter {
    *
    * @param report         The report content
    * @param outputFilePath Path to a CSV file where to store the result
-   * @param homeCurrency   The Home currency in which the profit and obtain prices are calculated
    */
   public static void writeReportToFile(Report report, String outputFilePath)
       throws IOException {

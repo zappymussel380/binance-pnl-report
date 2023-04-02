@@ -15,8 +15,6 @@ public class Decimal implements Comparable<Decimal> {
   private static final int DEFAULT_SCALE = 8;
   // Default rounding: round values >= 0.5 up to 1.0, others to 0.0
   private static final RoundingMode DEFAULT_ROUNDING = RoundingMode.HALF_UP;
-  private static final MathContext DEFAULT_PRECISION
-      = new MathContext(DEFAULT_SCALE, DEFAULT_ROUNDING);
   // This is used for as a temporary scale for division
   private static final MathContext DIV_PRECISION
       = new MathContext(DEFAULT_SCALE * 4, DEFAULT_ROUNDING);
