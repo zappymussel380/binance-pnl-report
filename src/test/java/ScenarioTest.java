@@ -26,11 +26,27 @@ class ScenarioTest {
     expectWalletState(ws4, 2, "0.00000383", "72.22",
         "119.29632526", "0.00770000", "0.01271786");
 
+    // Buy BNB, part of the obtained BNB is used as a fee
     WalletSnapshot ws5 = processBuy(ws4, "BNB", "1.00000000",
         "20.28760000", "USDT", "0.00075000", "BNB");
     expectWalletState(ws5, 3, "0.00000383", "72.22",
         "99.00872526", "0", "0.01271786");
     expectAssetAmount(ws5, "BNB", "0.99925", "20.30282712");
+
+    // Simulate another buy, where BTC is bought, fee is paid in USDT
+    WalletSnapshot ws5_1 = processBuy(ws4, "BTC", "0.001",
+        "20", "USDT", "0.2", "USDT");
+    expectWalletState(ws5_1, 3, "0.00000383", "72.22",
+        "99.09632526", "0", "0.01271786");
+    expectAssetAmount(ws5_1, "BTC", "0.001", "20200");
+
+
+
+    WalletSnapshot ws6 = processDeposit(ws5, "LTC", "11.98728478", "72.49245909");
+    expectWalletState(ws6, 3, "11.98728861", "72.49245900",
+        "99.00872526", "0", "0.01271786");
+    expectAssetAmount(ws6, "BNB", "0.99925", "20.30282712");
+
   }
 
   private WalletSnapshot processDeposit(WalletSnapshot startSnapshot,

@@ -42,7 +42,6 @@ public class BuyTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     fee = feeOp.getAmount();
     feeCurrency = feeOp.getAsset();
     quoteCurrency = quote.getAsset();
@@ -50,15 +49,15 @@ public class BuyTransaction extends Transaction {
     baseCurrency = base.getAsset();
     baseCurrencyAmount = base.getAmount();
 
+    WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     calculateFeeInUsdt(newSnapshot.getWallet());
-
 
     if (feeInUsdt.isZero() && feeOp.getAsset().equals("BNB") && base.getAsset().equals("BNB")) {
       return processFirstBnbBuy(newSnapshot);
-//    } else if (quote.getAsset().equals("BNB")) {
-//      return processBuyWithBnbFee();
-//    } else if (quote.getAsset().equals("USDT")) {
-//      return processBuyWithUsdtFee();
+    } else if (feeOp.getAsset().equals("BNB")) {
+      return processBuyWithBnbFee(newSnapshot);
+    } else if (feeOp.getAsset().equals("USDT")) {
+      return processBuyWithUsdtFee(newSnapshot);
     } else {
       throw new UnsupportedOperationException("Unknown type of buy transaction: " + this);
     }
@@ -77,6 +76,21 @@ public class BuyTransaction extends Transaction {
     baseObtainPriceInUsdt = avgBnbPrice;
     feeInUsdt = fee.multiply(avgBnbPrice).negate();
 
+    return newSnapshot;
+  }
+
+  private WalletSnapshot processBuyWithBnbFee(WalletSnapshot newSnapshot) {
+    throw new UnsupportedOperationException("Unknown type of buy transaction: " + this);
+  }
+
+  private WalletSnapshot processBuyWithUsdtFee(WalletSnapshot newSnapshot) {
+    Decimal usdtUsedInTransaction = (quote.getAmount().add(feeInUsdt)).negate();
+    newSnapshot.decreaseAsset("USDT", usdtUsedInTransaction);
+
+    Decimal avgBuyPrice = usdtUsedInTransaction.divide(base.getAmount());
+    newSnapshot.addAsset(base.getAsset(), base.getAmount(), avgBuyPrice);
+
+    baseObtainPriceInUsdt = avgBuyPrice;
     return newSnapshot;
   }
 }
