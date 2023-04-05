@@ -1,5 +1,6 @@
 package no.strazdins.transaction;
 
+import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
@@ -41,8 +42,41 @@ public class BuyTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    // TODO
-    // !!! throw new UnsupportedOperationException();
-    return walletSnapshot;
+    WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
+    fee = feeOp.getAmount();
+    feeCurrency = feeOp.getAsset();
+    quoteCurrency = quote.getAsset();
+    quoteAmount = quote.getAmount();
+    baseCurrency = base.getAsset();
+    baseCurrencyAmount = base.getAmount();
+
+    calculateFeeInUsdt(newSnapshot.getWallet());
+
+
+    if (feeInUsdt.isZero() && feeOp.getAsset().equals("BNB") && base.getAsset().equals("BNB")) {
+      return processFirstBnbBuy(newSnapshot);
+//    } else if (quote.getAsset().equals("BNB")) {
+//      return processBuyWithBnbFee();
+//    } else if (quote.getAsset().equals("USDT")) {
+//      return processBuyWithUsdtFee();
+    } else {
+      throw new UnsupportedOperationException("Unknown type of buy transaction: " + this);
+    }
+  }
+
+  private WalletSnapshot processFirstBnbBuy(WalletSnapshot newSnapshot) {
+    Decimal usdtUsedInTransaction = quote.getAmount().negate();
+    newSnapshot.decreaseAsset(quote.getAsset(), usdtUsedInTransaction);
+
+    Decimal obtainedBnb = base.getAmount().subtract(fee.negate());
+    Decimal avgBnbPrice = usdtUsedInTransaction.divide(obtainedBnb).multiply(
+        newSnapshot.getWallet().getAvgObtainPrice(quote.getAsset())
+    );
+    newSnapshot.addAsset("BNB", obtainedBnb, avgBnbPrice);
+
+    baseObtainPriceInUsdt = avgBnbPrice;
+    feeInUsdt = fee.multiply(avgBnbPrice).negate();
+
+    return newSnapshot;
   }
 }
