@@ -24,9 +24,15 @@ public class BuyTransaction extends Transaction {
     base = getFirstChangeOfType(Operation.BUY);
     quote = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
     feeOp = getFirstChangeOfType(Operation.FEE);
+    baseCurrencyAmount = base.getAmount();
     if (base == null || quote == null || feeOp == null) {
       throw new IllegalStateException("Can't create a buy when some ops are missing!");
     }
+    fee = feeOp.getAmount();
+    feeCurrency = feeOp.getAsset();
+    quoteCurrency = quote.getAsset();
+    quoteAmount = quote.getAmount();
+    baseCurrency = base.getAsset();
   }
 
   @Override
@@ -42,13 +48,6 @@ public class BuyTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    fee = feeOp.getAmount();
-    feeCurrency = feeOp.getAsset();
-    quoteCurrency = quote.getAsset();
-    quoteAmount = quote.getAmount();
-    baseCurrency = base.getAsset();
-    baseCurrencyAmount = base.getAmount();
-
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     calculateFeeInUsdt(newSnapshot.getWallet());
 

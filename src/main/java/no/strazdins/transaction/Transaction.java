@@ -1,5 +1,6 @@
 package no.strazdins.transaction;
 
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,6 +78,10 @@ public class Transaction {
    * @return A transaction with specific type, with the same atomic operations
    */
   public final Transaction clarifyTransactionType() {
+    if (consistsOfMultiple(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)) {
+      mergeRawChangesByType();
+    }
+
     if (consistsOf(Operation.DEPOSIT)) {
       return new DepositTransaction(this);
     } else if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)) {
@@ -100,9 +105,34 @@ public class Transaction {
     return sold != null && sold.getAsset().equals("USDT");
   }
 
+  /**
+   * Returns true if this transaction consists ONLY of the given operations, one of each type.
+   *
+   * @param operations The expected operations
+   * @return True if this transaction consists ONLY of the given change operations
+   */
   private boolean consistsOf(Operation... operations) {
     return getOperationMultiSet().equals(new OperationMultiSet(operations));
   }
+
+  /**
+   * Returns true if this transaction consists ONLY of the given operations, N of each type.
+   * N must be equal for all operation types, and N must be greater than 1.
+   * N is detected automatically.
+   *
+   * @param operations The expected operations
+   * @return True if this transaction consists ONLY of the given change operations
+   */
+  private boolean consistsOfMultiple(Operation... operations) {
+    int n = getCountOfOperationsWithType(operations[0]);
+    return n > 1 && getOperationMultiSet().equals(new OperationMultiSet(n, operations));
+  }
+
+  private int getCountOfOperationsWithType(Operation operation) {
+    List<RawAccountChange> changes = atomicAccountChanges.get(operation);
+    return changes != null ? changes.size() : 0;
+  }
+
 
   private OperationMultiSet getOperationMultiSet() {
     OperationMultiSet operationMultiSet = new OperationMultiSet();
@@ -111,6 +141,22 @@ public class Transaction {
     }
     return operationMultiSet;
   }
+
+  /**
+   * Merge the raw account changes by their type. For example, if there are three BUY changes:
+   * Buy 0.1 BTC, BUY 0.2 BTC, BUY 0.3 BTC, these will be merged into a single change: BUY 0.6 BTC.
+   */
+  public void mergeRawChangesByType() {
+    Map<Operation, List<RawAccountChange>> mergedChanges = new EnumMap<>(Operation.class);
+
+    for (Operation operation : atomicAccountChanges.keySet()) {
+      List<RawAccountChange> originalChanges = atomicAccountChanges.get(operation);
+      RawAccountChange mergedChange = RawAccountChange.merge(originalChanges);
+      mergedChanges.put(operation, Collections.singletonList(mergedChange));
+    }
+    atomicAccountChanges = mergedChanges;
+  }
+
 
   /**
    * Get the first account change with the given type.

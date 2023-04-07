@@ -35,6 +35,12 @@ public class SellTransaction extends Transaction {
       throw new IllegalStateException("Sell transactions must have "
           + QUOTE_CURR + " quote currency!");
     }
+    baseCurrency = base.getAsset();
+    baseCurrencyAmount = base.getAmount();
+    quoteAmount = quote.getAmount();
+    quoteCurrency = "USDT";
+    fee = feeOp.getAmount();
+    feeCurrency = feeOp.getAsset();
   }
 
   @Override
@@ -57,13 +63,7 @@ public class SellTransaction extends Transaction {
     newSnapshot.decreaseAsset(base.getAsset(), base.getAmount().negate());
     newSnapshot.decreaseAsset(feeOp.getAsset(), feeOp.getAmount().negate());
 
-    baseCurrency = base.getAsset();
-    baseCurrencyAmount = base.getAmount();
     baseObtainPriceInUsdt = w.getAvgObtainPrice(base.getAsset());
-    fee = feeOp.getAmount();
-    feeCurrency = feeOp.getAsset();
-    quoteCurrency = "USDT";
-    quoteAmount = quote.getAmount();
 
     return newSnapshot;
   }
