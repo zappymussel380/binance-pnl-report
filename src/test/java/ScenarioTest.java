@@ -40,12 +40,20 @@ class ScenarioTest {
         "99.09632526", "0", "0.01271786");
     expectAssetAmount(ws5_1, "BTC", "0.001", "20200");
 
+    // Simulate another buy, where BTC is bought, fee paid in BNB (BNB exists in the wallet)
+    WalletSnapshot ws6 = processBuy(ws5, "BTC", "0.00799300",
+        "79.85846265", "USDT", "0.00295735", "BNB");
+    expectWalletState(ws6, 4, "0.00000383", "72.22",
+        "19.15026261", "0", "0.01271786");
+    expectAssetAmount(ws6, "BTC", "0.00799300", "9998.56189416");
+    expectAssetAmount(ws6, "BNB", "0.99629265", "20.30282712");
 
 
-    WalletSnapshot ws6 = processDeposit(ws5, "LTC", "11.98728478", "72.49245909");
-    expectWalletState(ws6, 3, "11.98728861", "72.49245900",
+
+    WalletSnapshot ws7 = processDeposit(ws5, "LTC", "11.98728478", "72.49245909");
+    expectWalletState(ws7, 3, "11.98728861", "72.49245900",
         "99.00872526", "0", "0.01271786");
-    expectAssetAmount(ws6, "BNB", "0.99925", "20.30282712");
+    expectAssetAmount(ws7, "BNB", "0.99925", "20.30282712");
 
   }
 
@@ -74,7 +82,6 @@ class ScenarioTest {
         Operation.FEE, feeCurrency, new Decimal(fee).negate(), "Fee in " + feeCurrency));
     BuyTransaction buy = new BuyTransaction(t);
     return buy.process(startSnapshot, null);
-
   }
 
   private WalletSnapshot processSell(WalletSnapshot startSnapshot, String asset, String amount,

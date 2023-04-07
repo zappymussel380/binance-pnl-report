@@ -80,7 +80,14 @@ public class BuyTransaction extends Transaction {
   }
 
   private WalletSnapshot processBuyWithBnbFee(WalletSnapshot newSnapshot) {
-    throw new UnsupportedOperationException("Unknown type of buy transaction: " + this);
+    Decimal usdtUsedInTransaction = quote.getAmount().negate();
+    newSnapshot.decreaseAsset(quote.getAsset(), usdtUsedInTransaction);
+    Decimal usdtValueOfAsset = usdtUsedInTransaction.add(feeInUsdt.negate());
+    baseObtainPriceInUsdt = usdtValueOfAsset.divide(base.getAmount());
+    newSnapshot.addAsset(base.getAsset(), base.getAmount(), baseObtainPriceInUsdt);
+    newSnapshot.decreaseAsset("BNB", fee.negate());
+
+    return newSnapshot;
   }
 
   private WalletSnapshot processBuyWithUsdtFee(WalletSnapshot newSnapshot) {
