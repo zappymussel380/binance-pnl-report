@@ -51,6 +51,7 @@ public class BuyTransaction extends Transaction {
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     calculateFeeInUsdt(newSnapshot.getWallet());
 
+    // TODO - support /BTC, /ETH and other /non-USDT markets, test them!
     if (feeInUsdt.isZero() && feeOp.getAsset().equals("BNB") && base.getAsset().equals("BNB")) {
       return processFirstBnbBuy(newSnapshot);
     } else if (feeOp.getAsset().equals("BNB")) {
@@ -63,13 +64,15 @@ public class BuyTransaction extends Transaction {
   }
 
   private WalletSnapshot processFirstBnbBuy(WalletSnapshot newSnapshot) {
-    Decimal usdtUsedInTransaction = quote.getAmount().negate();
-    newSnapshot.decreaseAsset(quote.getAsset(), usdtUsedInTransaction);
+    Decimal quoteUsedInTransaction = quoteAmount.negate();
+    newSnapshot.decreaseAsset(quoteCurrency, quoteUsedInTransaction);
+
+    Decimal quoteObtainPrice = newSnapshot.getWallet().getAvgObtainPrice(quote.getAsset());
+
+    avgPriceInUsdt = quoteUsedInTransaction.divide(baseCurrencyAmount).multiply(quoteObtainPrice);
 
     Decimal obtainedBnb = base.getAmount().subtract(fee.negate());
-    Decimal avgBnbPrice = usdtUsedInTransaction.divide(obtainedBnb).multiply(
-        newSnapshot.getWallet().getAvgObtainPrice(quote.getAsset())
-    );
+    Decimal avgBnbPrice = quoteUsedInTransaction.divide(obtainedBnb).multiply(quoteObtainPrice);
     newSnapshot.addAsset("BNB", obtainedBnb, avgBnbPrice);
 
     baseObtainPriceInUsdt = avgBnbPrice;
@@ -83,6 +86,7 @@ public class BuyTransaction extends Transaction {
     newSnapshot.decreaseAsset(quote.getAsset(), usdtUsedInTransaction);
     Decimal usdtValueOfAsset = usdtUsedInTransaction.add(feeInUsdt.negate());
     baseObtainPriceInUsdt = usdtValueOfAsset.divide(base.getAmount());
+    avgPriceInUsdt = usdtUsedInTransaction.divide(baseCurrencyAmount);
     newSnapshot.addAsset(base.getAsset(), base.getAmount(), baseObtainPriceInUsdt);
     newSnapshot.decreaseAsset("BNB", fee.negate());
 
@@ -96,6 +100,7 @@ public class BuyTransaction extends Transaction {
     Decimal avgBuyPrice = usdtUsedInTransaction.divide(base.getAmount());
     newSnapshot.addAsset(base.getAsset(), base.getAmount(), avgBuyPrice);
 
+    avgPriceInUsdt = usdtUsedInTransaction.divide(baseCurrencyAmount);
     baseObtainPriceInUsdt = avgBuyPrice;
     return newSnapshot;
   }

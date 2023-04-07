@@ -54,16 +54,18 @@ public class SellTransaction extends Transaction {
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     Wallet w = newSnapshot.getWallet();
     calculateFeeInUsdt(w);
-    Decimal receivedUsdt = quote.getAmount().add(feeInUsdt); // Fee is negative
-    Decimal investedUsdt = base.getAmount().negate().multiply(w.getAvgObtainPrice(base.getAsset()));
+    Decimal receivedUsdt = quoteAmount.add(feeInUsdt); // Fee is negative
+    Decimal investedUsdt = base.getAmount().negate().multiply(newSnapshot.getAvgBaseObtainPrice());
     pnl = receivedUsdt.subtract(investedUsdt);
     newSnapshot.addPnl(pnl);
+
+    baseObtainPriceInUsdt = newSnapshot.getAvgBaseObtainPrice();
+    avgPriceInUsdt = quoteAmount.divide(baseCurrencyAmount.negate());
 
     newSnapshot.addAsset(QUOTE_CURR, quote.getAmount(), Decimal.ONE);
     newSnapshot.decreaseAsset(base.getAsset(), base.getAmount().negate());
     newSnapshot.decreaseAsset(feeOp.getAsset(), feeOp.getAmount().negate());
 
-    baseObtainPriceInUsdt = w.getAvgObtainPrice(base.getAsset());
 
     return newSnapshot;
   }

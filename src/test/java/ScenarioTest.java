@@ -55,11 +55,14 @@ class ScenarioTest {
         "98.90777367", "-0.22114332", "-0.20842546");
     expectAssetAmount(ws7, "BNB", "0.99333005", "20.30282712");
 
-    WalletSnapshot ws8 = processDeposit(ws5, "LTC", "11.98728478", "72.49245909");
+    WalletSnapshot ws8 = processDeposit(ws7, "LTC", "11.98728478", "72.49245909");
     expectWalletState(ws8, 3, "11.98728861", "72.49245900",
-        "99.00872526", "0", "0.01271786");
-    expectAssetAmount(ws8, "BNB", "0.99925", "20.30282712");
+        "98.90777367", "0", "-0.20842546");
+    expectAssetAmount(ws8, "BNB", "0.99333005", "20.30282712");
 
+    WalletSnapshot ws9 = processWithdraw(ws8, "LTC", "2", "82.49245900");
+    expectWalletState(ws9, 3, "9.98728861", "72.49245900",
+        "98.90777367", "20", "19.79157454");
   }
 
   private WalletSnapshot processDeposit(WalletSnapshot startSnapshot,
@@ -71,6 +74,18 @@ class ScenarioTest {
     ExtraInfoEntry ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE, obtainPrice);
     DepositTransaction deposit = new DepositTransaction(t);
     return deposit.process(startSnapshot, ei);
+  }
+
+  private WalletSnapshot processWithdraw(WalletSnapshot startSnapshot, String asset, String amount,
+                                         String realizationPrice) {
+    transactionTime += 1000;
+    Transaction t = new Transaction(transactionTime);
+    t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.WITHDRAW,
+        asset, new Decimal(amount).negate(), "Withdraw"));
+    ExtraInfoEntry ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE,
+        realizationPrice);
+    WithdrawTransaction withdraw = new WithdrawTransaction(t);
+    return withdraw.process(startSnapshot, ei);
   }
 
   private WalletSnapshot processBuy(WalletSnapshot startSnapshot, String asset, String amount,

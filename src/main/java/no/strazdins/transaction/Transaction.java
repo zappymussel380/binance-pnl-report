@@ -30,6 +30,7 @@ public class Transaction {
   protected Decimal baseCurrencyAmount = Decimal.ZERO;
   // Base currency obtaining price in Home Currency
   protected Decimal baseObtainPriceInUsdt = Decimal.ZERO;
+  protected Decimal avgPriceInUsdt = Decimal.ZERO;
   protected String quoteCurrency = "";
   protected Decimal fee = Decimal.ZERO;
   protected String feeCurrency = "";
@@ -84,6 +85,8 @@ public class Transaction {
 
     if (consistsOf(Operation.DEPOSIT)) {
       return new DepositTransaction(this);
+    } else if (consistsOf(Operation.WITHDRAW)) {
+      return new WithdrawTransaction(this);
     } else if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)) {
       if (isSell()) {
         return new SellTransaction(this);
@@ -207,7 +210,8 @@ public class Transaction {
    * @return A human-readable type of the transaction.
    */
   public String getType() {
-    return "Unknown";
+    throw new UnsupportedOperationException("getType not implemented for "
+        + this.getClass().getSimpleName());
   }
 
   /**
@@ -272,6 +276,15 @@ public class Transaction {
    */
   public final Decimal getObtainPrice() {
     return baseObtainPriceInUsdt;
+  }
+
+  /**
+   * Get the average transaction price (sell price, buy price, etc.), calculated in USDT.
+   *
+   * @return The average price of the transaction, in USDT
+   */
+  public final Decimal getAvgPriceInUsdt() {
+    return avgPriceInUsdt;
   }
 
   /**

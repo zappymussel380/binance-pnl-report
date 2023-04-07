@@ -28,8 +28,8 @@ public class ReportFileWriter {
     String[] header = new String[]{
         "Unix timestamp", "UTC time",
         "Transaction", "Asset",
-        "Amount", "Quote currency",
-        "Quote amount",
+        "Amount", "Price",
+        "Quote currency", "Quote amount",
         "Fee", "Fee currency",
         "Fee in USDT", "Obtain price in USDT",
         "Transaction PNL in USDT", "Amount in Wallet",
@@ -42,8 +42,8 @@ public class ReportFileWriter {
       writer.writeRow(new String[]{
           "" + timestamp, Converter.utcTimeToString(timestamp),
           t.getType(), t.getBaseCurrency(),
-          t.getBaseCurrencyAmount().getNiceString(), t.getQuoteCurrency(),
-          t.getQuoteAmount().getNiceString(),
+          t.getBaseCurrencyAmount().getNiceString(), t.getAvgPriceInUsdt().getNiceString(),
+          t.getQuoteCurrency(), t.getQuoteAmount().getNiceString(),
           t.getFee().getNiceString(), t.getFeeCurrency(),
           t.getFeeInUsdt().getNiceString(), t.getObtainPrice().getNiceString(),
           t.getPnl().getNiceString(),

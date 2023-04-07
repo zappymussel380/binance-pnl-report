@@ -36,7 +36,7 @@ public class DepositTransaction extends Transaction {
   @Override
   public ExtraInfoEntry getNecessaryExtraInfo() {
     String date = Converter.utcTimeToDateString(utcTime);
-    String hint = "<" + deposit.getAsset() + " price in home currency on " + date + ">";
+    String hint = "<" + deposit.getAsset() + " price in USD on " + date + ">";
     return new ExtraInfoEntry(utcTime, ExtraInfoType.ASSET_PRICE, hint);
   }
 

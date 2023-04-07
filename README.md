@@ -48,7 +48,7 @@ The CSV file with extra information must contain the following columns:
 2. The type of the extra information,
    see [ExtraInfoType](src/main/java/no/strazdins/data/ExtraInfoType.java)
 3. The value of the transaction. The meaning of it depends on the extra info type. For example, a
-   price at which the currency was purchased (measured in the Home currency).
+   price at which the currency was purchased (in USDT).
 
 Note: you can run the report generator tool, and it will tell you what kind of extra information it
 needs. Copy that output (the right timestamps will be there), find out the necessary values
