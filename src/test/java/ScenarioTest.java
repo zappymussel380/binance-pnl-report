@@ -48,12 +48,17 @@ class ScenarioTest {
     expectAssetAmount(ws6, "BTC", "0.00799300", "9998.56189416");
     expectAssetAmount(ws6, "BNB", "0.99629265", "20.30282712");
 
+    // Simulate a sell - sell the whole BTC, no BTC left in the wallet
+    WalletSnapshot ws7 = processSell(ws6, "BTC", "0.00799300",
+        "79.75751106", "0.00296260", "BNB");
+    expectWalletState(ws7, 3, "0.00000383", "72.22",
+        "98.90777367", "-0.22114332", "-0.20842546");
+    expectAssetAmount(ws7, "BNB", "0.99333005", "20.30282712");
 
-
-    WalletSnapshot ws7 = processDeposit(ws5, "LTC", "11.98728478", "72.49245909");
-    expectWalletState(ws7, 3, "11.98728861", "72.49245900",
+    WalletSnapshot ws8 = processDeposit(ws5, "LTC", "11.98728478", "72.49245909");
+    expectWalletState(ws8, 3, "11.98728861", "72.49245900",
         "99.00872526", "0", "0.01271786");
-    expectAssetAmount(ws7, "BNB", "0.99925", "20.30282712");
+    expectAssetAmount(ws8, "BNB", "0.99925", "20.30282712");
 
   }
 
