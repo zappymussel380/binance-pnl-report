@@ -15,7 +15,7 @@ import no.strazdins.transaction.Transaction;
  * Logic for generation of the PNL report.
  */
 public class ReportGenerator {
-  private final static String TRANSACTION_LOG_CSV_FILE = "transactions.csv";
+  private static final String TRANSACTION_LOG_CSV_FILE = "transactions.csv";
   private final String inputFilePath;
   private final String homeCurrency;
   private final String extraFilePath;

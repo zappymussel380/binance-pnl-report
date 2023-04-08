@@ -152,10 +152,10 @@ public class Transaction {
   public void mergeRawChangesByType() {
     Map<Operation, List<RawAccountChange>> mergedChanges = new EnumMap<>(Operation.class);
 
-    for (Operation operation : atomicAccountChanges.keySet()) {
-      List<RawAccountChange> originalChanges = atomicAccountChanges.get(operation);
+    for (Map.Entry<Operation, List<RawAccountChange>> e : atomicAccountChanges.entrySet()) {
+      List<RawAccountChange> originalChanges = e.getValue();
       RawAccountChange mergedChange = RawAccountChange.merge(originalChanges);
-      mergedChanges.put(operation, Collections.singletonList(mergedChange));
+      mergedChanges.put(e.getKey(), Collections.singletonList(mergedChange));
     }
     atomicAccountChanges = mergedChanges;
   }

@@ -1,6 +1,11 @@
 package no.strazdins.transaction;
 
-import no.strazdins.data.*;
+import no.strazdins.data.Decimal;
+import no.strazdins.data.ExtraInfoEntry;
+import no.strazdins.data.ExtraInfoType;
+import no.strazdins.data.Operation;
+import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.Converter;
 
 /**
@@ -9,6 +14,11 @@ import no.strazdins.tool.Converter;
 public class WithdrawTransaction extends Transaction {
   RawAccountChange withdraw;
 
+  /**
+   * Create a Withdrawal transaction.
+   *
+   * @param t The raw transaction to use as the starting point
+   */
   public WithdrawTransaction(Transaction t) {
     super(t);
     withdraw = getFirstChangeOfType(Operation.WITHDRAW);
