@@ -44,9 +44,20 @@ public class WalletSnapshot {
     return ws;
   }
 
-  public void addAsset(String asset, Decimal depositAmount, Decimal obtainPrice) {
-    wallet.addAsset(asset, depositAmount, obtainPrice);
+  public void addAsset(String asset, Decimal amount, Decimal obtainPrice) {
+    wallet.addAsset(asset, amount, obtainPrice);
   }
+
+  /**
+   * Decrease the amount of given asset in the wallet.
+   *
+   * @param asset  The asset to decrease
+   * @param amount The decrease amount
+   */
+  public void decreaseAsset(String asset, Decimal amount) {
+    wallet.decreaseAsset(asset, amount);
+  }
+
 
   @Override
   public String toString() {
@@ -58,8 +69,22 @@ public class WalletSnapshot {
     return wallet;
   }
 
+  /**
+   * Get Profit & Loss (PNL), in USDT.
+   *
+   * @return PNL in USDT
+   */
   public Decimal getPnl() {
     return pnl;
+  }
+
+  /**
+   * Add a PNL of one transaction to the total running PNL.
+   *
+   * @param transactionPnl PNL of a single transaction
+   */
+  public void addPnl(Decimal transactionPnl) {
+    pnl = pnl.add(transactionPnl);
   }
 
   /**
@@ -93,4 +118,5 @@ public class WalletSnapshot {
   public Decimal getAvgBaseObtainPrice() {
     return wallet.getAvgObtainPrice(transaction.getBaseCurrency());
   }
+
 }

@@ -1,5 +1,7 @@
 package no.strazdins.data;
 
+import java.util.List;
+import java.util.Objects;
 import no.strazdins.tool.Converter;
 
 /**
@@ -10,7 +12,7 @@ public class RawAccountChange {
   private final AccountType account;
   private final Operation operation;
   private final String asset;
-  private final Decimal changeAmount;
+  private Decimal changeAmount;
   private final String remark;
 
   /**
@@ -32,6 +34,49 @@ public class RawAccountChange {
     this.asset = asset;
     this.changeAmount = changeAmount;
     this.remark = remark;
+  }
+
+  /**
+   * Merge the given list of original changes into a single change.
+   *
+   * @param originalChanges The list of original changes to merge
+   * @return A single change, where all original changes are merged
+   * @throws IllegalArgumentException When the changes can't be merged: different types or assets
+   */
+  public static RawAccountChange merge(List<RawAccountChange> originalChanges)
+      throws IllegalArgumentException {
+    if (originalChanges == null || originalChanges.isEmpty()) {
+      throw new IllegalArgumentException("Can't merge an empty list");
+    }
+
+    RawAccountChange merged = new RawAccountChange(originalChanges.get(0));
+
+    for (int i = 1; i < originalChanges.size(); ++i) {
+      RawAccountChange c = originalChanges.get(i);
+      if (c.utcTime != merged.utcTime || c.account != merged.account
+          || c.operation != merged.operation || !c.asset.equals(merged.asset)) {
+        throw new IllegalArgumentException(
+            "Merged changes must have the same time, account, operation and asset"
+        );
+      }
+      merged.changeAmount = merged.changeAmount.add(c.changeAmount);
+    }
+
+    return merged;
+  }
+
+  /**
+   * Copy an object.
+   *
+   * @param original The object to copy
+   */
+  public RawAccountChange(RawAccountChange original) {
+    this.account = original.account;
+    this.changeAmount = original.changeAmount;
+    this.asset = original.asset;
+    this.remark = original.remark;
+    this.operation = original.operation;
+    this.utcTime = original.utcTime;
   }
 
   /**
@@ -71,6 +116,25 @@ public class RawAccountChange {
         + ", changeAmount='" + changeAmount + '\''
         + ", remark='" + remark + '\''
         + '}';
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    RawAccountChange that = (RawAccountChange) o;
+    return utcTime == that.utcTime && account == that.account && operation == that.operation
+        && Objects.equals(asset, that.asset) && Objects.equals(changeAmount, that.changeAmount)
+        && Objects.equals(remark, that.remark);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(utcTime, account, operation, asset, changeAmount, remark);
   }
 
   /**

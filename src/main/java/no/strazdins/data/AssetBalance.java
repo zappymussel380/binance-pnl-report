@@ -76,4 +76,16 @@ public class AssetBalance {
     return Objects.hash(amount, obtainPrice);
   }
 
+  /**
+   * Decrease the amount of the asset by the given amount.
+   *
+   * @param d The amount to subtract from the current amount
+   */
+  public void decrease(Decimal d) {
+    if (amount.isLessThan(d)) {
+      throw new IllegalStateException("Can't reduce amount " + amount.getNiceString()
+          + " by " + d.getNiceString());
+    }
+    this.amount = this.amount.subtract(d);
+  }
 }

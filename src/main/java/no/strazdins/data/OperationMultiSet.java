@@ -21,6 +21,18 @@ public class OperationMultiSet {
     }
   }
 
+  /**
+   * Create a multiset, add all the given operations to the set.
+   *
+   * @param n          The count of each operation type
+   * @param operations The operations to add
+   */
+  public OperationMultiSet(int n, Operation... operations) {
+    for (Operation operation : operations) {
+      add(operation, n);
+    }
+  }
+
   public OperationMultiSet() {
   }
 

@@ -1,5 +1,6 @@
 package no.strazdins.transaction;
 
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +10,7 @@ import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
 import no.strazdins.data.OperationMultiSet;
 import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.Converter;
 
@@ -17,6 +19,9 @@ import no.strazdins.tool.Converter;
  * For example, purchasing a cryptocurrency may consist of three changes: buy + sell + fee.
  */
 public class Transaction {
+  // All PNL is calculated in this currency
+  public static final String QUOTE_CURR = "USDT";
+
   Map<Operation, List<RawAccountChange>> atomicAccountChanges = new EnumMap<>(Operation.class);
   protected final long utcTime;
 
@@ -24,13 +29,15 @@ public class Transaction {
   protected String baseCurrency;
   protected Decimal baseCurrencyAmount = Decimal.ZERO;
   // Base currency obtaining price in Home Currency
-  protected Decimal baseObtainPriceInHc = Decimal.ZERO;
-  protected String quoteCurrency;
+  protected Decimal baseObtainPriceInUsdt = Decimal.ZERO;
+  protected Decimal avgPriceInUsdt = Decimal.ZERO;
+  protected String quoteCurrency = "";
   protected Decimal fee = Decimal.ZERO;
-  protected String feeCurrency;
-  protected Decimal feeInHomeCurrency = Decimal.ZERO;
+  protected String feeCurrency = "";
+  protected Decimal feeInUsdt = Decimal.ZERO;
 
   protected Decimal pnl = Decimal.ZERO;
+  protected Decimal quoteAmount = Decimal.ZERO;
 
 
   /**
@@ -52,7 +59,7 @@ public class Transaction {
    *
    * @param change An atomic account change
    */
-  public void append(RawAccountChange change) {
+  public final void append(RawAccountChange change) {
     if (!atomicAccountChanges.containsKey(change.getOperation())) {
       atomicAccountChanges.put(change.getOperation(), new LinkedList<>());
     }
@@ -71,17 +78,64 @@ public class Transaction {
    *
    * @return A transaction with specific type, with the same atomic operations
    */
-  public Transaction clarifyTransactionType() {
+  public final Transaction clarifyTransactionType() {
+    if (consistsOfMultiple(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)) {
+      mergeRawChangesByType();
+    }
+
     if (consistsOf(Operation.DEPOSIT)) {
       return new DepositTransaction(this);
+    } else if (consistsOf(Operation.WITHDRAW)) {
+      return new WithdrawTransaction(this);
+    } else if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)) {
+      if (isSell()) {
+        return new SellTransaction(this);
+      } else if (isBuy()) {
+        return new BuyTransaction(this);
+      }
     }
     // TODO - implement other transaction types
     return null;
   }
 
+  protected boolean isSell() {
+    RawAccountChange bought = getFirstChangeOfType(Operation.BUY);
+    return bought != null && bought.getAsset().equals("USDT");
+  }
+
+  protected boolean isBuy() {
+    RawAccountChange sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    return sold != null && sold.getAsset().equals("USDT");
+  }
+
+  /**
+   * Returns true if this transaction consists ONLY of the given operations, one of each type.
+   *
+   * @param operations The expected operations
+   * @return True if this transaction consists ONLY of the given change operations
+   */
   private boolean consistsOf(Operation... operations) {
     return getOperationMultiSet().equals(new OperationMultiSet(operations));
   }
+
+  /**
+   * Returns true if this transaction consists ONLY of the given operations, N of each type.
+   * N must be equal for all operation types, and N must be greater than 1.
+   * N is detected automatically.
+   *
+   * @param operations The expected operations
+   * @return True if this transaction consists ONLY of the given change operations
+   */
+  private boolean consistsOfMultiple(Operation... operations) {
+    int n = getCountOfOperationsWithType(operations[0]);
+    return n > 1 && getOperationMultiSet().equals(new OperationMultiSet(n, operations));
+  }
+
+  private int getCountOfOperationsWithType(Operation operation) {
+    List<RawAccountChange> changes = atomicAccountChanges.get(operation);
+    return changes != null ? changes.size() : 0;
+  }
+
 
   private OperationMultiSet getOperationMultiSet() {
     OperationMultiSet operationMultiSet = new OperationMultiSet();
@@ -92,12 +146,28 @@ public class Transaction {
   }
 
   /**
+   * Merge the raw account changes by their type. For example, if there are three BUY changes:
+   * Buy 0.1 BTC, BUY 0.2 BTC, BUY 0.3 BTC, these will be merged into a single change: BUY 0.6 BTC.
+   */
+  public void mergeRawChangesByType() {
+    Map<Operation, List<RawAccountChange>> mergedChanges = new EnumMap<>(Operation.class);
+
+    for (Operation operation : atomicAccountChanges.keySet()) {
+      List<RawAccountChange> originalChanges = atomicAccountChanges.get(operation);
+      RawAccountChange mergedChange = RawAccountChange.merge(originalChanges);
+      mergedChanges.put(operation, Collections.singletonList(mergedChange));
+    }
+    atomicAccountChanges = mergedChanges;
+  }
+
+
+  /**
    * Get the first account change with the given type.
    *
    * @param operation Operation type
    * @return The first change or null if no change of this type is found.
    */
-  protected RawAccountChange getFirstChangeOfType(Operation operation) {
+  protected final RawAccountChange getFirstChangeOfType(Operation operation) {
     List<RawAccountChange> changes = atomicAccountChanges.get(operation);
     return changes != null && !changes.isEmpty() ? changes.get(0) : null;
   }
@@ -117,7 +187,7 @@ public class Transaction {
    *
    * @return UTC timestamp of the transaction, containing milliseconds.
    */
-  public long getUtcTime() {
+  public final long getUtcTime() {
     return utcTime;
   }
 
@@ -137,82 +207,118 @@ public class Transaction {
   /**
    * Get the type of the transaction.
    *
-   * @return A human-readable type of the transaction. Override this in the child classes.
+   * @return A human-readable type of the transaction.
    */
   public String getType() {
-    return "Unknown";
+    throw new UnsupportedOperationException("getType not implemented for "
+        + this.getClass().getSimpleName());
   }
 
   /**
-   * Get the base currency of the transaction. Override this in the child classes.
+   * Get the base currency of the transaction.
    *
    * @return The base currency.
    */
-  public String getBaseCurrency() {
+  public final String getBaseCurrency() {
     return baseCurrency;
   }
 
   /**
-   * Get the quote currency of the transaction. Override this in the child classes.
+   * Get the quote currency of the transaction.
    *
    * @return The quote currency
    */
-  public String getQuoteCurrency() {
+  public final String getQuoteCurrency() {
     return quoteCurrency;
   }
 
 
   /**
-   * Get the amount of base currency of the transaction. Override this in the child classes.
+   * Get the amount of base currency of the transaction.
    *
    * @return The amount of base currency
    */
-  public Decimal getBaseCurrencyAmount() {
+  public final Decimal getBaseCurrencyAmount() {
     return baseCurrencyAmount;
   }
 
   /**
-   * Get the fee paid in this transaction. Override this in the child classes.
+   * Get the fee paid in this transaction.
    *
    * @return The fee, in the fee-currency
    */
-  public Decimal getFee() {
+  public final Decimal getFee() {
     return fee;
   }
 
   /**
-   * Get the nominal currency of the fee. Override this in the child classes.
+   * Get the nominal currency of the fee.
    *
    * @return The currency in which the fee was paid.
    */
-  public String getFeeCurrency() {
+  public final String getFeeCurrency() {
     return feeCurrency;
   }
 
   /**
-   * Get the amount of fee, converted to the Home Currency. Override this in the child classes.
+   * Get the amount of fee, in USDT. Note: the value will be negative!
    *
-   * @return The fee converted to the Home Currency
+   * @return The fee amount, converted to the USDT currency
    */
-  public Decimal getFeeInHomeCurrency() {
-    return feeInHomeCurrency;
+  public final Decimal getFeeInUsdt() {
+    return feeInUsdt;
   }
 
   /**
-   * Get obtain-price of the base currency, calculated in the Home Currency.
+   * Get obtain-price of the base currency, calculated in USDT.
    *
-   * @return The obtain-price of the main asset, in Home Currency
+   * @return The obtain-price of the main asset, in USDT
    */
-  public Decimal getObtainPrice() {
-    return baseObtainPriceInHc;
+  public final Decimal getObtainPrice() {
+    return baseObtainPriceInUsdt;
+  }
+
+  /**
+   * Get the average transaction price (sell price, buy price, etc.), calculated in USDT.
+   *
+   * @return The average price of the transaction, in USDT
+   */
+  public final Decimal getAvgPriceInUsdt() {
+    return avgPriceInUsdt;
   }
 
   /**
    * Get Profit & Loss (PNL) of this single transaction.
    *
-   * @return The PNL, in Home currency
+   * @return The PNL, in USDT
    */
-  public Decimal getPnl() {
+  public final Decimal getPnl() {
     return pnl;
+  }
+
+  /**
+   * Get the amount of quote currency change in this transaction.
+   *
+   * @return The amount of quote currency change in this transaction
+   */
+  public final Decimal getQuoteAmount() {
+    return quoteAmount;
+  }
+
+  /**
+   * Find out the fee in USDT, store it.
+   *
+   * @throws IllegalStateException When no fee raw-account-change is found
+   */
+  protected void calculateFeeInUsdt(Wallet wallet) throws IllegalStateException {
+    RawAccountChange feeOp = getFirstChangeOfType(Operation.FEE);
+    if (feeOp == null) {
+      throw new IllegalStateException("Could not find fee operation!");
+    }
+    if (feeOp.getAsset().equals("USDT")) {
+      feeInUsdt = feeOp.getAmount();
+    } else {
+      feeInUsdt = feeOp.getAmount().multiply(wallet.getAvgObtainPrice(feeOp.getAsset()));
+    }
   }
 }

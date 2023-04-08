@@ -48,7 +48,7 @@ public class ReportGenerator {
     ExtraInfo missingInfo = extraInfoHandler.detectMissingInfo(transactions);
     if (missingInfo.isEmpty()) {
       Report report = generateReport(transactions, extraInfoHandler.getUserProvidedInfo());
-      ReportFileWriter.writeReportToFile(report, outputFilePath, homeCurrency);
+      ReportFileWriter.writeReportToFile(report, outputFilePath);
     } else {
       printMissingInfoRequirement(missingInfo);
     }
@@ -88,6 +88,8 @@ public class ReportGenerator {
       Transaction transaction = rawTransaction.clarifyTransactionType();
       if (transaction != null) {
         transactions.add(transaction);
+      } else {
+        // !!! throw new IllegalStateException("Unknown transaction: " + rawTransaction);
       }
     }
     return transactions;
