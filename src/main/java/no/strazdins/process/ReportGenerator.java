@@ -15,8 +15,8 @@ import no.strazdins.transaction.Transaction;
  * Logic for generation of the PNL report.
  */
 public class ReportGenerator {
+  private final static String TRANSACTION_LOG_CSV_FILE = "transactions.csv";
   private final String inputFilePath;
-  private final String outputFilePath;
   private final String homeCurrency;
   private final String extraFilePath;
 
@@ -24,16 +24,13 @@ public class ReportGenerator {
    * Create a new report generator.
    *
    * @param inputFilePath  Path to the CVS input file (exported from Binance)
-   * @param outputFilePath Path to the output file where the report will be written
    * @param homeCurrency   Home currency - used for profit-and-loss calculations
    * @param extraFilePath  Path to a CSV file where necessary extra information is stored
    * @throws IOException When some error happened during input file reading or output file writing
    */
-  public ReportGenerator(String inputFilePath, String outputFilePath,
-                         String homeCurrency, String extraFilePath) throws IOException {
-
+  public ReportGenerator(String inputFilePath, String homeCurrency, String extraFilePath)
+      throws IOException {
     this.inputFilePath = inputFilePath;
-    this.outputFilePath = outputFilePath;
     this.homeCurrency = homeCurrency;
     this.extraFilePath = extraFilePath;
   }
@@ -48,7 +45,7 @@ public class ReportGenerator {
     ExtraInfo missingInfo = extraInfoHandler.detectMissingInfo(transactions);
     if (missingInfo.isEmpty()) {
       Report report = generateReport(transactions, extraInfoHandler.getUserProvidedInfo());
-      ReportFileWriter.writeReportToFile(report, outputFilePath);
+      ReportFileWriter.writeTransactionLogToFile(report, TRANSACTION_LOG_CSV_FILE);
     } else {
       printMissingInfoRequirement(missingInfo);
     }
