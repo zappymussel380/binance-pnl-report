@@ -35,9 +35,8 @@ Run the tool from the command line (or from your IDE) and provide the following 
 arguments:
 
 1. Path to the Binance-exported CSV file
-2. Path to a CSV file where the report will be written
-3. Home currency (for example, NOK)
-4. Path to the CSV file with extra information
+2. Home currency (for example, NOK)
+3. Path to the CSV file with extra information
 
 ## Extra information CSV
 

@@ -23,7 +23,7 @@ public class ReportFileWriter {
    * @param report         The report content
    * @param outputFilePath Path to a CSV file where to store the result
    */
-  public static void writeReportToFile(Report report, String outputFilePath)
+  public static void writeTransactionLogToFile(Report report, String outputFilePath)
       throws IOException {
     String[] header = new String[]{
         "Unix timestamp", "UTC time",

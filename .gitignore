@@ -17,3 +17,5 @@ buildNumber.properties
 *.DS_Store
 
 pnl-report-tool.iml
+
+*.xlsx

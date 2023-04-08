@@ -18,13 +18,12 @@ public class Runner {
   public static void main(String[] args) {
     try {
       String inputFilePath = getInputFilePath(args);
-      String outputFilePath = getOutputFilePath(args);
       String homeCurrency = getCurrency(args);
       String extraFilePath = getExtraFilePath(args);
-      ReportGenerator reportGenerator = new ReportGenerator(inputFilePath, outputFilePath,
+      ReportGenerator reportGenerator = new ReportGenerator(inputFilePath,
           homeCurrency, extraFilePath);
       reportGenerator.createReport();
-      System.out.println("Report successfully generated, saved in the file " + outputFilePath);
+      System.out.println("Reports successfully generated, saved in CSV files");
     } catch (IOException e) {
       System.out.println("Report generation failed: " + e.getMessage());
     }
@@ -39,27 +38,19 @@ public class Runner {
     return args[0];
   }
 
-  private static String getOutputFilePath(String[] args) throws IOException {
+  private static String getCurrency(String[] args) throws IOException {
     if (args.length < 2) {
       throw new IOException(
-          "The second command-line argument must contain path to the output file");
+          "The second command-line argument must contain the accounting currency (example: NOK)");
     }
     return args[1];
   }
 
-  private static String getCurrency(String[] args) throws IOException {
+  private static String getExtraFilePath(String[] args) throws IOException {
     if (args.length < 3) {
       throw new IOException(
-          "The third command-line argument must contain the accounting currency (example: NOK)");
+          "The 3rd command-line argument must contain path to CSV file with extra information");
     }
     return args[2];
-  }
-
-  private static String getExtraFilePath(String[] args) throws IOException {
-    if (args.length < 4) {
-      throw new IOException(
-          "The 4th command-line argument must contain path to CSV file with extra information");
-    }
-    return args[3];
   }
 }

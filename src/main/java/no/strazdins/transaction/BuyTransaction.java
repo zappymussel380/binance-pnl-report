@@ -24,7 +24,6 @@ public class BuyTransaction extends Transaction {
     base = getFirstChangeOfType(Operation.BUY);
     quote = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
     feeOp = getFirstChangeOfType(Operation.FEE);
-    baseCurrencyAmount = base.getAmount();
     if (base == null || quote == null || feeOp == null) {
       throw new IllegalStateException("Can't create a buy when some ops are missing!");
     }
@@ -33,6 +32,7 @@ public class BuyTransaction extends Transaction {
     quoteCurrency = quote.getAsset();
     quoteAmount = quote.getAmount();
     baseCurrency = base.getAsset();
+    baseCurrencyAmount = base.getAmount();
   }
 
   @Override
