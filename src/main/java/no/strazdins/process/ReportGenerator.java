@@ -102,7 +102,7 @@ public class ReportGenerator {
   private void printMissingInfoRequirement(ExtraInfo missingInfo) {
     logger.warn("Provide the necessary information in the extra-info file `{}`:", extraFilePath);
     for (ExtraInfoEntry mi : missingInfo.getAllEntries()) {
-      logger.warn("{},{},{}", mi.utcTimestamp(), mi.type(), mi.value());
+      logger.warn("{},{},{}", mi.utcTimestamp(), mi.type(), mi.val());
     }
   }
 

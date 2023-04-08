@@ -44,7 +44,7 @@ public class WithdrawTransaction extends Transaction {
     baseCurrency = withdraw.getAsset();
     baseCurrencyAmount = withdraw.getAmount();
     Decimal assetAmount = withdraw.getAmount().negate();
-    Decimal realizationPrice = new Decimal(extraInfo.value());
+    Decimal realizationPrice = new Decimal(extraInfo.val());
     avgPriceInUsdt = realizationPrice;
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     baseObtainPriceInUsdt = newSnapshot.getAvgBaseObtainPrice();
