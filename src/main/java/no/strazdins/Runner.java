@@ -4,12 +4,15 @@ import java.io.IOException;
 import no.strazdins.file.ReportFileWriter;
 import no.strazdins.process.Report;
 import no.strazdins.process.ReportGenerator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The main application runner - handles command-line arguments, calls the necessary logic.
  */
 public class Runner {
   private static final String TRANSACTION_LOG_CSV_FILE = "transactions.csv";
+  private static final Logger logger = LogManager.getLogger(Runner.class);
 
   /**
    * The main entrypoint of the application.
@@ -26,9 +29,9 @@ public class Runner {
       ReportGenerator reportGenerator = new ReportGenerator(inputFilePath, extraFilePath);
       Report report = reportGenerator.createReport();
       ReportFileWriter.writeTransactionLogToFile(report, TRANSACTION_LOG_CSV_FILE);
-      System.out.println("Reports successfully generated, saved in CSV files");
+      logger.info("Reports successfully generated, saved in CSV files");
     } catch (IOException e) {
-      System.out.println("Report generation failed: " + e.getMessage());
+      logger.error("Report generation failed: {}", e.getMessage());
     }
   }
 

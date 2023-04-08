@@ -8,12 +8,15 @@ import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.file.TransactionFileReader;
 import no.strazdins.transaction.Transaction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
  * Logic for generation of the PNL report.
  */
 public class ReportGenerator {
+  private static final Logger logger = LogManager.getLogger(ReportGenerator.class);
   private final String inputFilePath;
   private final String extraFilePath;
 
@@ -97,10 +100,9 @@ public class ReportGenerator {
 
 
   private void printMissingInfoRequirement(ExtraInfo missingInfo) {
-    System.out.println("Provide the necessary information in the extra-info file `"
-        + extraFilePath + "`: ");
+    logger.warn("Provide the necessary information in the extra-info file `{}`:", extraFilePath);
     for (ExtraInfoEntry mi : missingInfo.getAllEntries()) {
-      System.out.println(mi.utcTimestamp() + "," + mi.type() + "," + mi.value());
+      logger.warn("{},{},{}", mi.utcTimestamp(), mi.type(), mi.value());
     }
   }
 
