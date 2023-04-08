@@ -1,12 +1,19 @@
 package no.strazdins;
 
 import java.io.IOException;
+import no.strazdins.file.ReportFileWriter;
+import no.strazdins.process.Report;
 import no.strazdins.process.ReportGenerator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The main application runner - handles command-line arguments, calls the necessary logic.
  */
 public class Runner {
+  private static final String TRANSACTION_LOG_CSV_FILE = "transactions.csv";
+  private static final String BALANCE_LOG_CSV_FILE = "balances.csv";
+  private static final Logger logger = LogManager.getLogger(Runner.class);
 
   /**
    * The main entrypoint of the application.
@@ -20,12 +27,14 @@ public class Runner {
       String inputFilePath = getInputFilePath(args);
       String homeCurrency = getCurrency(args);
       String extraFilePath = getExtraFilePath(args);
-      ReportGenerator reportGenerator = new ReportGenerator(inputFilePath,
-          homeCurrency, extraFilePath);
-      reportGenerator.createReport();
-      System.out.println("Reports successfully generated, saved in CSV files");
+      ReportGenerator reportGenerator = new ReportGenerator(inputFilePath, extraFilePath);
+      Report report = reportGenerator.createReport();
+      ReportFileWriter.writeTransactionLogToFile(report, TRANSACTION_LOG_CSV_FILE);
+      logger.info("Transaction log written to file {}", TRANSACTION_LOG_CSV_FILE);
+      ReportFileWriter.writeBalanceLogToFile(report, BALANCE_LOG_CSV_FILE);
+      logger.info("Wallet balance log written to file {}", BALANCE_LOG_CSV_FILE);
     } catch (IOException e) {
-      System.out.println("Report generation failed: " + e.getMessage());
+      logger.error("Report generation failed: {}", e.getMessage());
     }
   }
 

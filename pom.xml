@@ -16,13 +16,27 @@
             <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- For logging, as suggested by ChatGPT Mar 23 version -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${logger.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${logger.version}</version>
+        </dependency>
+
     </dependencies>
-    <version>0.3.0</version>
+    <version>0.5.0</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <logger.version>2.20.0</logger.version>
     </properties>
 
 </project>

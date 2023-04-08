@@ -82,7 +82,8 @@ class RawAccountChangeTest {
 
   @Test
   void testMergeEmptyList() {
-    assertThrows(IllegalArgumentException.class, () -> RawAccountChange.merge(new LinkedList<>()));
+    List<RawAccountChange> emptyList = new LinkedList<>();
+    assertThrows(IllegalArgumentException.class, () -> RawAccountChange.merge(emptyList));
   }
 
   @Test

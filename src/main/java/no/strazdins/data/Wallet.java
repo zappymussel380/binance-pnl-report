@@ -1,6 +1,7 @@
 package no.strazdins.data;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -8,7 +9,7 @@ import java.util.Objects;
  * A wallet that holds a list of assets in it, keeps track of the amount and average purchase
  * price for each asset.
  */
-public class Wallet {
+public class Wallet implements Iterable<String> {
   private final Map<String, AssetBalance> assets = new HashMap<>();
 
   public Wallet() {
@@ -114,4 +115,8 @@ public class Wallet {
     return b != null ? b.getObtainPrice() : Decimal.ZERO;
   }
 
+  @Override
+  public Iterator<String> iterator() {
+    return assets.keySet().iterator();
+  }
 }

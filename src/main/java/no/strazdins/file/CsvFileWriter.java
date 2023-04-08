@@ -16,6 +16,8 @@ public class CsvFileWriter {
   final boolean useCommaForDecimalSeparator;
   final String columnSeparator;
 
+  private boolean checkColumnCount;
+
   /**
    * Create a CSV file writer.
    *
@@ -29,6 +31,7 @@ public class CsvFileWriter {
     useCommaForDecimalSeparator = isOsDecimalSeparatorComma();
     columnSeparator = useCommaForDecimalSeparator ? ";" : ",";
     writeRow(headerRow);
+    checkColumnCount = true;
   }
 
   /**
@@ -60,7 +63,7 @@ public class CsvFileWriter {
    *                                  the number of columns in the first row (header)
    */
   public void writeRow(String[] columns) throws IOException, IllegalArgumentException {
-    if (columns.length != columnCount) {
+    if (columns.length != columnCount && checkColumnCount) {
       throw new IllegalArgumentException("Invalid column count: " + columns.length
           + ", must be " + columnCount + " columns");
     }
@@ -69,6 +72,13 @@ public class CsvFileWriter {
       row = replaceDecimalDotsWithCommas(row);
     }
     writer.write(row + "\n");
+  }
+
+  /**
+   * Disable the requirement that each row must have the same number of columns as the header.
+   */
+  public void disableColumnCountChecking() {
+    checkColumnCount = false;
   }
 
   private String replaceDecimalDotsWithCommas(String row) {

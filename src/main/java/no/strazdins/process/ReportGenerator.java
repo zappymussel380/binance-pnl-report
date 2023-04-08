@@ -6,32 +6,30 @@ import java.util.List;
 import no.strazdins.data.ExtraInfo;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.RawAccountChange;
-import no.strazdins.file.ReportFileWriter;
 import no.strazdins.file.TransactionFileReader;
 import no.strazdins.transaction.Transaction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
  * Logic for generation of the PNL report.
  */
 public class ReportGenerator {
-  private static final String TRANSACTION_LOG_CSV_FILE = "transactions.csv";
+  private static final Logger logger = LogManager.getLogger(ReportGenerator.class);
   private final String inputFilePath;
-  private final String homeCurrency;
   private final String extraFilePath;
 
   /**
    * Create a new report generator.
    *
-   * @param inputFilePath  Path to the CVS input file (exported from Binance)
-   * @param homeCurrency   Home currency - used for profit-and-loss calculations
-   * @param extraFilePath  Path to a CSV file where necessary extra information is stored
+   * @param inputFilePath Path to the CVS input file (exported from Binance)
+   * @param extraFilePath Path to a CSV file where necessary extra information is stored
    * @throws IOException When some error happened during input file reading or output file writing
    */
-  public ReportGenerator(String inputFilePath, String homeCurrency, String extraFilePath)
+  public ReportGenerator(String inputFilePath, String extraFilePath)
       throws IOException {
     this.inputFilePath = inputFilePath;
-    this.homeCurrency = homeCurrency;
     this.extraFilePath = extraFilePath;
   }
 
@@ -39,16 +37,15 @@ public class ReportGenerator {
    * Analyze Transaction CSV file exported from Binance, generate a report, write it in
    * the output file.
    */
-  public void createReport() throws IOException {
+  public Report createReport() throws IOException {
     List<Transaction> transactions = readTransactions();
     ExtraInfoHandler extraInfoHandler = new ExtraInfoHandler(extraFilePath);
     ExtraInfo missingInfo = extraInfoHandler.detectMissingInfo(transactions);
-    if (missingInfo.isEmpty()) {
-      Report report = generateReport(transactions, extraInfoHandler.getUserProvidedInfo());
-      ReportFileWriter.writeTransactionLogToFile(report, TRANSACTION_LOG_CSV_FILE);
-    } else {
+    if (!missingInfo.isEmpty()) {
       printMissingInfoRequirement(missingInfo);
+      throw new IOException("Some information missing, can't generate the report");
     }
+    return generateReport(transactions, extraInfoHandler.getUserProvidedInfo());
   }
 
   private List<Transaction> readTransactions() throws IOException {
@@ -103,10 +100,9 @@ public class ReportGenerator {
 
 
   private void printMissingInfoRequirement(ExtraInfo missingInfo) {
-    System.out.println("Provide the necessary information in the extra-info file `"
-        + extraFilePath + "`: ");
+    logger.warn("Provide the necessary information in the extra-info file `{}`:", extraFilePath);
     for (ExtraInfoEntry mi : missingInfo.getAllEntries()) {
-      System.out.println(mi.utcTimestamp() + "," + mi.type() + "," + mi.value());
+      logger.warn("{},{},{}", mi.utcTimestamp(), mi.type(), mi.val());
     }
   }
 

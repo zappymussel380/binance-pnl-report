@@ -42,7 +42,7 @@ public class DepositTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    baseObtainPriceInUsdt = new Decimal(extraInfo.value());
+    baseObtainPriceInUsdt = new Decimal(extraInfo.val());
     baseCurrency = deposit.getAsset();
     baseCurrencyAmount = deposit.getAmount();
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
