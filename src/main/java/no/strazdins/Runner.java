@@ -1,12 +1,15 @@
 package no.strazdins;
 
 import java.io.IOException;
+import no.strazdins.file.ReportFileWriter;
+import no.strazdins.process.Report;
 import no.strazdins.process.ReportGenerator;
 
 /**
  * The main application runner - handles command-line arguments, calls the necessary logic.
  */
 public class Runner {
+  private static final String TRANSACTION_LOG_CSV_FILE = "transactions.csv";
 
   /**
    * The main entrypoint of the application.
@@ -20,9 +23,9 @@ public class Runner {
       String inputFilePath = getInputFilePath(args);
       String homeCurrency = getCurrency(args);
       String extraFilePath = getExtraFilePath(args);
-      ReportGenerator reportGenerator = new ReportGenerator(inputFilePath,
-          homeCurrency, extraFilePath);
-      reportGenerator.createReport();
+      ReportGenerator reportGenerator = new ReportGenerator(inputFilePath, extraFilePath);
+      Report report = reportGenerator.createReport();
+      ReportFileWriter.writeTransactionLogToFile(report, TRANSACTION_LOG_CSV_FILE);
       System.out.println("Reports successfully generated, saved in CSV files");
     } catch (IOException e) {
       System.out.println("Report generation failed: " + e.getMessage());

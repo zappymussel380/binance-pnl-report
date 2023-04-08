@@ -6,7 +6,7 @@ import no.strazdins.transaction.Transaction;
  * A snapshot of the wallet.
  */
 public class WalletSnapshot {
-  private Transaction transaction;
+  private final Transaction transaction;
   private Wallet wallet;
   private Decimal pnl;
 
