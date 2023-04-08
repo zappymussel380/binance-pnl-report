@@ -1,6 +1,7 @@
 package no.strazdins.file;
 
 import java.io.IOException;
+import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.process.Report;
 import no.strazdins.tool.Converter;
@@ -50,6 +51,41 @@ public class ReportFileWriter {
           snapshot.getBaseCurrencyAmountInWallet().getNiceString(),
           snapshot.getAvgBaseObtainPrice().getNiceString(), snapshot.getPnl().getNiceString()
       });
+    }
+    writer.close();
+  }
+
+  /**
+   * Write wallet balances to a CSV file.
+   *
+   * @param report         The report containing the wallet snapshots
+   * @param outputFilePath Path to the CSV file
+   * @throws IOException When something went wrong while writing data to the file
+   */
+  public static void writeBalanceLogToFile(Report report, String outputFilePath)
+      throws IOException {
+    String[] header = new String[]{
+        "Unix timestamp",
+        "UTC time",
+        "Balances: amount & asset & average obtain price (for each asset)"
+    };
+    CsvFileWriter writer = new CsvFileWriter(outputFilePath, header);
+    writer.disableColumnCountChecking();
+    for (WalletSnapshot snapshot : report) {
+      long timestamp = snapshot.getTimestamp();
+      int assetCount = snapshot.getWallet().getAssetCount();
+      String[] columns = new String[2 + assetCount * 4];
+      columns[0] = String.valueOf(timestamp);
+      columns[1] = Converter.utcTimeToString(timestamp);
+      int i = 2;
+      Wallet wallet = snapshot.getWallet();
+      for (String asset : wallet) {
+        columns[i++] = wallet.getAssetAmount(asset).getNiceString();
+        columns[i++] = asset;
+        columns[i++] = wallet.getAvgObtainPrice(asset).getNiceString();
+        columns[i++] = "";
+      }
+      writer.writeRow(columns);
     }
     writer.close();
   }
