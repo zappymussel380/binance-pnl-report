@@ -8,6 +8,7 @@ import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.file.TransactionFileReader;
 import no.strazdins.transaction.Transaction;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,44 +18,40 @@ import org.apache.logging.log4j.Logger;
  */
 public class ReportGenerator {
   private static final Logger logger = LogManager.getLogger(ReportGenerator.class);
-  private final String inputFilePath;
-  private final String extraFilePath;
 
   /**
-   * Create a new report generator.
-   *
-   * @param inputFilePath Path to the CVS input file (exported from Binance)
-   * @param extraFilePath Path to a CSV file where necessary extra information is stored
-   * @throws IOException When some error happened during input file reading or output file writing
+   * Not allowed to construct an object of this class.
    */
-  public ReportGenerator(String inputFilePath, String extraFilePath)
-      throws IOException {
-    this.inputFilePath = inputFilePath;
-    this.extraFilePath = extraFilePath;
+  private ReportGenerator() {
   }
 
   /**
    * Analyze Transaction CSV file exported from Binance, generate a report, write it in
    * the output file.
+   *
+   * @param inputFilePath Path to the CVS input file (exported from Binance)
+   * @param extraFilePath Path to a CSV file where necessary extra information is stored
    */
-  public Report createReport() throws IOException {
-    List<Transaction> transactions = readTransactions();
-    ExtraInfoHandler extraInfoHandler = new ExtraInfoHandler(extraFilePath);
+  public static Report createReport(String inputFilePath, String extraFilePath, String homeCurrency)
+      throws IOException {
+    List<Transaction> transactions = readTransactions(inputFilePath);
+    ExtraInfoHandler extraInfoHandler = new ExtraInfoHandler(extraFilePath, homeCurrency);
     ExtraInfo missingInfo = extraInfoHandler.detectMissingInfo(transactions);
     if (!missingInfo.isEmpty()) {
-      printMissingInfoRequirement(missingInfo);
+      printMissingInfoRequirement(missingInfo, extraFilePath);
       throw new IOException("Some information missing, can't generate the report");
     }
     return generateReport(transactions, extraInfoHandler.getUserProvidedInfo());
   }
 
-  private List<Transaction> readTransactions() throws IOException {
+  private static List<Transaction> readTransactions(String inputFilePath) throws IOException {
     List<RawAccountChange> accountChanges = TransactionFileReader.readAccountChanges(inputFilePath);
     List<Transaction> rawTransactions = groupTransactionsByTimestamp(accountChanges);
     return clarifyTransactionTypes(rawTransactions);
   }
 
-  private List<Transaction> groupTransactionsByTimestamp(List<RawAccountChange> accountChanges) {
+  private static List<Transaction> groupTransactionsByTimestamp(
+      List<RawAccountChange> accountChanges) {
     List<Transaction> transactions = new LinkedList<>();
     RawAccountChange lastChange = null;
     Transaction transaction = null;
@@ -76,7 +73,7 @@ public class ReportGenerator {
    * @param rawTransactions Raw transactions
    * @return List of the same transactions, but with specific types
    */
-  private List<Transaction> clarifyTransactionTypes(List<Transaction> rawTransactions) {
+  private static List<Transaction> clarifyTransactionTypes(List<Transaction> rawTransactions) {
     List<Transaction> transactions = new LinkedList<>();
     for (Transaction rawTransaction : rawTransactions) {
       Transaction transaction = rawTransaction.clarifyTransactionType();
@@ -90,7 +87,7 @@ public class ReportGenerator {
   }
 
 
-  private Report generateReport(List<Transaction> transactions, ExtraInfo extraUserInfo) {
+  private static Report generateReport(List<Transaction> transactions, ExtraInfo extraUserInfo) {
     Report report = new Report(extraUserInfo);
     for (Transaction transaction : transactions) {
       report.process(transaction);
@@ -99,10 +96,12 @@ public class ReportGenerator {
   }
 
 
-  private void printMissingInfoRequirement(ExtraInfo missingInfo) {
-    logger.warn("Provide the necessary information in the extra-info file `{}`:", extraFilePath);
-    for (ExtraInfoEntry mi : missingInfo.getAllEntries()) {
-      logger.warn("{},{},{}", mi.utcTimestamp(), mi.type(), mi.val());
+  private static void printMissingInfoRequirement(ExtraInfo missingInfo, String extraFilePath) {
+    logger.error("Provide the necessary information in the extra-info file `{}`:", extraFilePath);
+    if (logger.isEnabled(Level.ERROR)) {
+      for (ExtraInfoEntry mi : missingInfo.getAllEntries()) {
+        logger.error("{},{},{}", mi.utcTimestamp(), mi.type(), mi.val());
+      }
     }
   }
 

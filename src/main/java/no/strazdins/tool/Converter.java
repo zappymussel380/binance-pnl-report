@@ -3,6 +3,8 @@ package no.strazdins.tool;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -93,5 +95,16 @@ public class Converter {
     } catch (NumberFormatException e) {
       throw new IOException("Invalid number format: " + s);
     }
+  }
+
+  /**
+   * Get the year of the given timestamp.
+   *
+   * @param utcTime UTC timestamp, including milliseconds
+   * @return Year of the timestamp, as an integer. For example: 2023
+   */
+  public static Integer getUtcYear(long utcTime) {
+    Instant instant = Instant.ofEpochMilli(utcTime);
+    return instant.atZone(ZoneOffset.UTC).getYear();
   }
 }
