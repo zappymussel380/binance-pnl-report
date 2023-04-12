@@ -1,8 +1,10 @@
 package no.strazdins.file;
 
 import java.io.IOException;
+import java.util.List;
 import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletSnapshot;
+import no.strazdins.process.AnnualReport;
 import no.strazdins.process.Report;
 import no.strazdins.tool.Converter;
 import no.strazdins.transaction.Transaction;
@@ -89,4 +91,39 @@ public class ReportFileWriter {
     }
     writer.close();
   }
+
+  /**
+   * Write annual reports to a CSV file.
+   *
+   * @param annualReports  List of annual reports, ordered chronologically
+   * @param outputFilePath Path to the CSV file where to write the report
+   * @param homeCurrency   Home currency of the user
+   * @throws IOException When something goes wrong with writing the file
+   */
+  public static void writeAnnualReportsToFile(List<AnnualReport> annualReports,
+                                              String outputFilePath,
+                                              String homeCurrency) throws IOException {
+    throw new UnsupportedOperationException();
+    String[] header = new String[]{
+        "Date",
+        "Annual PNL in USD",
+        homeCurrency + "/USD exchange rate",
+        "Annual PNL in " + homeCurrency,
+        "Held asset value in USD",
+        "Held asset value in " + homeCurrency
+    };
+    CsvFileWriter writer = new CsvFileWriter(outputFilePath, header);
+    for (AnnualReport report : annualReports) {
+      writer.writeRow(new String[]{
+          Converter.utcTimeToDateString(report.timestamp()),
+          report.pnlUsd().getNiceString(),
+          report.exchangeRate(),
+          report.pnlHc().getNiceString(),
+          report.walletValueUsd(),
+          report.walletValueHc()
+      });
+    }
+    writer.close();
+  }
+
 }

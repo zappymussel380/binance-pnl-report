@@ -38,6 +38,12 @@ arguments:
 2. Home currency (for example, NOK)
 3. Path to the CSV file with extra information
 
+## Output files
+The reports are written to the following files:
+- Transaction log (what was bought or sold, at what price) is written to file `transactions.csv`
+- Asset balances in the wallet after each transaction - file `balances.csv`
+- Annual PNL report - file `profits.csv`
+
 ## Extra information CSV
 
 The CSV file with extra information must contain the following columns:

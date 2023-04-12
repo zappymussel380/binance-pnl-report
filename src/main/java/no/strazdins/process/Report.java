@@ -34,4 +34,8 @@ public class Report implements Iterable<WalletSnapshot> {
   public Iterator<WalletSnapshot> iterator() {
     return walletSnapshots.iterator();
   }
+
+  public List<AnnualReport> getAnnualReports() {
+    return null;
+  }
 }
