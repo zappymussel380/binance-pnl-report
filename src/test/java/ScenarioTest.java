@@ -1,7 +1,18 @@
-import no.strazdins.data.*;
-import no.strazdins.transaction.*;
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import no.strazdins.data.AccountType;
+import no.strazdins.data.Decimal;
+import no.strazdins.data.ExtraInfoEntry;
+import no.strazdins.data.ExtraInfoType;
+import no.strazdins.data.Operation;
+import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.WalletSnapshot;
+import no.strazdins.transaction.BuyTransaction;
+import no.strazdins.transaction.DepositTransaction;
+import no.strazdins.transaction.SellTransaction;
+import no.strazdins.transaction.Transaction;
+import no.strazdins.transaction.WithdrawTransaction;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test realistic scenario(s) - list of transactions.
@@ -19,7 +30,7 @@ class ScenarioTest {
     WalletSnapshot ws3 = processSell(ws2, "LTC", "0.65167000",
         "47.115741", "0.04711574", "USDT");
     expectWalletState(ws3, 2, "1.00000383", "72.22",
-        "47.06862526","0.00501786", "0.00501786");
+        "47.06862526", "0.00501786", "0.00501786");
 
     WalletSnapshot ws4 = processSell(ws3, "LTC", "1.00000000",
         "72.30000000", "0.07230000", "USDT");
@@ -34,11 +45,11 @@ class ScenarioTest {
     expectAssetAmount(ws5, "BNB", "0.99925", "20.30282712");
 
     // Simulate another buy, where BTC is bought, fee is paid in USDT
-    WalletSnapshot ws5_1 = processBuy(ws4, "BTC", "0.001",
+    WalletSnapshot ws51 = processBuy(ws4, "BTC", "0.001",
         "20", "USDT", "0.2", "USDT");
-    expectWalletState(ws5_1, 3, "0.00000383", "72.22",
+    expectWalletState(ws51, 3, "0.00000383", "72.22",
         "99.09632526", "0", "0.01271786");
-    expectAssetAmount(ws5_1, "BTC", "0.001", "20200");
+    expectAssetAmount(ws51, "BTC", "0.001", "20200");
 
     // Simulate another buy, where BTC is bought, fee paid in BNB (BNB exists in the wallet)
     WalletSnapshot ws6 = processBuy(ws5, "BTC", "0.00799300",

@@ -1,3 +1,5 @@
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
@@ -8,7 +10,6 @@ import no.strazdins.data.WalletSnapshot;
 import no.strazdins.transaction.DepositTransaction;
 import no.strazdins.transaction.Transaction;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DepositTest {
 
