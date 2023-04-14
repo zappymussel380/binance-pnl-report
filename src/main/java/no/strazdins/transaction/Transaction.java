@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
@@ -12,7 +13,7 @@ import no.strazdins.data.OperationMultiSet;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletSnapshot;
-import no.strazdins.tool.Converter;
+import no.strazdins.tool.TimeConverter;
 
 /**
  * Contains one financial asset transaction, consisting of several AccountChanges.
@@ -69,7 +70,7 @@ public class Transaction {
 
   @Override
   public String toString() {
-    return "Transaction@" + Converter.utcTimeToString(utcTime);
+    return "Transaction@" + TimeConverter.utcTimeToString(utcTime);
   }
 
   /**
@@ -320,5 +321,35 @@ public class Transaction {
     } else {
       feeInUsdt = feeOp.getAmount().multiply(wallet.getAvgObtainPrice(feeOp.getAsset()));
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Transaction that = (Transaction) o;
+    return utcTime == that.utcTime
+        && Objects.equals(atomicAccountChanges, that.atomicAccountChanges)
+        && Objects.equals(baseCurrency, that.baseCurrency)
+        && Objects.equals(baseCurrencyAmount, that.baseCurrencyAmount)
+        && Objects.equals(baseObtainPriceInUsdt, that.baseObtainPriceInUsdt)
+        && Objects.equals(avgPriceInUsdt, that.avgPriceInUsdt)
+        && Objects.equals(quoteCurrency, that.quoteCurrency)
+        && Objects.equals(fee, that.fee)
+        && Objects.equals(feeCurrency, that.feeCurrency)
+        && Objects.equals(feeInUsdt, that.feeInUsdt)
+        && Objects.equals(pnl, that.pnl)
+        && Objects.equals(quoteAmount, that.quoteAmount);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(atomicAccountChanges, utcTime, baseCurrency, baseCurrencyAmount,
+        baseObtainPriceInUsdt, avgPriceInUsdt, quoteCurrency, fee, feeCurrency, feeInUsdt,
+        pnl, quoteAmount);
   }
 }

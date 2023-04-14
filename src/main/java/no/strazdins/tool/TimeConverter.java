@@ -9,9 +9,9 @@ import java.util.Date;
 import java.util.TimeZone;
 
 /**
- * Utility class for conversion between different formats.
+ * Utility class for conversion between different date and time formats.
  */
-public class Converter {
+public class TimeConverter {
   private static final SimpleDateFormat timestampFormat
       = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
   private static final SimpleDateFormat dateFormat
@@ -26,7 +26,7 @@ public class Converter {
   /**
    * No construction of the object is allowed.
    */
-  private Converter() {
+  private TimeConverter() {
   }
 
   /**
@@ -107,4 +107,16 @@ public class Converter {
     Instant instant = Instant.ofEpochMilli(utcTime);
     return instant.atZone(ZoneOffset.UTC).getYear();
   }
+
+  /**
+   * Get timestamp of the end of the year.
+   *
+   * @param year The year to consider
+   * @return Timestamp of the last second of the year, including milliseconds
+   */
+  public static long getYearEndTimestamp(int year) {
+    String yearEnd = year + "-12-31 23:59:59";
+    return TimeConverter.stringToUtcTimestamp(yearEnd);
+  }
+
 }

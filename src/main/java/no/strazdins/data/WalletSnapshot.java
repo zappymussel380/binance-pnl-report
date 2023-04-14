@@ -1,5 +1,7 @@
 package no.strazdins.data;
 
+import java.util.Objects;
+import no.strazdins.tool.TimeConverter;
 import no.strazdins.transaction.Transaction;
 
 /**
@@ -119,4 +121,31 @@ public class WalletSnapshot {
     return wallet.getAvgObtainPrice(transaction.getBaseCurrency());
   }
 
+  /**
+   * Get year of this snapshot, as an integer.
+   *
+   * @return The year, for example, 2023
+   */
+  public int getYear() {
+    return TimeConverter.getUtcYear(getTimestamp());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    WalletSnapshot snapshot = (WalletSnapshot) o;
+    return Objects.equals(transaction, snapshot.transaction)
+        && Objects.equals(wallet, snapshot.wallet)
+        && Objects.equals(pnl, snapshot.pnl);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(transaction, wallet, pnl);
+  }
 }

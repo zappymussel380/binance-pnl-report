@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import no.strazdins.tool.TimeConverter;
 
 /**
  * A wallet that holds a list of assets in it, keeps track of the amount and average purchase
@@ -46,7 +47,7 @@ public class Wallet implements Iterable<String> {
   /**
    * Remove given amount of the given asset from the wallet.
    *
-   * @param asset  The asset to remove (decrease it's amount)
+   * @param asset  The asset to remove (decrease its amount)
    * @param amount The amount of the asset to reduce
    * @throws IllegalStateException If there is no enough asset in the wallet
    */
@@ -118,5 +119,28 @@ public class Wallet implements Iterable<String> {
   @Override
   public Iterator<String> iterator() {
     return assets.keySet().iterator();
+  }
+
+  /**
+   * Get Total wallet value at the given time moment.
+   *
+   * @param timestamp The timestamp of the time moment of interest, including milliseconds
+   * @param extraInfo Extra information - asset values at the given time are expected to be here
+   * @return The total wallet value at the given time moment, in USD currency
+   */
+  public Decimal getTotalValueAt(long timestamp, ExtraInfo extraInfo) {
+    Decimal totalValue = Decimal.ZERO;
+    for (Map.Entry<String, AssetBalance> entry : assets.entrySet()) {
+      String asset = entry.getKey();
+      Decimal amount = entry.getValue().getAmount();
+      Decimal assetPrice = extraInfo.getAssetPriceAtTime(timestamp, asset);
+      if (assetPrice == null) {
+        throw new IllegalStateException("Missing " + asset + " price at " + timestamp
+            + " (" + TimeConverter.utcTimeToString(timestamp) + ")");
+      }
+      Decimal assetValue = amount.multiply(assetPrice);
+      totalValue = totalValue.add(assetValue);
+    }
+    return totalValue;
   }
 }

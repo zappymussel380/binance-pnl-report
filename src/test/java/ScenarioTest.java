@@ -71,7 +71,8 @@ class ScenarioTest {
     Transaction t = new Transaction(transactionTime);
     t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.DEPOSIT,
         asset, new Decimal(amount), "Deposit"));
-    ExtraInfoEntry ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE, obtainPrice);
+    ExtraInfoEntry ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE,
+        asset, obtainPrice);
     DepositTransaction deposit = new DepositTransaction(t);
     return deposit.process(startSnapshot, ei);
   }
@@ -83,7 +84,7 @@ class ScenarioTest {
     t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.WITHDRAW,
         asset, new Decimal(amount).negate(), "Withdraw"));
     ExtraInfoEntry ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE,
-        realizationPrice);
+        asset, realizationPrice);
     WithdrawTransaction withdraw = new WithdrawTransaction(t);
     return withdraw.process(startSnapshot, ei);
   }

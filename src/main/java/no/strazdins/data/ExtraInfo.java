@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import no.strazdins.tool.TimeConverter;
 
 /**
  * Extra user-provided information.
@@ -74,5 +75,25 @@ public class ExtraInfo {
   public ExtraInfoEntry getAtTime(long utcTime) {
     List<ExtraInfoEntry> entryList = entries.get(utcTime);
     return entryList != null ? entryList.get(0) : null;
+  }
+
+  /**
+   * Find price for a given asset at a given time moment.
+   *
+   * @param timestamp The time moment to consider
+   * @param asset     The asset in question
+   * @return The price of the asset at that moment or null if none found
+   * @throws IllegalStateException When there is more than one price of the asset at that moment
+   */
+  public Decimal getAssetPriceAtTime(long timestamp, String asset) throws IllegalStateException {
+    List<ExtraInfoEntry> entriesAtTime = entries.get(timestamp);
+    List<ExtraInfoEntry> assetPrices = entriesAtTime.stream().filter(
+        entry -> entry.asset().equals(asset) && entry.type().equals(ExtraInfoType.ASSET_PRICE)
+    ).toList();
+    if (assetPrices.size() > 1) {
+      throw new IllegalStateException("Multiple " + asset + " prices at " + timestamp + "("
+          + TimeConverter.utcTimeToString(timestamp) + ")");
+    }
+    return assetPrices.size() == 1 ? new Decimal(assetPrices.get(0).value()) : null;
   }
 }

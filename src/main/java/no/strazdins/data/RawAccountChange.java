@@ -2,7 +2,7 @@ package no.strazdins.data;
 
 import java.util.List;
 import java.util.Objects;
-import no.strazdins.tool.Converter;
+import no.strazdins.tool.TimeConverter;
 
 /**
  * One single, atomic account change (part of a larger transaction).
@@ -109,7 +109,7 @@ public class RawAccountChange {
   @Override
   public String toString() {
     return "RawAccountChange{"
-        + "utcTime=" + Converter.utcTimeToString(utcTime)
+        + "utcTime=" + TimeConverter.utcTimeToString(utcTime)
         + ", account=" + account
         + ", operation=" + operation
         + ", asset='" + asset + '\''

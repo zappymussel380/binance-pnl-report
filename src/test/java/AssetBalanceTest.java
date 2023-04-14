@@ -1,7 +1,8 @@
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import no.strazdins.data.AssetBalance;
 import no.strazdins.data.Decimal;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AssetBalanceTest {
   @Test

@@ -1,12 +1,13 @@
 package no.strazdins.transaction;
 
+import java.util.Objects;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletSnapshot;
-import no.strazdins.tool.Converter;
+import no.strazdins.tool.TimeConverter;
 
 /**
  * A Sell transaction. Note: only transactions where USDT was obtained are
@@ -46,7 +47,7 @@ public class SellTransaction extends Transaction {
   @Override
   public String toString() {
     return "Sell " + base.getAmount() + " " + base.getAsset() + "/" + quote.getAsset()
-        + " @ " + Converter.utcTimeToString(utcTime);
+        + " @ " + TimeConverter.utcTimeToString(utcTime);
   }
 
   @Override
@@ -75,4 +76,25 @@ public class SellTransaction extends Transaction {
     return "Sell";
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    SellTransaction that = (SellTransaction) o;
+    return Objects.equals(base, that.base)
+        && Objects.equals(quote, that.quote)
+        && Objects.equals(feeOp, that.feeOp);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), base, quote, feeOp);
+  }
 }
