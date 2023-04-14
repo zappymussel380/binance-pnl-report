@@ -34,7 +34,7 @@ public class Runner {
       ReportFileWriter.writeBalanceLogToFile(report, BALANCE_LOG_CSV_FILE);
       logger.info("Wallet balance log written to file {}", BALANCE_LOG_CSV_FILE);
       ReportFileWriter.writeAnnualReportsToFile(
-          report.getAnnualReports(), ANNUAL_REPORT_CSV_FILE, homeCurrency);
+          report.createAnnualReports(), ANNUAL_REPORT_CSV_FILE, homeCurrency);
     } catch (IOException e) {
       logger.error("Report generation failed: {}", e.getMessage());
     }

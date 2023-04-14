@@ -38,7 +38,7 @@ public class Report implements Iterable<WalletSnapshot> {
     return walletSnapshots.iterator();
   }
 
-  public List<AnnualReport> getAnnualReports() {
+  public List<AnnualReport> createAnnualReports() {
     List<WalletSnapshot> yearEndSnapshots = getYearEndSnapshots();
     return yearEndSnapshots.stream().map(this::createYearEndReport).toList();
   }
