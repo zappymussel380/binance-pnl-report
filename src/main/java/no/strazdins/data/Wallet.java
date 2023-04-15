@@ -133,10 +133,15 @@ public class Wallet implements Iterable<String> {
     for (Map.Entry<String, AssetBalance> entry : assets.entrySet()) {
       String asset = entry.getKey();
       Decimal amount = entry.getValue().getAmount();
-      Decimal assetPrice = extraInfo.getAssetPriceAtTime(timestamp, asset);
-      if (assetPrice == null) {
-        throw new IllegalStateException("Missing " + asset + " price at " + timestamp
-            + " (" + TimeConverter.utcTimeToString(timestamp) + ")");
+      Decimal assetPrice;
+      if (asset.equals("USDT")) {
+        assetPrice = Decimal.ONE;
+      } else {
+        assetPrice = extraInfo.getAssetPriceAtTime(timestamp, asset);
+        if (assetPrice == null) {
+          throw new IllegalStateException("Missing " + asset + " price at " + timestamp
+              + " (" + TimeConverter.utcTimeToString(timestamp) + ")");
+        }
       }
       Decimal assetValue = amount.multiply(assetPrice);
       totalValue = totalValue.add(assetValue);
