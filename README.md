@@ -50,9 +50,11 @@ The CSV file with extra information must contain the following columns:
 
 1. Unix timestamp, including milliseconds. This timestamp must match the timestamp of the
    transaction to which you want to attach this extra information.
-2. The type of the extra information,
+2. Human-readable timestamp. Not used by the tool, for human debugging only.
+3. The type of the extra information,
    see [ExtraInfoType](src/main/java/no/strazdins/data/ExtraInfoType.java)
-3. The value of the transaction. The meaning of it depends on the extra info type. For example, a
+4. The asset in question. For example, "NOK" or "LTC".
+5. The value of the transaction. The meaning of it depends on the extra info type. For example, a
    price at which the currency was purchased (in USDT).
 
 Note: you can run the report generator tool, and it will tell you what kind of extra information it

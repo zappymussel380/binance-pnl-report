@@ -133,6 +133,7 @@ public class ReportFileWriter {
     for (ExtraInfoEntry entry : extraInfo) {
       writer.writeRow(new String[] {
           String.valueOf(entry.utcTimestamp()),
+          TimeConverter.utcTimeToString(entry.utcTimestamp()),
           String.valueOf(entry.type()),
           entry.asset(),
           entry.value()

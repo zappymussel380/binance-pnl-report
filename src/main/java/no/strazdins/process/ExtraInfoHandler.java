@@ -112,9 +112,9 @@ public class ExtraInfoHandler {
   private ExtraInfoEntry createExtraInfoEntryFromCsvRow(String[] csvRow) throws IOException {
     return new ExtraInfoEntry(
         TimeConverter.parseLong(csvRow[0]),
-        ExtraInfoType.fromString(csvRow[1]),
-        csvRow[2],
-        TimeConverter.parseDecimalString(csvRow[3])
+        ExtraInfoType.fromString(csvRow[2]),
+        csvRow[3],
+        TimeConverter.parseDecimalString(csvRow[4])
     );
   }
 
