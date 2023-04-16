@@ -4,12 +4,16 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.util.List;
 import no.strazdins.data.Decimal;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Handles Binance REST API.
  */
 public class BinanceApiClient {
+  private static final Logger logger = LogManager.getLogger(BinanceApiClient.class);
   private static final String API_BASE_URL = "https://api.binance.com/api/v3";
+  private static final long DELAY_AFTER_REQUEST_MS = 500;
 
   private final RestApiClient client = new RestApiClient(API_BASE_URL);
 
@@ -28,7 +32,17 @@ public class BinanceApiClient {
     List<List<Object>> rawResponse = client.get(requestUrl,
         new TypeToken<List<List<Object>>>() {
         }.getType());
+    sleepToAvoidRateLimitBan();
     return getClosePriceFromSingleCandleArray(rawResponse);
+  }
+
+  private void sleepToAvoidRateLimitBan() {
+    try {
+      Thread.sleep(DELAY_AFTER_REQUEST_MS);
+    } catch (InterruptedException e) {
+      logger.error("Interrupted while sleeping between REST API calls");
+      Thread.currentThread().interrupt();
+    }
   }
 
   private Decimal getClosePriceFromSingleCandleArray(List<List<Object>> rawResponse) {
