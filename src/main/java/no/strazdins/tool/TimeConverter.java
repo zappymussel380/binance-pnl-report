@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.TimeZone;
@@ -119,4 +120,19 @@ public class TimeConverter {
     return TimeConverter.stringToUtcTimestamp(yearEnd);
   }
 
+  /**
+   * Get a timestamp representing the start of the day (in UTC timezone) for the given timestamp.
+   *
+   * @param utcTime The timestamp to consider, must fit somewhere within the given day
+   * @return Timestamp of 00:00:00 of the given day
+   */
+
+  public static long getDayStart(long utcTime) {
+    // Code from ChatGPT Mar 23 version.
+    Instant instant = Instant.ofEpochMilli(utcTime);
+    LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+    LocalDateTime startOfDay = localDateTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
+    Instant startOfDayInstant = startOfDay.toInstant(ZoneOffset.UTC);
+    return startOfDayInstant.toEpochMilli();
+  }
 }
