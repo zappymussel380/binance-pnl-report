@@ -2,6 +2,8 @@ package no.strazdins.file;
 
 import java.io.IOException;
 import java.util.List;
+import no.strazdins.data.ExtraInfo;
+import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.process.AnnualReport;
@@ -125,4 +127,17 @@ public class ReportFileWriter {
     writer.close();
   }
 
+  public static void writeExtraInfoToFile(ExtraInfo extraInfo, String outputFilePath)
+      throws IOException {
+    CsvFileWriter writer = new CsvFileWriter(outputFilePath);
+    for (ExtraInfoEntry entry : extraInfo) {
+      writer.writeRow(new String[] {
+          String.valueOf(entry.utcTimestamp()),
+          String.valueOf(entry.type()),
+          entry.asset(),
+          entry.value()
+      });
+    }
+    writer.close();
+  }
 }

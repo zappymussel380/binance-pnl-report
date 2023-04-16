@@ -23,6 +23,7 @@ public class Report implements Iterable<WalletSnapshot> {
   private static final Logger logger = LogManager.getLogger(Report.class);
 
   private final ExtraInfo extraInfo;
+  private boolean extraInfoUpdated = false;
   private final List<WalletSnapshot> walletSnapshots = new LinkedList<>();
   private WalletSnapshot currentWalletSnapshot;
 
@@ -111,6 +112,7 @@ public class Report implements Iterable<WalletSnapshot> {
   private void appendPriceToExtraInfo(long utcTimestamp, String asset, Decimal price) {
     extraInfo.add(new ExtraInfoEntry(utcTimestamp, ExtraInfoType.ASSET_PRICE,
         asset, price.getNiceString()));
+    extraInfoUpdated = true;
   }
 
   private Decimal getExchangeRateAt(long timestamp) {
@@ -120,5 +122,24 @@ public class Report implements Iterable<WalletSnapshot> {
           + TimeConverter.utcTimeToString(timestamp));
     }
     return new Decimal(ei.value());
+  }
+
+  /**
+   * Get the extra provided information (not part of Binance transaction CSV).
+   *
+   * @return Extra info collection
+   */
+  public ExtraInfo getExtraInfo() {
+    return extraInfo;
+  }
+
+  /**
+   * Check whether extra info has been updated with some prices from Binance API.
+   *
+   * @return True when extra info has been updated, false if extra info contains only previously
+   * provided values (those loaded at the start of the script)
+   */
+  public boolean isExtraInfoUpdated() {
+    return extraInfoUpdated;
   }
 }

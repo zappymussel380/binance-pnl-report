@@ -10,7 +10,7 @@ import no.strazdins.tool.TimeConverter;
 /**
  * Extra user-provided information.
  */
-public class ExtraInfo {
+public class ExtraInfo implements Iterable<ExtraInfoEntry> {
   // Mapping timestamp to a list of extra info entries
   private final Map<Long, List<ExtraInfoEntry>> entries = new TreeMap<>();
   // Copy of all the entries
@@ -95,5 +95,10 @@ public class ExtraInfo {
           + TimeConverter.utcTimeToString(timestamp) + ")");
     }
     return assetPrices.size() == 1 ? new Decimal(assetPrices.get(0).value()) : null;
+  }
+
+  @Override
+  public Iterator<ExtraInfoEntry> iterator() {
+    return allEntries.iterator();
   }
 }

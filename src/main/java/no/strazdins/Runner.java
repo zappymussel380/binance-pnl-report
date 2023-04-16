@@ -1,6 +1,7 @@
 package no.strazdins;
 
 import java.io.IOException;
+import no.strazdins.file.CsvFileWriter;
 import no.strazdins.file.ReportFileWriter;
 import no.strazdins.process.Report;
 import no.strazdins.process.ReportGenerator;
@@ -36,7 +37,10 @@ public class Runner {
       ReportFileWriter.writeAnnualReportsToFile(
           report.createAnnualReports(), ANNUAL_REPORT_CSV_FILE, homeCurrency);
       logger.info("Annual PNL reports written to file {}", ANNUAL_REPORT_CSV_FILE);
-      // TODO - write updated ExtraInfo to file
+      if (report.isExtraInfoUpdated()) {
+        ReportFileWriter.writeExtraInfoToFile(report.getExtraInfo(), extraFilePath);
+        logger.info("Extra info file {} updated with asset prices from Binance API", extraFilePath);
+      }
     } catch (IOException e) {
       logger.error("Report generation failed: {}", e.getMessage());
     }
