@@ -121,31 +121,4 @@ public class Wallet implements Iterable<String> {
     return assets.keySet().iterator();
   }
 
-  /**
-   * Get Total wallet value at the given time moment.
-   *
-   * @param timestamp The timestamp of the time moment of interest, including milliseconds
-   * @param extraInfo Extra information - asset values at the given time are expected to be here
-   * @return The total wallet value at the given time moment, in USD currency
-   */
-  public Decimal getTotalValueAt(long timestamp, ExtraInfo extraInfo) {
-    Decimal totalValue = Decimal.ZERO;
-    for (Map.Entry<String, AssetBalance> entry : assets.entrySet()) {
-      String asset = entry.getKey();
-      Decimal amount = entry.getValue().getAmount();
-      Decimal assetPrice;
-      if (asset.equals("USDT")) {
-        assetPrice = Decimal.ONE;
-      } else {
-        assetPrice = extraInfo.getAssetPriceAtTime(timestamp, asset);
-        if (assetPrice == null) {
-          throw new IllegalStateException("Missing " + asset + " price at " + timestamp
-              + " (" + TimeConverter.utcTimeToString(timestamp) + ")");
-        }
-      }
-      Decimal assetValue = amount.multiply(assetPrice);
-      totalValue = totalValue.add(assetValue);
-    }
-    return totalValue;
-  }
 }

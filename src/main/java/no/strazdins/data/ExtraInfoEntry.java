@@ -1,5 +1,7 @@
 package no.strazdins.data;
 
+import no.strazdins.tool.TimeConverter;
+
 /**
  * Represents one unit of extra information for a financial transaction, provided by the user.
  *
@@ -11,4 +13,14 @@ package no.strazdins.data;
  *                     Note: when the entry is used as a hint to the user, a hint is stored here.
  */
 public record ExtraInfoEntry(long utcTimestamp, ExtraInfoType type, String asset, String value) {
+  @Override
+  public String toString() {
+    return "ExtraInfoEntry{"
+        + "utcTimestamp=" + utcTimestamp
+        + " (" + TimeConverter.utcTimeToString(utcTimestamp)
+        + "), type=" + type
+        + ", asset='" + asset + '\''
+        + ", value='" + value + '\''
+        + '}';
+  }
 }

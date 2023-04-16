@@ -36,6 +36,7 @@ public class Runner {
       ReportFileWriter.writeAnnualReportsToFile(
           report.createAnnualReports(), ANNUAL_REPORT_CSV_FILE, homeCurrency);
       logger.info("Annual PNL reports written to file {}", ANNUAL_REPORT_CSV_FILE);
+      // TODO - write updated ExtraInfo to file
     } catch (IOException e) {
       logger.error("Report generation failed: {}", e.getMessage());
     }
