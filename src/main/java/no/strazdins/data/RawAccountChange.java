@@ -56,7 +56,8 @@ public class RawAccountChange {
       if (c.utcTime != merged.utcTime || c.account != merged.account
           || c.operation != merged.operation || !c.asset.equals(merged.asset)) {
         throw new IllegalArgumentException(
-            "Merged changes must have the same time, account, operation and asset"
+            "Merged changes must have the same time, account, operation and asset, time="
+                + TimeConverter.utcTimeToString(merged.utcTime)
         );
       }
       merged.changeAmount = merged.changeAmount.add(c.changeAmount);
