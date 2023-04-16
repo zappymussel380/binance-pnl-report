@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
-import no.strazdins.tool.TimeConverter;
 
 /**
  * A wallet that holds a list of assets in it, keeps track of the amount and average purchase

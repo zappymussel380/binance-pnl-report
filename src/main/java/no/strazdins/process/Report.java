@@ -94,7 +94,7 @@ public class Report implements Iterable<WalletSnapshot> {
     }
 
     if (assetPrice == null) {
-      logger.info("No " + asset + " price found in extra info, checking Binance REST API");
+      logger.info("No {} price found in extra info, checking Binance REST API", asset);
       assetPrice = apiClient.getDailyClosePrice(asset, timestamp);
       if (assetPrice != null) {
         appendPriceToExtraInfo(timestamp, asset, assetPrice);
@@ -129,7 +129,7 @@ public class Report implements Iterable<WalletSnapshot> {
    *
    * @return Extra info collection
    */
-  public ExtraInfo getExtraInfo() {
+  public ExtraInfo getExtras() {
     return extraInfo;
   }
 
@@ -137,7 +137,7 @@ public class Report implements Iterable<WalletSnapshot> {
    * Check whether extra info has been updated with some prices from Binance API.
    *
    * @return True when extra info has been updated, false if extra info contains only previously
-   * provided values (those loaded at the start of the script)
+   *         provided values (those loaded at the start of the script)
    */
   public boolean isExtraInfoUpdated() {
     return extraInfoUpdated;

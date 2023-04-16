@@ -38,7 +38,7 @@ public class Runner {
           report.createAnnualReports(), ANNUAL_REPORT_CSV_FILE, homeCurrency);
       logger.info("Annual PNL reports written to file {}", ANNUAL_REPORT_CSV_FILE);
       if (report.isExtraInfoUpdated()) {
-        ReportFileWriter.writeExtraInfoToFile(report.getExtraInfo(), extraFilePath);
+        ReportFileWriter.writeExtraInfoToFile(report.getExtras(), extraFilePath);
         logger.info("Extra info file {} updated with asset prices from Binance API", extraFilePath);
       }
     } catch (IOException e) {

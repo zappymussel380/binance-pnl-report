@@ -60,20 +60,20 @@ public class RestApiClient {
 
   private HttpURLConnection establishConnection(String method, String apiPath) {
     final String apiUrl = apiBaseUrl + apiPath;
-    logger.info("HTTP " + method + " " + apiUrl);
+    logger.info("HTTP {} {}", method, apiUrl);
     HttpURLConnection connection;
     try {
       URL url = new URL(apiUrl);
       connection = (HttpURLConnection) url.openConnection();
       connection.setRequestMethod(method);
     } catch (MalformedURLException e) {
-      logger.error("Wrong API URL: " + apiUrl);
+      logger.error("Wrong API URL: {}", apiUrl);
       connection = null;
     } catch (ProtocolException e) {
-      logger.error("Wrong HTTP request method: " + method);
+      logger.error("Wrong HTTP request method: {}", method);
       connection = null;
     } catch (IOException e) {
-      logger.error("Could not establish connection to API: " + e.getMessage());
+      logger.error("Could not establish connection to API: {}", e.getMessage());
       connection = null;
     }
 
@@ -90,7 +90,7 @@ public class RestApiClient {
       }
       in.close();
     } catch (IOException e) {
-      logger.error("Error while reading HTTP response: " + e.getMessage());
+      logger.error("Error while reading HTTP response: {}", e.getMessage());
       response = new StringBuilder();
     }
 

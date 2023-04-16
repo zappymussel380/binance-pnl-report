@@ -127,11 +127,18 @@ public class ReportFileWriter {
     writer.close();
   }
 
+  /**
+   * Write ExtraInfo to a CSV file.
+   *
+   * @param extraInfo      The Extra info to write
+   * @param outputFilePath Path to the CSV file where to write the output
+   * @throws IOException When something goes wrong with file handling
+   */
   public static void writeExtraInfoToFile(ExtraInfo extraInfo, String outputFilePath)
       throws IOException {
     CsvFileWriter writer = new CsvFileWriter(outputFilePath);
     for (ExtraInfoEntry entry : extraInfo) {
-      writer.writeRow(new String[] {
+      writer.writeRow(new String[]{
           String.valueOf(entry.utcTimestamp()),
           TimeConverter.utcTimeToString(entry.utcTimestamp()),
           String.valueOf(entry.type()),
