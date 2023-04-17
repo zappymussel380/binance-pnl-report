@@ -52,14 +52,16 @@ public class BuyTransaction extends Transaction {
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     calculateFeeInUsdt(newSnapshot.getWallet());
 
+    if (!quote.getAsset().equals("USDT")) {
+      throw new UnsupportedOperationException("Support Buy in markets /X, where X != USDT");
+    }
+
     if (feeInUsdt.isZero() && feeOp.getAsset().equals("BNB") && base.getAsset().equals("BNB")) {
       return processFirstBnbBuy(newSnapshot);
     } else if (feeOp.getAsset().equals("BNB")) {
       return processBuyWithBnbFee(newSnapshot);
     } else if (feeOp.getAsset().equals("USDT")) {
       return processBuyWithUsdtFee(newSnapshot);
-    } else if (!quote.getAsset().equals("USDT")) {
-      throw new UnsupportedOperationException("Support Buy in markets /X, where X != USDT");
     } else {
       throw new UnsupportedOperationException("Unknown type of buy transaction: " + this);
     }
