@@ -1,14 +1,24 @@
 package no.strazdins.transaction;
 
-import no.strazdins.data.*;
-import no.strazdins.tool.TimeConverter;
 import java.util.Objects;
+import no.strazdins.data.Decimal;
+import no.strazdins.data.ExtraInfoEntry;
+import no.strazdins.data.Operation;
+import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.WalletSnapshot;
+import no.strazdins.tool.TimeConverter;
 
 /**
  * A transaction of receiving interest on savings.
  */
 public class SavingsInterestTransaction extends Transaction {
   private final RawAccountChange interest;
+
+  /**
+   * Create a Savings interest transaction.
+   *
+   * @param t The base transaction
+   */
   public SavingsInterestTransaction(Transaction t) {
     super(t);
     interest = getFirstChangeOfType(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST);
