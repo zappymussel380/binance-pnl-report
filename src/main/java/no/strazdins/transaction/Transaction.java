@@ -94,6 +94,8 @@ public class Transaction {
       } else if (isBuy()) {
         return new BuyTransaction(this);
       }
+    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)) {
+      return new SavingsSubscriptionTransaction(this);
     }
     // TODO - implement other transaction types
     return null;
