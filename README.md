@@ -66,3 +66,10 @@ as [unixtimestamp. com](https://www.unixtimestamp.com/).
 ## Report generation logic
 
 See [report-logic.md](report-logic.md).
+
+## Known issues
+
+If there have been two transactions happening at the same second with two different assets (for 
+example, buy LTC and Buy BTC), the tool will crash. To fix it, you need to manually shift the 
+timestamp of one of the deals so that it is unique. For example, shift the timestamp of one deal 
+one second in the future.  
