@@ -19,7 +19,7 @@ public class CsvFileWriter {
   private boolean checkColumnCount;
 
   /**
-   * Create a CSV file writer.
+   * Create a CSV file writer, write the header row to the file.
    *
    * @param filePath  Path to the CSV file
    * @param headerRow The strings that will be used as the header row - the colum names
@@ -32,6 +32,20 @@ public class CsvFileWriter {
     columnSeparator = useCommaForDecimalSeparator ? ";" : ",";
     writeRow(headerRow);
     checkColumnCount = true;
+  }
+
+  /**
+   * Create a CSV file writer, without a header. Column count will not be checked.
+   *
+   * @param filePath Path to the CSV file
+   * @throws IOException When file writing fails
+   */
+  public CsvFileWriter(String filePath) throws IOException {
+    writer = new FileWriter(filePath);
+    columnCount = -1;
+    checkColumnCount = false;
+    useCommaForDecimalSeparator = isOsDecimalSeparatorComma();
+    columnSeparator = useCommaForDecimalSeparator ? ";" : ",";
   }
 
   /**

@@ -1,10 +1,15 @@
 package no.strazdins.data;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for Decimal class
+ * Unit tests for Decimal class.
  */
 class DecimalTest {
 
@@ -66,10 +71,10 @@ class DecimalTest {
     Decimal d2 = new Decimal("-1");
     Decimal d3 = new Decimal("0");
     Decimal d4 = new Decimal("1");
-    Decimal d5 = new Decimal("3");
     assertTrue(d1.isLessThan(d2));
     assertTrue(d2.isLessThan(d3));
     assertTrue(d3.isLessThan(d4));
+    Decimal d5 = new Decimal("3");
     assertTrue(d4.isLessThan(d5));
 
     assertTrue(d5.isGreaterThan(d4));
@@ -117,9 +122,9 @@ class DecimalTest {
     assertEquals(Decimal.ZERO, d.add(d.negate()));
 
     assertEquals(new Decimal("13.63895895"),
-        new Decimal( "1.65167382").add(new Decimal("11.98728513")));
+        new Decimal("1.65167382").add(new Decimal("11.98728513")));
     assertEquals(new Decimal("133.99999999"),
-        new Decimal( "111.77777777").add(new Decimal("22.22222222")));
+        new Decimal("111.77777777").add(new Decimal("22.22222222")));
   }
 
   @Test
@@ -212,15 +217,8 @@ class DecimalTest {
     assertEquals("8", Decimal.removeMinusSign("-8"));
     assertEquals("0.78", Decimal.removeMinusSign("-0.78"));
     assertEquals(".89", Decimal.removeMinusSign("-.89"));
-    try {
-      Decimal.removeMinusSign("--8");
-      assertFalse(true);
-    } catch (IllegalArgumentException e) {
-    }
-    try {
-      Decimal.removeMinusSign(" -8");
-      assertFalse(true);
-    } catch (IllegalArgumentException e) {
-    }
+
+    assertThrows(IllegalArgumentException.class, () -> Decimal.removeMinusSign("--8"));
+    assertThrows(IllegalArgumentException.class, () -> Decimal.removeMinusSign(" -8"));
   }
 }

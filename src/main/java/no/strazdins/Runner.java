@@ -1,6 +1,7 @@
 package no.strazdins;
 
 import java.io.IOException;
+import no.strazdins.file.CsvFileWriter;
 import no.strazdins.file.ReportFileWriter;
 import no.strazdins.process.Report;
 import no.strazdins.process.ReportGenerator;
@@ -13,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 public class Runner {
   private static final String TRANSACTION_LOG_CSV_FILE = "transactions.csv";
   private static final String BALANCE_LOG_CSV_FILE = "balances.csv";
+  private static final String ANNUAL_REPORT_CSV_FILE = "profits.csv";
   private static final Logger logger = LogManager.getLogger(Runner.class);
 
   /**
@@ -32,6 +34,13 @@ public class Runner {
       logger.info("Transaction log written to file {}", TRANSACTION_LOG_CSV_FILE);
       ReportFileWriter.writeBalanceLogToFile(report, BALANCE_LOG_CSV_FILE);
       logger.info("Wallet balance log written to file {}", BALANCE_LOG_CSV_FILE);
+      ReportFileWriter.writeAnnualReportsToFile(
+          report.createAnnualReports(), ANNUAL_REPORT_CSV_FILE, homeCurrency);
+      logger.info("Annual PNL reports written to file {}", ANNUAL_REPORT_CSV_FILE);
+      if (report.isExtraInfoUpdated()) {
+        ReportFileWriter.writeExtraInfoToFile(report.getExtras(), extraFilePath);
+        logger.info("Extra info file {} updated with asset prices from Binance API", extraFilePath);
+      }
     } catch (IOException e) {
       logger.error("Report generation failed: {}", e.getMessage());
     }

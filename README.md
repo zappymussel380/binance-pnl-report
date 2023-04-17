@@ -38,15 +38,23 @@ arguments:
 2. Home currency (for example, NOK)
 3. Path to the CSV file with extra information
 
+## Output files
+The reports are written to the following files:
+- Transaction log (what was bought or sold, at what price) is written to file `transactions.csv`
+- Asset balances in the wallet after each transaction - file `balances.csv`
+- Annual PNL report - file `profits.csv`
+
 ## Extra information CSV
 
 The CSV file with extra information must contain the following columns:
 
 1. Unix timestamp, including milliseconds. This timestamp must match the timestamp of the
    transaction to which you want to attach this extra information.
-2. The type of the extra information,
+2. Human-readable timestamp. Not used by the tool, for human debugging only.
+3. The type of the extra information,
    see [ExtraInfoType](src/main/java/no/strazdins/data/ExtraInfoType.java)
-3. The value of the transaction. The meaning of it depends on the extra info type. For example, a
+4. The asset in question. For example, "NOK" or "LTC".
+5. The value of the transaction. The meaning of it depends on the extra info type. For example, a
    price at which the currency was purchased (in USDT).
 
 Note: you can run the report generator tool, and it will tell you what kind of extra information it
@@ -58,3 +66,10 @@ as [unixtimestamp. com](https://www.unixtimestamp.com/).
 ## Report generation logic
 
 See [report-logic.md](report-logic.md).
+
+## Known issues
+
+If there have been two transactions happening at the same second with two different assets (for 
+example, buy LTC and Buy BTC), the tool will crash. To fix it, you need to manually shift the 
+timestamp of one of the deals so that it is unique. For example, shift the timestamp of one deal 
+one second in the future.  

@@ -100,7 +100,7 @@ public class ReportGenerator {
     logger.error("Provide the necessary information in the extra-info file `{}`:", extraFilePath);
     if (logger.isEnabled(Level.ERROR)) {
       for (ExtraInfoEntry mi : missingInfo.getAllEntries()) {
-        logger.error("{},{},{}", mi.utcTimestamp(), mi.type(), mi.val());
+        logger.error("{},{},{},{}", mi.utcTimestamp(), mi.type(), mi.asset(), mi.value());
       }
     }
   }

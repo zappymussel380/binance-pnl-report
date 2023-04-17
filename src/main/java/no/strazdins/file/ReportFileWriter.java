@@ -1,10 +1,14 @@
 package no.strazdins.file;
 
 import java.io.IOException;
+import java.util.List;
+import no.strazdins.data.ExtraInfo;
+import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletSnapshot;
+import no.strazdins.process.AnnualReport;
 import no.strazdins.process.Report;
-import no.strazdins.tool.Converter;
+import no.strazdins.tool.TimeConverter;
 import no.strazdins.transaction.Transaction;
 
 /**
@@ -41,7 +45,7 @@ public class ReportFileWriter {
       long timestamp = snapshot.getTimestamp();
       Transaction t = snapshot.getTransaction();
       writer.writeRow(new String[]{
-          "" + timestamp, Converter.utcTimeToString(timestamp),
+          "" + timestamp, TimeConverter.utcTimeToString(timestamp),
           t.getType(), t.getBaseCurrency(),
           t.getBaseCurrencyAmount().getNiceString(), t.getAvgPriceInUsdt().getNiceString(),
           t.getQuoteCurrency(), t.getQuoteAmount().getNiceString(),
@@ -76,7 +80,7 @@ public class ReportFileWriter {
       int assetCount = snapshot.getWallet().getAssetCount();
       String[] columns = new String[2 + assetCount * 4];
       columns[0] = String.valueOf(timestamp);
-      columns[1] = Converter.utcTimeToString(timestamp);
+      columns[1] = TimeConverter.utcTimeToString(timestamp);
       int i = 2;
       Wallet wallet = snapshot.getWallet();
       for (String asset : wallet) {
@@ -86,6 +90,61 @@ public class ReportFileWriter {
         columns[i++] = "";
       }
       writer.writeRow(columns);
+    }
+    writer.close();
+  }
+
+  /**
+   * Write annual reports to a CSV file.
+   *
+   * @param annualReports  List of annual reports, ordered chronologically
+   * @param outputFilePath Path to the CSV file where to write the report
+   * @param homeCurrency   Home currency of the user
+   * @throws IOException When something goes wrong with writing the file
+   */
+  public static void writeAnnualReportsToFile(List<AnnualReport> annualReports,
+                                              String outputFilePath,
+                                              String homeCurrency) throws IOException {
+    String[] header = new String[]{
+        "Date",
+        "Annual PNL in USD",
+        homeCurrency + "/USD exchange rate",
+        "Annual PNL in " + homeCurrency,
+        "Held asset value in USD",
+        "Held asset value in " + homeCurrency
+    };
+    CsvFileWriter writer = new CsvFileWriter(outputFilePath, header);
+    for (AnnualReport report : annualReports) {
+      writer.writeRow(new String[]{
+          TimeConverter.utcTimeToDateString(report.timestamp()),
+          report.pnlUsd().getNiceString(),
+          report.exchangeRate().getNiceString(),
+          report.pnlHc().getNiceString(),
+          report.walletValueUsd().getNiceString(),
+          report.walletValueHc().getNiceString()
+      });
+    }
+    writer.close();
+  }
+
+  /**
+   * Write ExtraInfo to a CSV file.
+   *
+   * @param extraInfo      The Extra info to write
+   * @param outputFilePath Path to the CSV file where to write the output
+   * @throws IOException When something goes wrong with file handling
+   */
+  public static void writeExtraInfoToFile(ExtraInfo extraInfo, String outputFilePath)
+      throws IOException {
+    CsvFileWriter writer = new CsvFileWriter(outputFilePath);
+    for (ExtraInfoEntry entry : extraInfo) {
+      writer.writeRow(new String[]{
+          String.valueOf(entry.utcTimestamp()),
+          TimeConverter.utcTimeToString(entry.utcTimestamp()),
+          String.valueOf(entry.type()),
+          entry.asset(),
+          entry.value()
+      });
     }
     writer.close();
   }

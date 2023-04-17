@@ -1,12 +1,13 @@
 package no.strazdins.transaction;
 
+import java.util.Objects;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.ExtraInfoType;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletSnapshot;
-import no.strazdins.tool.Converter;
+import no.strazdins.tool.TimeConverter;
 
 /**
  * Withdrawal transaction.
@@ -29,9 +30,9 @@ public class WithdrawTransaction extends Transaction {
 
   @Override
   public ExtraInfoEntry getNecessaryExtraInfo() {
-    String date = Converter.utcTimeToDateString(utcTime);
+    String date = TimeConverter.utcTimeToDateString(utcTime);
     String hint = "<" + withdraw.getAsset() + " price in USD on " + date + ">";
-    return new ExtraInfoEntry(utcTime, ExtraInfoType.ASSET_PRICE, hint);
+    return new ExtraInfoEntry(utcTime, ExtraInfoType.ASSET_PRICE, withdraw.getAsset(), hint);
   }
 
   @Override
@@ -44,7 +45,7 @@ public class WithdrawTransaction extends Transaction {
     baseCurrency = withdraw.getAsset();
     baseCurrencyAmount = withdraw.getAmount();
     Decimal assetAmount = withdraw.getAmount().negate();
-    Decimal realizationPrice = new Decimal(extraInfo.val());
+    Decimal realizationPrice = new Decimal(extraInfo.value());
     avgPriceInUsdt = realizationPrice;
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     baseObtainPriceInUsdt = newSnapshot.getAvgBaseObtainPrice();
@@ -55,5 +56,25 @@ public class WithdrawTransaction extends Transaction {
     newSnapshot.decreaseAsset(baseCurrency, assetAmount);
 
     return newSnapshot;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    WithdrawTransaction that = (WithdrawTransaction) o;
+    return Objects.equals(withdraw, that.withdraw);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), withdraw);
   }
 }

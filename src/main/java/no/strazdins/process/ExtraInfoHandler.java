@@ -8,7 +8,7 @@ import no.strazdins.data.ExtraInfo;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.ExtraInfoType;
 import no.strazdins.file.CsvFileParser;
-import no.strazdins.tool.Converter;
+import no.strazdins.tool.TimeConverter;
 import no.strazdins.transaction.Transaction;
 
 /**
@@ -74,7 +74,7 @@ public class ExtraInfoHandler {
   public static Set<Integer> getTransactionYears(List<Transaction> transactions) {
     Set<Integer> years = new HashSet<>();
     for (Transaction transaction : transactions) {
-      years.add(Converter.getUtcYear(transaction.getUtcTime()));
+      years.add(TimeConverter.getUtcYear(transaction.getUtcTime()));
     }
     return years;
   }
@@ -104,17 +104,17 @@ public class ExtraInfoHandler {
   }
 
   private ExtraInfoEntry getYearEndExchangeRateInfo(int year) {
-    String yearEnd = year + "-12-31 23:59:59";
-    long yearEndTimestamp = Converter.stringToUtcTimestamp(yearEnd);
-    return new ExtraInfoEntry(yearEndTimestamp, ExtraInfoType.ASSET_PRICE,
+    long yearEndTimestamp = TimeConverter.getYearEndTimestamp(year);
+    return new ExtraInfoEntry(yearEndTimestamp, ExtraInfoType.ASSET_PRICE, homeCurrency,
         "<" + homeCurrency + "/USD exchange rate at the end of year " + year + ">");
   }
 
   private ExtraInfoEntry createExtraInfoEntryFromCsvRow(String[] csvRow) throws IOException {
     return new ExtraInfoEntry(
-        Converter.parseLong(csvRow[0]),
-        ExtraInfoType.fromString(csvRow[1]),
-        Converter.parseDecimalString(csvRow[2])
+        TimeConverter.parseLong(csvRow[0]),
+        ExtraInfoType.fromString(csvRow[2]),
+        csvRow[3],
+        TimeConverter.parseDecimalString(csvRow[4])
     );
   }
 

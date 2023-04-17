@@ -7,7 +7,7 @@ import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
-import no.strazdins.tool.Converter;
+import no.strazdins.tool.TimeConverter;
 
 
 /**
@@ -66,11 +66,11 @@ public class TransactionFileReader {
     if (row.length != 7) {
       throw new IOException("Invalid row format: " + String.join(",", row));
     }
-    long utcTimestamp = Converter.stringToUtcTimestamp(row[1]);
+    long utcTimestamp = TimeConverter.stringToUtcTimestamp(row[1]);
     AccountType accountType = AccountType.fromString(row[2]);
     Operation operation = Operation.fromString(row[3]);
     String asset = row[4];
-    Decimal change = new Decimal(Converter.parseDecimalString(row[5]));
+    Decimal change = new Decimal(TimeConverter.parseDecimalString(row[5]));
     String remark = row[6];
     return new RawAccountChange(utcTimestamp, accountType, operation, asset, change, remark);
   }

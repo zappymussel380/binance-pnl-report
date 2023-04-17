@@ -2,7 +2,7 @@ package no.strazdins.data;
 
 import java.util.List;
 import java.util.Objects;
-import no.strazdins.tool.Converter;
+import no.strazdins.tool.TimeConverter;
 
 /**
  * One single, atomic account change (part of a larger transaction).
@@ -56,7 +56,8 @@ public class RawAccountChange {
       if (c.utcTime != merged.utcTime || c.account != merged.account
           || c.operation != merged.operation || !c.asset.equals(merged.asset)) {
         throw new IllegalArgumentException(
-            "Merged changes must have the same time, account, operation and asset"
+            "Merged changes must have the same time, account, operation and asset, time="
+                + TimeConverter.utcTimeToString(merged.utcTime)
         );
       }
       merged.changeAmount = merged.changeAmount.add(c.changeAmount);
@@ -109,7 +110,7 @@ public class RawAccountChange {
   @Override
   public String toString() {
     return "RawAccountChange{"
-        + "utcTime=" + Converter.utcTimeToString(utcTime)
+        + "utcTime=" + TimeConverter.utcTimeToString(utcTime)
         + ", account=" + account
         + ", operation=" + operation
         + ", asset='" + asset + '\''

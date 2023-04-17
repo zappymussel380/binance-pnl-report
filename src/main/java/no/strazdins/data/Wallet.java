@@ -46,7 +46,7 @@ public class Wallet implements Iterable<String> {
   /**
    * Remove given amount of the given asset from the wallet.
    *
-   * @param asset  The asset to remove (decrease it's amount)
+   * @param asset  The asset to remove (decrease its amount)
    * @param amount The amount of the asset to reduce
    * @throws IllegalStateException If there is no enough asset in the wallet
    */
@@ -119,4 +119,5 @@ public class Wallet implements Iterable<String> {
   public Iterator<String> iterator() {
     return assets.keySet().iterator();
   }
+
 }

@@ -1,11 +1,12 @@
 package no.strazdins.transaction;
 
+import java.util.Objects;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletSnapshot;
-import no.strazdins.tool.Converter;
+import no.strazdins.tool.TimeConverter;
 
 /**
  * A Buy-transaction.
@@ -38,7 +39,7 @@ public class BuyTransaction extends Transaction {
   @Override
   public String toString() {
     return "Buy " + base.getAmount() + " " + base.getAsset() + "/" + quote.getAsset()
-        + " @ " + Converter.utcTimeToString(utcTime);
+        + " @ " + TimeConverter.utcTimeToString(utcTime);
   }
 
   @Override
@@ -51,7 +52,10 @@ public class BuyTransaction extends Transaction {
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     calculateFeeInUsdt(newSnapshot.getWallet());
 
-    // TODO - support /BTC, /ETH and other /non-USDT markets, test them!
+    if (!quote.getAsset().equals("USDT")) {
+      throw new UnsupportedOperationException("Support Buy in markets /X, where X != USDT");
+    }
+
     if (feeInUsdt.isZero() && feeOp.getAsset().equals("BNB") && base.getAsset().equals("BNB")) {
       return processFirstBnbBuy(newSnapshot);
     } else if (feeOp.getAsset().equals("BNB")) {
@@ -103,5 +107,27 @@ public class BuyTransaction extends Transaction {
     avgPriceInUsdt = usdtUsedInTransaction.divide(baseCurrencyAmount);
     baseObtainPriceInUsdt = avgBuyPrice;
     return newSnapshot;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    BuyTransaction that = (BuyTransaction) o;
+    return Objects.equals(base, that.base)
+        && Objects.equals(quote, that.quote)
+        && Objects.equals(feeOp, that.feeOp);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), base, quote, feeOp);
   }
 }

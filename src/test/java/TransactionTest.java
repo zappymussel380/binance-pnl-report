@@ -1,3 +1,8 @@
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
@@ -6,10 +11,8 @@ import no.strazdins.transaction.BuyTransaction;
 import no.strazdins.transaction.DepositTransaction;
 import no.strazdins.transaction.Transaction;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class TransactionTest {
-
   @Test
   void testClarifyTransactionType() {
     long time = System.currentTimeMillis();
