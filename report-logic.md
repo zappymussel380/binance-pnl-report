@@ -232,9 +232,11 @@ Asset dividend means that the user gets a "free token" because of her holding a 
 the wallet for a specific amount of time. The algorithm for wallet updates is the same as for the
 savings interest, because we get an extra amount of asset (coin) for free.
 
+This is the same as `Asset Distribution` transaction.
+
 #### Other transactions
 
-Binance transaction export includes the following additional transaction types:
+Binance's transaction export includes the following additional transaction types:
 
 * Commission Rebate
 * Cashback Voucher

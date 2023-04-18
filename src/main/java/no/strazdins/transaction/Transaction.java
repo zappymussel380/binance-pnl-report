@@ -103,6 +103,8 @@ public class Transaction {
       return new SavingsRedemptionTransaction(this);
     } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST)) {
       return new SavingsInterestTransaction(this);
+    } else if (consistsOf(Operation.DISTRIBUTION)) {
+      return new DistributionTransaction(this);
     }
     // TODO - implement other transaction types
     return null;
