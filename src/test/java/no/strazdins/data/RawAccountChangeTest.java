@@ -1,13 +1,11 @@
+package no.strazdins.data;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import no.strazdins.data.AccountType;
-import no.strazdins.data.Decimal;
-import no.strazdins.data.Operation;
-import no.strazdins.data.RawAccountChange;
 import org.junit.jupiter.api.Test;
 
 class RawAccountChangeTest {

@@ -1,3 +1,5 @@
+package no.strazdins.transaction;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -7,9 +9,6 @@ import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletSnapshot;
-import no.strazdins.transaction.DistributionTransaction;
-import no.strazdins.transaction.SellTransaction;
-import no.strazdins.transaction.Transaction;
 import org.junit.jupiter.api.Test;
 
 class DistributionTest {
