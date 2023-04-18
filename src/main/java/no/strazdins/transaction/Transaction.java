@@ -94,19 +94,28 @@ public class Transaction {
       } else if (isBuy()) {
         return new BuyTransaction(this);
       }
-    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)) {
+    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)
+        || consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION,
+        Operation.SAVINGS_DISTRIBUTION)) {
       return new SavingsSubscriptionTransaction(this);
+    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)
+        || consistsOfMultiple(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)) {
+      return new SavingsRedemptionTransaction(this);
+    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST)) {
+      return new SavingsInterestTransaction(this);
+    } else if (consistsOf(Operation.DISTRIBUTION)) {
+      return new DistributionTransaction(this);
     }
     // TODO - implement other transaction types
     return null;
   }
 
-  protected boolean isSell() {
+  private boolean isSell() {
     RawAccountChange bought = getFirstChangeOfType(Operation.BUY);
     return bought != null && bought.getAsset().equals("USDT");
   }
 
-  protected boolean isBuy() {
+  private boolean isBuy() {
     RawAccountChange sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
     return sold != null && sold.getAsset().equals("USDT");
   }
@@ -152,7 +161,7 @@ public class Transaction {
    * Merge the raw account changes by their type. For example, if there are three BUY changes:
    * Buy 0.1 BTC, BUY 0.2 BTC, BUY 0.3 BTC, these will be merged into a single change: BUY 0.6 BTC.
    */
-  public void mergeRawChangesByType() {
+  private void mergeRawChangesByType() {
     Map<Operation, List<RawAccountChange>> mergedChanges = new EnumMap<>(Operation.class);
 
     for (Map.Entry<Operation, List<RawAccountChange>> e : atomicAccountChanges.entrySet()) {
@@ -313,7 +322,7 @@ public class Transaction {
    *
    * @throws IllegalStateException When no fee raw-account-change is found
    */
-  protected void calculateFeeInUsdt(Wallet wallet) throws IllegalStateException {
+  protected final void calculateFeeInUsdt(Wallet wallet) throws IllegalStateException {
     RawAccountChange feeOp = getFirstChangeOfType(Operation.FEE);
     if (feeOp == null) {
       throw new IllegalStateException("Could not find fee operation!");

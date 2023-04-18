@@ -21,7 +21,6 @@ public class Decimal implements Comparable<Decimal> {
 
   public static final Decimal ZERO = new Decimal("0");
   public static final Decimal ONE = new Decimal("1");
-  public static final Decimal TEN = new Decimal("10");
 
   private final BigDecimal number;
 

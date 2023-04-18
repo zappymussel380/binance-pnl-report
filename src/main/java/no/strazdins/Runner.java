@@ -1,7 +1,6 @@
 package no.strazdins;
 
 import java.io.IOException;
-import no.strazdins.file.CsvFileWriter;
 import no.strazdins.file.ReportFileWriter;
 import no.strazdins.process.Report;
 import no.strazdins.process.ReportGenerator;

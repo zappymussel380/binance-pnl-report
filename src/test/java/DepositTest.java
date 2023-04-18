@@ -1,4 +1,6 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
@@ -22,8 +24,11 @@ class DepositTest {
     ExtraInfoEntry ei1 = new ExtraInfoEntry(currentTime, ExtraInfoType.ASSET_PRICE,
         "LTC", "650.98");
     WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    Transaction ct1 = t1.clarifyTransactionType();
+    assertNotNull(ct1);
+    assertInstanceOf(DepositTransaction.class, ct1);
 
-    DepositTransaction deposit1 = new DepositTransaction(t1);
+    DepositTransaction deposit1 = (DepositTransaction) ct1;
     WalletSnapshot ws2 = deposit1.process(ws1, ei1);
     assertEquals(Decimal.ZERO, ws2.getPnl());
     assertEquals(1, ws2.getWallet().getAssetCount());

@@ -71,6 +71,7 @@ public class ReportFileWriter {
     String[] header = new String[]{
         "Unix timestamp",
         "UTC time",
+        "Transaction",
         "Balances: amount & asset & average obtain price (for each asset)"
     };
     CsvFileWriter writer = new CsvFileWriter(outputFilePath, header);
@@ -78,10 +79,11 @@ public class ReportFileWriter {
     for (WalletSnapshot snapshot : report) {
       long timestamp = snapshot.getTimestamp();
       int assetCount = snapshot.getWallet().getAssetCount();
-      String[] columns = new String[2 + assetCount * 4];
+      String[] columns = new String[3 + assetCount * 4];
       columns[0] = String.valueOf(timestamp);
       columns[1] = TimeConverter.utcTimeToString(timestamp);
-      int i = 2;
+      columns[2] = snapshot.getTransaction().getType();
+      int i = 3;
       Wallet wallet = snapshot.getWallet();
       for (String asset : wallet) {
         columns[i++] = wallet.getAssetAmount(asset).getNiceString();
