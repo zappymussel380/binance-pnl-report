@@ -94,9 +94,12 @@ public class Transaction {
       } else if (isBuy()) {
         return new BuyTransaction(this);
       }
-    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)) {
+    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)
+        || consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION,
+        Operation.SAVINGS_DISTRIBUTION)) {
       return new SavingsSubscriptionTransaction(this);
-    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)) {
+    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)
+        || consistsOfMultiple(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)) {
       return new SavingsRedemptionTransaction(this);
     } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST)) {
       return new SavingsInterestTransaction(this);
