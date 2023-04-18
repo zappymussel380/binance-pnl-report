@@ -34,9 +34,6 @@ public class SavingsSubscriptionTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    if (deposit == null) {
-      throw new IllegalStateException("Savings subscription without necessary raw change");
-    }
     baseObtainPriceInUsdt = walletSnapshot.getWallet().getAvgObtainPrice(baseCurrency);
     return walletSnapshot.prepareForTransaction(this);
   }
