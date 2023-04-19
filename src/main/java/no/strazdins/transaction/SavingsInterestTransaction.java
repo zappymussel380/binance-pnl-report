@@ -25,6 +25,9 @@ public class SavingsInterestTransaction extends Transaction {
     if (interest == null) {
       throw new IllegalStateException("Savings interest without a required raw change");
     }
+    if (!interest.getAccount().equals(AccountType.EARN)) {
+      throw new IllegalArgumentException("Interest must be added to earnings account");
+    }
     baseCurrency = interest.getAsset();
     baseCurrencyAmount = interest.getAmount();
     baseObtainPriceInUsdt = Decimal.ZERO;

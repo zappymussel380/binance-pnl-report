@@ -105,6 +105,8 @@ public class Transaction {
       return new SavingsInterestTransaction(this);
     } else if (consistsOf(Operation.DISTRIBUTION)) {
       return new DistributionTransaction(this);
+    } else if (consistsOfMultiple(Operation.SMALL_ASSETS_EXCHANGE_BNB)) {
+      return new DustCollectionTransaction(this);
     }
     // TODO - implement other transaction types
     return null;
