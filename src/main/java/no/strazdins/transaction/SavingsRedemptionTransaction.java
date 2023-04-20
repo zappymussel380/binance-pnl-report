@@ -40,7 +40,7 @@ public class SavingsRedemptionTransaction extends Transaction {
 
   @Override
   public String getType() {
-    return "withdraw from savings account";
+    return "Withdraw from savings account";
   }
 
   @Override

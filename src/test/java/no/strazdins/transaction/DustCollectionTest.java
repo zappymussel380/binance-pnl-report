@@ -117,7 +117,7 @@ class DustCollectionTest {
     WalletSnapshot finalSnapshot = dustCollection.process(startWallet, null);
     int expectedAssetCount = finalWalletAssets.length / 3;
     Wallet wallet = finalSnapshot.getWallet();
-    assertEquals(expectedAssetCount, wallet.getAssetCount());
+    assertEquals(expectedAssetCount, wallet.getAssetCount(), "Wrong asset count");
     for (int i = 0; i < finalWalletAssets.length; i += 3) {
       String asset = finalWalletAssets[i];
       Decimal expectedAmount = new Decimal(finalWalletAssets[i + 1]);

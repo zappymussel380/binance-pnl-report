@@ -1,6 +1,7 @@
 package no.strazdins.transaction;
 
 import java.util.Objects;
+import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
