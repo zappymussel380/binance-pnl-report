@@ -1,6 +1,9 @@
 package no.strazdins.transaction;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
@@ -22,19 +25,33 @@ class DustCollectionTest {
         "BNB", new Decimal("0.1"), "Got BNB"));
     t.append(new RawAccountChange(time, AccountType.SPOT, Operation.SMALL_ASSETS_EXCHANGE_BNB,
         "SXP", new Decimal("-8"), "Exchanged SXP dust"));
-    Transaction dust = t.clarifyTransactionType();
-    assertNotNull(dust, "Dust transaction must be correctly interpreted");
-    assertInstanceOf(DustCollectionTransaction.class, dust,
+    Transaction d = t.clarifyTransactionType();
+    assertNotNull(d, "Dust transaction must be correctly interpreted");
+    assertInstanceOf(DustCollectionTransaction.class, d,
         "Dust transaction must be correctly interpreted");
-    assertEquals("Dust collection", dust.getType());
-    assertEquals(time, dust.getUtcTime());
-    assertEquals(new Decimal("0.1"), dust.getQuoteAmount());
+    assertEquals("Convert dust to BNB", d.getType());
+    assertEquals(time, d.getUtcTime());
+    assertEquals(new Decimal("0.1"), d.getQuoteAmount());
+    assertEquals("BNB", d.getQuoteCurrency());
+    assertEquals("SXP", d.getBaseCurrency());
+    DustCollectionTransaction dust = (DustCollectionTransaction) d;
+    assertEquals(1, dust.getBaseAssetCount());
+    assertEquals(new Decimal("-8"), d.getBaseCurrencyAmount());
+    assertEquals(Decimal.ZERO, d.getFee());
+    assertEquals("", d.getFeeCurrency());
+    assertNull(d.getNecessaryExtraInfo());
+  }
+
+  @Test
+  void multiDustConstructorTest() {
+    DustCollectionTransaction dust = createDustCollection("0.1", "BNB",
+        "-3", "SXP", "-0.2", "LEND", "-82", "SHIB", "0.2", "BNB", "0.3", "BNB",
+        "-1", "SXP", "-2", "SXP");
     assertEquals("BNB", dust.getQuoteCurrency());
-    assertEquals("SXP", dust.getBaseCurrency());
-    assertEquals(new Decimal("-8"), dust.getBaseCurrencyAmount());
-    assertEquals(Decimal.ZERO, dust.getFee());
-    assertEquals("", dust.getFeeCurrency());
-    assertNull(dust.getNecessaryExtraInfo());
+    assertEquals(new Decimal("0.6"), dust.getQuoteAmount());
+    assertEquals(Decimal.ZERO, dust.getBaseCurrencyAmount());
+    assertEquals("LEND+SHIB+SXP", dust.getBaseCurrency());
+    assertEquals("Dust collect 0.6 BNB, -0.2 LEND, -82 SHIB, -6 SXP", dust.toString());
   }
 
   // TODO - one asset to BNB, asset has obtainPrice > 0, no previous BNB
@@ -53,6 +70,15 @@ class DustCollectionTest {
         "REN", "0.2", "0", "BNB", "0.1", "0"
     );
   }
+
+  @Test
+  void testMerge() {
+    DustCollectionTransaction dust = createDustCollection("0.1", "BNB",
+        "-3", "SXP", "-0.2", "LEND", "-82", "SHIB", "0.2", "BNB", "0.3", "BNB",
+        "-1", "SXP", "-2", "SXP");
+    expectDustChangeAmounts(dust, "0.6", "BNB", "-0.2", "LEND", "-6", "SXP", "-82", "SHIB");
+  }
+
 
   /**
    * Create a dust collection transaction.
@@ -127,4 +153,18 @@ class DustCollectionTest {
           asset + " AVG price incorrect");
     }
   }
+
+  /**
+   * Expect the given merged asset changes in the dust transaction.
+   *
+   * @param dust    The transaction to check
+   * @param changes The expected changes. Each change is specified as two strings: amount and asset
+   */
+  private void expectDustChangeAmounts(DustCollectionTransaction dust, String... changes) {
+    for (int i = 0; i < changes.length; i += 2) {
+      assertEquals(new Decimal(changes[i]), dust.getDustChangeAmount(changes[i + 1]),
+          "Incorrect change amount for " + changes[i + 1]);
+    }
+  }
+
 }

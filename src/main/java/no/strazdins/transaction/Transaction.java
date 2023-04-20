@@ -108,7 +108,6 @@ public class Transaction {
     } else if (consistsOfMultiple(Operation.SMALL_ASSETS_EXCHANGE_BNB)) {
       return new DustCollectionTransaction(this);
     }
-    // TODO - implement other transaction types
     return null;
   }
 
@@ -364,5 +363,15 @@ public class Transaction {
     return Objects.hash(atomicAccountChanges, utcTime, baseCurrency, baseCurrencyAmount,
         baseObtainPriceInUsdt, avgPriceInUsdt, quoteCurrency, fee, feeCurrency, feeInUsdt,
         pnl, quoteAmount);
+  }
+
+  /**
+   * Get all changes of given type.
+   *
+   * @param type The type of changes to consider
+   * @return The list of all changes or an empty list if no changes of that type are stored
+   */
+  protected List<RawAccountChange> getChangesOfType(Operation type) {
+    return atomicAccountChanges.getOrDefault(type, Collections.emptyList());
   }
 }
