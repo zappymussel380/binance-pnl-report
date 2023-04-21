@@ -54,10 +54,6 @@ class DustCollectionTest {
     assertEquals("Dust collect 0.6 BNB, -0.2 LEND, -82 SHIB, -6 SXP", dust.toString());
   }
 
-  // TODO - one asset to BNB, asset has obtainPrice > 0, no previous BNB
-  // TODO - one asset to BNB, asset has obtainPrice = 0, no previous BNB
-  // TODO - one asset to BNB, asset has obtainPrice > 0, have BNB with obtain price > 0
-  // TODO - one asset to BNB, asset has obtainPrice = 0, have BNB with obtain price > 0
   // TODO - multiple assets to multi BNB, assets have obtainPrice > 0, BNB has obtain price = 0
   // TODO - multiple assets to multi BNB, assets have obtainPrice = 0, BNB has obtain price = 0
   // TODO - multiple assets to multi BNB, assets have obtainPrice > 0, BNB has obtain price > 0
@@ -68,6 +64,21 @@ class DustCollectionTest {
         createWallet("REN", "4", "0"),
         createDustCollection("0.1", "BNB", "-3.8", "REN"),
         "REN", "0.2", "0", "BNB", "0.1", "0"
+    );
+    expectDustResult(
+        createWallet("REN", "4", "10"),
+        createDustCollection("0.1", "BNB", "-3", "REN"),
+        "REN", "1", "10", "BNB", "0.1", "100"
+    );
+    expectDustResult(
+        createWallet("REN", "4", "0", "BNB", "0.9", "100"),
+        createDustCollection("0.1", "BNB", "-3.8", "REN"),
+        "REN", "0.2", "0", "BNB", "1", "90"
+    );
+    expectDustResult(
+        createWallet("REN", "4", "10", "BNB", "0.9", "100"),
+        createDustCollection("0.1", "BNB", "-3", "REN"),
+        "REN", "1", "10", "BNB", "1", "120"
     );
   }
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
@@ -35,9 +36,8 @@ public class DustCollectionTransaction extends Transaction {
 
   private String getBaseAsset() {
     String asset = null;
-    if (getBaseAssetCount() == 1) {
-      asset = assetChanges.keySet().stream().filter(a -> !a.equals("BNB"))
-          .findFirst().orElse(null);
+    if (getBaseAssets().count() == 1) {
+      asset = getBaseAssets().findFirst().orElse(null);
     }
     return asset;
   }
@@ -49,7 +49,7 @@ public class DustCollectionTransaction extends Transaction {
    * @return The number of small assets which were converted to BNB.
    */
   public long getBaseAssetCount() {
-    return assetChanges.keySet().stream().filter(asset -> !asset.equals("BNB")).count();
+    return getBaseAssets().count();
   }
 
   /**
@@ -59,10 +59,14 @@ public class DustCollectionTransaction extends Transaction {
    * @return Merged asset strings
    */
   private String mergeBaseCurrencySymbols() {
-    return assetChanges.keySet().stream()
-        .filter(asset -> !asset.equals("BNB"))
+    return getBaseAssets()
         .sorted()
         .collect(Collectors.joining("+"));
+  }
+
+  private Stream<String> getBaseAssets() {
+    return assetChanges.keySet().stream()
+        .filter(asset -> !asset.equals("BNB"));
   }
 
   private void mergeAssetAmounts() {
