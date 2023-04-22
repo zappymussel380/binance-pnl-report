@@ -10,6 +10,7 @@ import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletSnapshot;
 
 /**
@@ -111,7 +112,19 @@ public class DustCollectionTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    return walletSnapshot.prepareForTransaction(this);
+    WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
+    Wallet wallet = newSnapshot.getWallet();
+    Decimal totalDustValue = Decimal.ZERO;
+    for (Map.Entry<String, Decimal> dust : dustAssets.entrySet()) {
+      String asset = dust.getKey();
+      Decimal amount = dust.getValue().negate();
+      Decimal usdUsedToObtainDust = wallet.getAvgObtainPrice(asset).multiply(amount);
+      totalDustValue = totalDustValue.add(usdUsedToObtainDust);
+      newSnapshot.decreaseAsset(asset, amount);
+    }
+    Decimal bnbObtainPrice = totalDustValue.divide(obtainedBnbAmount);
+    newSnapshot.addAsset("BNB", obtainedBnbAmount, bnbObtainPrice);
+    return newSnapshot;
   }
 
   @Override

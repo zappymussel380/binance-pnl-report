@@ -68,7 +68,7 @@ class DustCollectionTest {
     expectDustResult(
         createWallet("REN", "4", "10"),
         createDustCollection("0.1", "BNB", "-3", "REN"),
-        "REN", "1", "10", "BNB", "0.1", "100"
+        "REN", "1", "10", "BNB", "0.1", "300"
     );
     expectDustResult(
         createWallet("REN", "4", "0", "BNB", "0.9", "100"),
