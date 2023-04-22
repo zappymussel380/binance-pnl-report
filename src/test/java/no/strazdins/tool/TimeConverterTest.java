@@ -1,6 +1,7 @@
+package no.strazdins.tool;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import no.strazdins.tool.TimeConverter;
 import org.junit.jupiter.api.Test;
 
 class TimeConverterTest {

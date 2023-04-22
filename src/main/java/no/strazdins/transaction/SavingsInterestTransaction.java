@@ -1,6 +1,7 @@
 package no.strazdins.transaction;
 
 import java.util.Objects;
+import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
@@ -24,6 +25,9 @@ public class SavingsInterestTransaction extends Transaction {
     interest = getFirstChangeOfType(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST);
     if (interest == null) {
       throw new IllegalStateException("Savings interest without a required raw change");
+    }
+    if (!interest.getAccount().equals(AccountType.EARN)) {
+      throw new IllegalArgumentException("Interest must be added to earnings account");
     }
     baseCurrency = interest.getAsset();
     baseCurrencyAmount = interest.getAmount();

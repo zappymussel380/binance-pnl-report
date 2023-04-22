@@ -1,10 +1,11 @@
+package no.strazdins.process;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import no.strazdins.process.ExtraInfoHandler;
 import no.strazdins.transaction.Transaction;
 import org.junit.jupiter.api.Test;
 

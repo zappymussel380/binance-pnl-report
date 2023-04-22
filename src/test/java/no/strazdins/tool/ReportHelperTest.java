@@ -1,11 +1,11 @@
+package no.strazdins.tool;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.LinkedList;
 import java.util.List;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.WalletSnapshot;
-import no.strazdins.tool.ReportHelper;
-import no.strazdins.tool.TimeConverter;
 import no.strazdins.transaction.Transaction;
 import org.junit.jupiter.api.Test;
 

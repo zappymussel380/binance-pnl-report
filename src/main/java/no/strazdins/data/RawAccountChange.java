@@ -146,4 +146,13 @@ public class RawAccountChange {
   public Decimal getAmount() {
     return changeAmount;
   }
+
+  /**
+   * Get the account to which the change was performed.
+   *
+   * @return The account
+   */
+  public AccountType getAccount() {
+    return account;
+  }
 }

@@ -1,8 +1,8 @@
+package no.strazdins.data;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-import no.strazdins.data.Operation;
-import no.strazdins.data.OperationMultiSet;
 import org.junit.jupiter.api.Test;
 
 class OperationSetTest {

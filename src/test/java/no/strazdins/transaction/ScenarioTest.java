@@ -1,3 +1,5 @@
+package no.strazdins.transaction;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import no.strazdins.data.AccountType;
@@ -7,11 +9,6 @@ import no.strazdins.data.ExtraInfoType;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletSnapshot;
-import no.strazdins.transaction.BuyTransaction;
-import no.strazdins.transaction.DepositTransaction;
-import no.strazdins.transaction.SellTransaction;
-import no.strazdins.transaction.Transaction;
-import no.strazdins.transaction.WithdrawTransaction;
 import org.junit.jupiter.api.Test;
 
 /**

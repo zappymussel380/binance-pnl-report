@@ -1,3 +1,5 @@
+package no.strazdins.transaction;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,8 +11,6 @@ import no.strazdins.data.ExtraInfoType;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletSnapshot;
-import no.strazdins.transaction.DepositTransaction;
-import no.strazdins.transaction.Transaction;
 import org.junit.jupiter.api.Test;
 
 class DepositTest {

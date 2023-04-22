@@ -1,7 +1,7 @@
+package no.strazdins.data;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import no.strazdins.data.Decimal;
-import no.strazdins.data.Wallet;
 import org.junit.jupiter.api.Test;
 
 class WalletTest {
