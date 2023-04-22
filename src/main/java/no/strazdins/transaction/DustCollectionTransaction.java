@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
@@ -18,7 +17,8 @@ import no.strazdins.data.WalletSnapshot;
  * raw account changes: positive BNB changes and negative changes of other assets.
  */
 public class DustCollectionTransaction extends Transaction {
-  private final Map<String, Decimal> assetChanges = new HashMap<>();
+  private final Map<String, Decimal> dustAssets = new HashMap<>();
+  private Decimal obtainedBnbAmount = Decimal.ZERO;
 
   /**
    * Create a dust collection transaction - convert small assets to BNB.
@@ -35,11 +35,16 @@ public class DustCollectionTransaction extends Transaction {
   }
 
   private String getBaseAsset() {
-    String asset = null;
-    if (getBaseAssets().count() == 1) {
-      asset = getBaseAssets().findFirst().orElse(null);
-    }
-    return asset;
+    return dustAssets.size() == 1 ? getFirstDustAssetName() : null;
+  }
+
+  /**
+   * Get the first asset name from the dustAssets map.
+   *
+   * @return The first asset name from the dustAssets map.
+   */
+  private String getFirstDustAssetName() {
+    return dustAssets.keySet().iterator().next();
   }
 
   /**
@@ -48,8 +53,8 @@ public class DustCollectionTransaction extends Transaction {
    *
    * @return The number of small assets which were converted to BNB.
    */
-  public long getBaseAssetCount() {
-    return getBaseAssets().count();
+  public long getDustAssetCount() {
+    return dustAssets.size();
   }
 
   /**
@@ -59,39 +64,46 @@ public class DustCollectionTransaction extends Transaction {
    * @return Merged asset strings
    */
   private String mergeBaseCurrencySymbols() {
-    return getBaseAssets()
+    return dustAssets.keySet().stream()
         .sorted()
         .collect(Collectors.joining("+"));
   }
 
-  private Stream<String> getBaseAssets() {
-    return assetChanges.keySet().stream()
-        .filter(asset -> !asset.equals("BNB"));
-  }
-
+  /**
+   * Look at all involved dust assets, group all sold dust assets as total amount per asset.
+   * Also calculate the total gained BNB amount.
+   */
   private void mergeAssetAmounts() {
     for (RawAccountChange dust : getChangesOfType(Operation.SMALL_ASSETS_EXCHANGE_BNB)) {
       String asset = dust.getAsset();
       Decimal amount = dust.getAmount();
-      if (assetChanges.containsKey(asset)) {
-        assetChanges.put(asset, assetChanges.get(asset).add(amount));
+      if (asset.equals("BNB")) {
+        obtainedBnbAmount = obtainedBnbAmount.add(amount);
       } else {
-        assetChanges.put(asset, amount);
+        addDustAsset(asset, amount);
       }
+    }
+  }
+
+  private void addDustAsset(String asset, Decimal amount) {
+    if (dustAssets.containsKey(asset)) {
+      dustAssets.put(asset, dustAssets.get(asset).add(amount));
+    } else {
+      dustAssets.put(asset, amount);
     }
   }
 
   @Override
   public String toString() {
-    return "Dust collect " + getAssetAmounts();
+    return "Dust collect " + obtainedBnbAmount.getNiceString() + " BNB, " + getAssetAmounts();
   }
 
 
   private String getAssetAmounts() {
-    List<String> orderedAssets = assetChanges.keySet().stream().sorted().toList();
+    List<String> orderedAssets = dustAssets.keySet().stream().sorted().toList();
     List<String> values = new LinkedList<>();
     for (String asset : orderedAssets) {
-      String amount = assetChanges.get(asset).getNiceString();
+      String amount = dustAssets.get(asset).getNiceString();
       values.add(amount + " " + asset);
     }
     return String.join(", ", values);
@@ -115,7 +127,13 @@ public class DustCollectionTransaction extends Transaction {
    *         not found involved in the transaction.
    */
   public Decimal getDustChangeAmount(String asset) {
-    return assetChanges.getOrDefault(asset, Decimal.ZERO);
+    Decimal amount;
+    if ("BNB".equals(asset)) {
+      amount = obtainedBnbAmount;
+    } else {
+      amount = dustAssets.getOrDefault(asset, Decimal.ZERO);
+    }
+    return amount;
   }
 
   @Override
@@ -130,11 +148,11 @@ public class DustCollectionTransaction extends Transaction {
       return false;
     }
     DustCollectionTransaction that = (DustCollectionTransaction) o;
-    return Objects.equals(assetChanges, that.assetChanges);
+    return Objects.equals(dustAssets, that.dustAssets);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), assetChanges);
+    return Objects.hash(super.hashCode(), dustAssets);
   }
 }

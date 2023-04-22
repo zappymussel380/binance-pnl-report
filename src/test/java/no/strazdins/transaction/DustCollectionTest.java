@@ -35,7 +35,7 @@ class DustCollectionTest {
     assertEquals("BNB", d.getQuoteCurrency());
     assertEquals("SXP", d.getBaseCurrency());
     DustCollectionTransaction dust = (DustCollectionTransaction) d;
-    assertEquals(1, dust.getBaseAssetCount());
+    assertEquals(1, dust.getDustAssetCount());
     assertEquals(new Decimal("-8"), d.getBaseCurrencyAmount());
     assertEquals(Decimal.ZERO, d.getFee());
     assertEquals("", d.getFeeCurrency());
