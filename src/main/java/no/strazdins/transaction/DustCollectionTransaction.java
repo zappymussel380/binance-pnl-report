@@ -29,13 +29,13 @@ public class DustCollectionTransaction extends Transaction {
   public DustCollectionTransaction(Transaction t) {
     super(t);
     mergeAssetAmounts();
-    quoteCurrency = "BNB";
-    quoteAmount = getDustChangeAmount("BNB");
-    baseCurrency = mergeBaseCurrencySymbols();
-    baseCurrencyAmount = getDustChangeAmount(getBaseAsset());
+    baseCurrency = "BNB";
+    baseCurrencyAmount = getDustChangeAmount("BNB");
+    quoteCurrency = mergeBaseCurrencySymbols();
+    quoteAmount = getDustChangeAmount(getQuoteAsset());
   }
 
-  private String getBaseAsset() {
+  private String getQuoteAsset() {
     return dustAssets.size() == 1 ? getFirstDustAssetName() : null;
   }
 
