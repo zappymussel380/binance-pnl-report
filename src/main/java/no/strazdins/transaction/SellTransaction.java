@@ -26,7 +26,10 @@ public class SellTransaction extends Transaction {
   }
 
   private void initBaseAndQuote() {
-    base = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    base = getFirstChangeOfType(Operation.SELL);
+    if (base == null) {
+      base = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    }
     quote = getFirstChangeOfType(Operation.BUY);
     feeOp = getFirstChangeOfType(Operation.FEE);
     if (base == null || quote == null || feeOp == null) {

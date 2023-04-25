@@ -84,31 +84,58 @@ public class Transaction {
       mergeRawChangesByType();
     }
 
-    if (consistsOf(Operation.DEPOSIT)) {
-      return new DepositTransaction(this);
-    } else if (consistsOf(Operation.WITHDRAW)) {
-      return new WithdrawTransaction(this);
-    } else if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)) {
-      if (isSell()) {
-        return new SellTransaction(this);
-      } else if (isBuy()) {
-        return new BuyTransaction(this);
-      }
-    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)
-        || consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION,
-        Operation.SAVINGS_DISTRIBUTION)) {
-      return new SavingsSubscriptionTransaction(this);
+    Transaction t = tryToConvertToBuyOrSell();
+    if (t == null) {
+      t = tryToConvertToDepositOrWithdraw();
+    }
+    if (t == null) {
+      t = tryToConvertToSavingsRelated();
+    }
+    return t;
+
+  }
+
+  private Transaction tryToConvertToSavingsRelated() {
+    Transaction t = null;
+    if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
+        || consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)) {
+      t = new SavingsSubscriptionTransaction(this);
     } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)
         || consistsOfMultiple(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)) {
-      return new SavingsRedemptionTransaction(this);
+      t = new SavingsRedemptionTransaction(this);
     } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST)) {
-      return new SavingsInterestTransaction(this);
+      t = new SavingsInterestTransaction(this);
     } else if (consistsOf(Operation.DISTRIBUTION)) {
-      return new DistributionTransaction(this);
+      t = new DistributionTransaction(this);
     } else if (consistsOfMultiple(Operation.SMALL_ASSETS_EXCHANGE_BNB)) {
-      return new DustCollectionTransaction(this);
+      t = new DustCollectionTransaction(this);
     }
-    return null;
+    return t;
+  }
+
+  private Transaction tryToConvertToBuyOrSell() {
+    Transaction t = null;
+    if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)
+        || consistsOf(Operation.BUY, Operation.FEE, Operation.SELL)) {
+      if (isSell()) {
+        t = new SellTransaction(this);
+      } else if (isBuy()) {
+        t = new BuyTransaction(this);
+      } else {
+        throw new IllegalArgumentException("Neither buy nor sell? " + this);
+      }
+    }
+    return t;
+  }
+
+  private Transaction tryToConvertToDepositOrWithdraw() {
+    Transaction t = null;
+    if (consistsOf(Operation.DEPOSIT)) {
+      t = new DepositTransaction(this);
+    } else if (consistsOf(Operation.WITHDRAW)) {
+      t = new WithdrawTransaction(this);
+    }
+    return t;
   }
 
   private boolean isSell() {
@@ -117,7 +144,10 @@ public class Transaction {
   }
 
   private boolean isBuy() {
-    RawAccountChange sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    RawAccountChange sold = getFirstChangeOfType(Operation.SELL);
+    if (sold == null) {
+      sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    }
     return sold != null && sold.getAsset().equals("USDT");
   }
 
