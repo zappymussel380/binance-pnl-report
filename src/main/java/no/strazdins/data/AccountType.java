@@ -16,9 +16,9 @@ public enum AccountType {
    * @throws IOException When an unexpected s value is provided
    */
   public static AccountType fromString(String s) throws IOException {
-    return switch (s) {
-      case "Spot" -> SPOT;
-      case "Earn" -> EARN;
+    return switch (s.toUpperCase()) {
+      case "SPOT" -> SPOT;
+      case "EARN" -> EARN;
       default -> throw new IOException("Invalid account type string: " + s);
     };
   }
