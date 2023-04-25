@@ -42,6 +42,7 @@ public class Runner {
       }
     } catch (IOException e) {
       logger.error("Report generation failed: {}", e.getMessage());
+      e.printStackTrace();
     }
   }
 

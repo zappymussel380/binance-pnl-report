@@ -150,7 +150,12 @@ public class Transaction {
   }
 
 
-  private OperationMultiSet getOperationMultiSet() {
+  /**
+   * Get multiset containing the count of each operation type (not the operation itself).
+   *
+   * @return Multiset of all operations: count by type
+   */
+  public OperationMultiSet getOperationMultiSet() {
     OperationMultiSet operationMultiSet = new OperationMultiSet();
     for (Map.Entry<Operation, List<RawAccountChange>> entry : atomicAccountChanges.entrySet()) {
       operationMultiSet.add(entry.getKey(), entry.getValue().size());
