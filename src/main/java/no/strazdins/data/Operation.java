@@ -9,7 +9,8 @@ public enum Operation {
   BUY, SELL, FEE, DEPOSIT, WITHDRAW, TRANSACTION_RELATED, DISTRIBUTION, SAVINGS_DISTRIBUTION,
   BNB_VAULT_REWARDS, BUY_CRYPTO, CASHBACK_VOUCHER, COMMISSION_REBATE, FIAT_DEPOSIT,
   SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION, SIMPLE_EARN_FLEXIBLE_REDEMPTION, SIMPLE_EARN_FLEXIBLE_INTEREST,
-  SMALL_ASSETS_EXCHANGE_BNB, AUTO_INVEST_TRANSACTION;
+  SMALL_ASSETS_EXCHANGE_BNB, AUTO_INVEST_TRANSACTION,
+  TRANSACTION_SOLD, TRANSACTION_REVENUE, TRANSACTION_SPEND, TRANSACTION_BUY;
 
   /**
    * Convert a capitalized string to a corresponding enum.
@@ -22,6 +23,10 @@ public enum Operation {
     return switch (s) {
       case "Buy" -> BUY;
       case "Sell" -> SELL;
+      case "Transaction Buy" -> TRANSACTION_BUY;
+      case "Transaction Sold" -> TRANSACTION_SOLD;
+      case "Transaction Spend" -> TRANSACTION_SPEND;
+      case "Transaction Revenue" -> TRANSACTION_REVENUE;
       case "Fee" -> FEE;
       case "Deposit" -> DEPOSIT;
       case "Withdraw" -> WITHDRAW;
