@@ -99,6 +99,7 @@ public class Transaction {
   private Transaction tryToConvertToSavingsRelated() {
     Transaction t = null;
     if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
+        || consistsOf(Operation.SAVINGS_DISTRIBUTION)
         || consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)) {
       t = new SavingsSubscriptionTransaction(this);
     } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)
