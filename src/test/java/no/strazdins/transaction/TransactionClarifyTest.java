@@ -4,85 +4,104 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class TransactionClarifyTest {
-  @Test
-  void testSell() {
-    expectTransactionClarification(
-        Operation.BUY, "12.52", "USDT",
-        Operation.SELL, "-0.09", "LTC",
-        Operation.FEE, "-0.00025", "BNB",
-        SellTransaction.class, "-0.09", "LTC", "12.52", "USDT", "-0.00025", "BNB"
-    );
-    expectTransactionClarification(
-        Operation.BUY, "12.52", "USDT",
-        Operation.TRANSACTION_RELATED, "-0.09", "LTC",
-        Operation.FEE, "-0.00025", "BNB",
-        SellTransaction.class, "-0.09", "LTC", "12.52", "USDT", "-0.00025", "BNB"
-    );
+  private List<String> assets;
+  private List<String> amounts;
+  private List<Operation> operations;
+
+  @BeforeEach
+  void setup() {
+    assets = new ArrayList<>();
+    amounts = new ArrayList<>();
+    operations = new ArrayList<>();
   }
 
   @Test
-  void testBuy() {
-    expectTransactionClarification(
-        Operation.SELL, "-12.52", "USDT",
-        Operation.BUY, "0.1", "LTC",
-        Operation.FEE, "-0.00025", "BNB",
-        BuyTransaction.class, "0.1", "LTC", "-12.52", "USDT", "-0.00025", "BNB"
-    );
-    expectTransactionClarification(
-        Operation.TRANSACTION_RELATED, "-12.52", "USDT",
-        Operation.BUY, "0.1", "LTC",
-        Operation.FEE, "-0.00025", "BNB",
-        BuyTransaction.class, "0.1", "LTC", "-12.52", "USDT", "-0.00025", "BNB"
-    );
+  void testSellWithBuy() {
+    setupOperations(Operation.BUY, Operation.SELL, Operation.FEE);
+    setupAmounts("12.52", "-0.09", "-0.00025");
+    setupAssets("USDT", "LTC", "BNB");
+    expectResult(SellTransaction.class, "-0.09", "LTC", "12.52", "USDT", "-0.00025", "BNB");
   }
 
-  private void expectTransactionClarification(Operation op1, String amount1, String asset1,
-                                              Operation op2, String amount2, String asset2,
-                                              Operation op3, String amount3, String asset3,
-                                              Class expectedClass,
-                                              String baseAmount, String baseAsset,
-                                              String quoteAmount, String quoteAsset,
-                                              String feeAmount, String feeAsset) {
-    Transaction t = createClarifiedTransaction(
-        op1, amount1, asset1,
-        op2, amount2, asset2,
-        op3, amount3, asset3
-    );
+  @Test
+  void testSellWithTransactionRelated() {
+    setupOperations(Operation.BUY, Operation.TRANSACTION_RELATED, Operation.FEE);
+    setupAmounts("12.52", "-0.09", "-0.00025");
+    setupAssets("USDT", "LTC", "BNB");
+    expectResult(SellTransaction.class, "-0.09", "LTC", "12.52", "USDT", "-0.00025", "BNB");
+  }
+
+
+  @Test
+  void testBuyWithSell() {
+    setupOperations(Operation.SELL, Operation.BUY, Operation.FEE);
+    setupAmounts("-12.52", "0.1", "-0.00025");
+    setupAssets("USDT", "LTC", "BNB");
+    expectResult(BuyTransaction.class, "0.1", "LTC", "-12.52", "USDT", "-0.00025", "BNB");
+  }
+
+  @Test
+  void testBuyWithTransactionRelated() {
+    setupOperations(Operation.TRANSACTION_RELATED, Operation.BUY, Operation.FEE);
+    setupAmounts("-12.52", "0.1", "-0.00025");
+    setupAssets("USDT", "LTC", "BNB");
+    expectResult(BuyTransaction.class, "0.1", "LTC", "-12.52", "USDT", "-0.00025", "BNB");
+  }
+
+  private void setupOperations(Operation... operations) {
+    this.operations.addAll(Arrays.asList(operations));
+  }
+
+  private void setupAmounts(String... amounts) {
+    this.amounts.addAll(Arrays.asList(amounts));
+  }
+
+  private void setupAssets(String... assets) {
+    this.assets.addAll(Arrays.asList(assets));
+  }
+
+  public <T extends Transaction> void expectResult(Class<T> transactionClass,
+                                                   String baseAmount, String baseAsset,
+                                                   String quoteAmount, String quoteAsset,
+                                                   String feeAmount, String feeAsset) {
+    Transaction t = createClarifiedTransaction();
     assertNotNull(t);
-    assertInstanceOf(expectedClass, t);
+    assertInstanceOf(transactionClass, t);
     expectTransactionDetails(t, baseAmount, baseAsset, quoteAmount, quoteAsset,
         feeAmount, feeAsset);
   }
 
-  private void expectTransactionDetails(Transaction t, String baseAmount, String baseAsset,
-                                        String quoteAmount, String quoteAsset,
-                                        String feeAmount, String feeAsset) {
+  private Transaction createClarifiedTransaction() {
+    assertEquals(operations.size(), amounts.size(), "Operation and amount count must match");
+    assertEquals(operations.size(), assets.size(), "Operation and asset count must match");
+    long time = System.currentTimeMillis();
+    Transaction t = new Transaction(time);
+    for (int i = 0; i < operations.size(); ++i) {
+      t.append(new RawAccountChange(time, AccountType.SPOT, operations.get(i), assets.get(i),
+          new Decimal(amounts.get(i)), ""));
+    }
+    return t.clarifyTransactionType();
+  }
+
+  private static void expectTransactionDetails(Transaction t, String baseAmount, String baseAsset,
+                                               String quoteAmount, String quoteAsset,
+                                               String feeAmount, String feeAsset) {
     assertEquals(baseAsset, t.getBaseCurrency());
     assertEquals(quoteAsset, t.getQuoteCurrency());
     assertEquals(new Decimal(baseAmount), t.getBaseCurrencyAmount());
     assertEquals(new Decimal(quoteAmount), t.getQuoteAmount());
     assertEquals(new Decimal(feeAmount), t.getFee());
     assertEquals(feeAsset, t.getFeeCurrency());
-  }
-
-  private Transaction createClarifiedTransaction(Operation op1, String amount1, String asset1,
-                                                 Operation op2, String amount2, String asset2,
-                                                 Operation op3, String amount3, String asset3) {
-    long time = System.currentTimeMillis();
-    Transaction t = new Transaction(time);
-    t.append(new RawAccountChange(time, AccountType.SPOT, op1, asset1,
-        new Decimal(amount1), "First change"));
-    t.append(new RawAccountChange(time, AccountType.SPOT, op2, asset2,
-        new Decimal(amount2), "Second change"));
-    t.append(new RawAccountChange(time, AccountType.SPOT, op3, asset3,
-        new Decimal(amount3), "Third change"));
-    return t.clarifyTransactionType();
   }
 }
