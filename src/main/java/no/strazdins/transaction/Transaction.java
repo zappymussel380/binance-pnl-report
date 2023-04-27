@@ -80,7 +80,8 @@ public class Transaction {
    * @return A transaction with specific type, with the same atomic operations
    */
   public final Transaction clarifyTransactionType() {
-    if (consistsOfMultiple(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)) {
+    if (consistsOfMultiple(Operation.BUY, Operation.TRANSACTION_RELATED, Operation.FEE)
+        || consistsOfMultiple(Operation.BUY, Operation.SELL, Operation.FEE)) {
       mergeRawChangesByType();
     }
 
