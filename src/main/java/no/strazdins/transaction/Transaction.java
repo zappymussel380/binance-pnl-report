@@ -121,9 +121,14 @@ public class Transaction {
         || consistsOf(Operation.BUY, Operation.FEE, Operation.SELL)) {
       if (isSell()) {
         t = new SellTransaction(this);
-      } else if (isBuy()) {
+      } else if (isBuyWithUsd()) {
         t = new BuyTransaction(this);
+      } else if (isCoinToCoinBuy()) {
+        t = new CoinToCoinTransaction(this);
       } else {
+        //        TODO - test BTC/EUR transaction clarification
+        //            TODO - test Sell transaction without fee (2021-04-27 13:15:51)
+        //        TODO - test Buy transaction without fee (no example found)
         throw new IllegalArgumentException("Neither buy nor sell? " + this);
       }
     }
@@ -145,12 +150,24 @@ public class Transaction {
     return bought != null && bought.getAsset().equals("USDT");
   }
 
-  private boolean isBuy() {
+  private boolean isBuyWithUsd() {
     RawAccountChange sold = getFirstChangeOfType(Operation.SELL);
     if (sold == null) {
       sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
     }
     return sold != null && sold.getAsset().equals("USDT");
+  }
+
+  private boolean isCoinToCoinBuy() {
+    RawAccountChange sold = getFirstChangeOfType(Operation.SELL);
+    if (sold == null) {
+      sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    }
+    RawAccountChange bought = getFirstChangeOfType(Operation.BUY);
+
+    return sold != null && bought != null
+        && !bought.getAsset().equals("USDT")
+        && !sold.getAsset().equals("USDT");
   }
 
   /**

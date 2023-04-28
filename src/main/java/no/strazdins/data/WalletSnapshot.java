@@ -116,9 +116,21 @@ public class WalletSnapshot {
    * The price is calculated over all the transactions so far.
    *
    * @return The average obtain-price of the main asset of this transaction
+   *     or Decimal.ZERO if the asset is not found in the wallet
    */
   public Decimal getAvgBaseObtainPrice() {
     return wallet.getAvgObtainPrice(transaction.getBaseCurrency());
+  }
+
+  /**
+   * Get the average purchase price (obtain price) of the quote currency of this transaction.
+   * The price is calculated over all the transactions so far.
+   *
+   * @return The average obtain-price of the quote currency of this transaction
+   *     or Decimal.ZERO if the asset is not found in the wallet
+   */
+  public Decimal getAvgQuoteObtainPrice() {
+    return wallet.getAvgObtainPrice(transaction.getQuoteCurrency());
   }
 
   /**

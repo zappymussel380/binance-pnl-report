@@ -18,7 +18,7 @@ class ScenarioTest {
   private static long transactionTime = System.currentTimeMillis();
 
   @Test
-  void testScenario() {
+  void testRealisticScenario() {
     WalletSnapshot ws1 = WalletSnapshot.createEmpty();
     WalletSnapshot ws2 = processDeposit(ws1, "LTC", "1.65167383", "72.22");
     expectWalletState(ws2, 1, "1.65167383", "72.22",
@@ -71,6 +71,24 @@ class ScenarioTest {
     WalletSnapshot ws9 = processWithdraw(ws8, "LTC", "2", "82.49245900");
     expectWalletState(ws9, 3, "9.98728861", "72.49245900",
         "98.90777367", "20", "19.79157454");
+  }
+
+  @Test
+  void testBtcToEur() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    ws1.addAsset("BNB", new Decimal("10"), new Decimal("200"));
+    ws1.addAsset("BTC", new Decimal("0.01"), new Decimal("20000"));
+    CoinToCoinContext t = new CoinToCoinContext(ws1)
+        .sell("BTC", "-0.008", "-0.002")
+        .buy("EUR", "148", "300")
+        .fees("BNB", "-0.04", "-0.08");
+    WalletSnapshot ws2 = t.process();
+
+    // 224 USD used to get 448 EUR -> avg price = 0.5
+    expectWalletState(ws2, 2, "0", "0", "0", "0", "0");
+    expectAssetAmount(ws2, "BNB", "9.88", "200");
+    expectAssetAmount(ws2, "BTC", "0", "0");
+    expectAssetAmount(ws2, "EUR", "448", "0.5");
   }
 
   private WalletSnapshot processDeposit(WalletSnapshot startSnapshot,
@@ -130,6 +148,7 @@ class ScenarioTest {
   private void expectWalletState(WalletSnapshot ws, int assetCount,
                                  String ltcAmount, String ltcObtainPrice, String usdtAmount,
                                  String transactionPnl, String runningPnl) {
+    // TODO - refactor wallet state
     assertEquals(assetCount, ws.getWallet().getAssetCount());
     expectAssetAmount(ws, "LTC", ltcAmount, ltcObtainPrice);
     expectAssetAmount(ws, "USDT", usdtAmount, "1.0");

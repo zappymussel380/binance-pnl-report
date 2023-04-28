@@ -12,9 +12,9 @@ import no.strazdins.tool.TimeConverter;
  * A Buy-transaction.
  */
 public class BuyTransaction extends Transaction {
-  private RawAccountChange base;
-  private RawAccountChange quote;
-  private RawAccountChange feeOp;
+  protected RawAccountChange base;
+  protected RawAccountChange quote;
+  protected RawAccountChange feeOp;
 
   public BuyTransaction(Transaction transaction) {
     super(transaction);
