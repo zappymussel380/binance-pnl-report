@@ -59,6 +59,22 @@ class TransactionClarifyTest {
     expectResult(BuyTransaction.class, "0.1", "LTC", "-12.52", "USDT", "-0.00025", "BNB");
   }
 
+  @Test
+  void testSellWithoutFee() {
+    setupOperations(Operation.SELL, Operation.BUY);
+    setupAmounts("-7.5", "15");
+    setupAssets("BAKE", "USDT");
+    expectResult(SellTransaction.class, "-7.5", "BAKE", "15", "USDT", "0", "");
+  }
+
+  @Test
+  void testCoinToCoinWithoutFee() {
+    setupOperations(Operation.SELL, Operation.BUY);
+    setupAmounts("-7.5", "15");
+    setupAssets("BAKE", "BUSD");
+    expectResult(CoinToCoinTransaction.class, "15", "BUSD", "-7.5", "BAKE", "0", "");
+  }
+
   private void setupOperations(Operation... operations) {
     this.operations.addAll(Arrays.asList(operations));
   }

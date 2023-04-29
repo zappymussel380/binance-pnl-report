@@ -27,12 +27,14 @@ public class BuyTransaction extends Transaction {
     if (quote == null) {
       quote = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
     }
-    feeOp = getFirstChangeOfType(Operation.FEE);
-    if (base == null || quote == null || feeOp == null) {
+    if (base == null || quote == null) {
       throw new IllegalStateException("Can't create a buy when some ops are missing!");
     }
-    fee = feeOp.getAmount();
-    feeCurrency = feeOp.getAsset();
+    feeOp = getFirstChangeOfType(Operation.FEE);
+    if (feeOp != null) {
+      fee = feeOp.getAmount();
+      feeCurrency = feeOp.getAsset();
+    }
     quoteCurrency = quote.getAsset();
     quoteAmount = quote.getAmount();
     baseCurrency = base.getAsset();
@@ -59,15 +61,21 @@ public class BuyTransaction extends Transaction {
       throw new UnsupportedOperationException("Support Buy in markets /X, where X != USDT");
     }
 
-    if (feeInUsdt.isZero() && feeOp.getAsset().equals("BNB") && base.getAsset().equals("BNB")) {
+    if (Decimal.ZERO.equals(feeInUsdt) && isFeeCurrency("BNB") && base.getAsset().equals("BNB")) {
       return processFirstBnbBuy(newSnapshot);
-    } else if (feeOp.getAsset().equals("BNB")) {
+    } else if (isFeeCurrency("BNB")) {
       return processBuyWithBnbFee(newSnapshot);
-    } else if (feeOp.getAsset().equals("USDT")) {
-      return processBuyWithUsdtFee(newSnapshot);
+    } else if (isFeeCurrency("USDT")) {
+      return processBuyWithUsdtFee(newSnapshot, feeInUsdt);
+    } else if (feeOp == null) {
+      return processBuyWithUsdtFee(newSnapshot, Decimal.ZERO);
     } else {
       throw new UnsupportedOperationException("Unknown type of buy transaction: " + this);
     }
+  }
+
+  private boolean isFeeCurrency(String expectedFeeCurrency) {
+    return feeOp != null && feeOp.getAsset().equals(expectedFeeCurrency);
   }
 
   private WalletSnapshot processFirstBnbBuy(WalletSnapshot newSnapshot) {
@@ -100,8 +108,8 @@ public class BuyTransaction extends Transaction {
     return newSnapshot;
   }
 
-  private WalletSnapshot processBuyWithUsdtFee(WalletSnapshot newSnapshot) {
-    Decimal usdtUsedInTransaction = (quote.getAmount().add(feeInUsdt)).negate();
+  private WalletSnapshot processBuyWithUsdtFee(WalletSnapshot newSnapshot, Decimal usdFee) {
+    Decimal usdtUsedInTransaction = (quote.getAmount().add(usdFee)).negate();
     newSnapshot.decreaseAsset("USDT", usdtUsedInTransaction);
 
     Decimal avgBuyPrice = usdtUsedInTransaction.divide(base.getAmount());

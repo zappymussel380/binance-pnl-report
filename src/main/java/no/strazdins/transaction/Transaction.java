@@ -118,7 +118,8 @@ public class Transaction {
   private Transaction tryToConvertToBuyOrSell() {
     Transaction t = null;
     if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)
-        || consistsOf(Operation.BUY, Operation.FEE, Operation.SELL)) {
+        || consistsOf(Operation.BUY, Operation.FEE, Operation.SELL)
+        || consistsOf(Operation.BUY, Operation.SELL)) {
       if (isSell()) {
         t = new SellTransaction(this);
       } else if (isBuyWithUsd()) {
@@ -126,9 +127,6 @@ public class Transaction {
       } else if (isCoinToCoinBuy()) {
         t = new CoinToCoinTransaction(this);
       } else {
-        //        TODO - test BTC/EUR transaction clarification
-        //            TODO - test Sell transaction without fee (2021-04-27 13:15:51)
-        //        TODO - test Buy transaction without fee (no example found)
         throw new IllegalArgumentException("Neither buy nor sell? " + this);
       }
     }
@@ -379,13 +377,12 @@ public class Transaction {
    */
   protected final void calculateFeeInUsdt(Wallet wallet) throws IllegalStateException {
     RawAccountChange feeOp = getFirstChangeOfType(Operation.FEE);
-    if (feeOp == null) {
-      throw new IllegalStateException("Could not find fee operation!");
-    }
-    if (feeOp.getAsset().equals("USDT")) {
-      feeInUsdt = feeOp.getAmount();
-    } else {
-      feeInUsdt = feeOp.getAmount().multiply(wallet.getAvgObtainPrice(feeOp.getAsset()));
+    if (feeOp != null) {
+      if (feeOp.getAsset().equals("USDT")) {
+        feeInUsdt = feeOp.getAmount();
+      } else {
+        feeInUsdt = feeOp.getAmount().multiply(wallet.getAvgObtainPrice(feeOp.getAsset()));
+      }
     }
   }
 

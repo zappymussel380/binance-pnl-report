@@ -91,6 +91,59 @@ class ScenarioTest {
     expectAssetAmount(ws2, "EUR", "448", "0.5");
   }
 
+  @Test
+  void testCoinToCoin() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    ws1.addAsset("BNB", new Decimal("10"), new Decimal("200"));
+    ws1.addAsset("BTC", new Decimal("0.03"), new Decimal("20000"));
+    ws1.addAsset("LTC", new Decimal("1"), new Decimal("190"));
+
+    CoinToCoinContext t = new CoinToCoinContext(ws1)
+        .sell("LTC", "-1")
+        .buy("BTC", "0.02")
+        .fees("BNB", "-0.05");
+    WalletSnapshot ws2 = t.process();
+    // LTC bought at price 190, get 0.02 BTC when selling
+    // $10 used in BNB fee. In total: $200 used to get the 0.02 BTC
+    // => obtain price of the new BTC is $10000. Avg obtain price of the whole BTC: $16000
+
+    expectWalletState(ws2, 2, "0", "0", "0", "0", "0");
+    expectAssetAmount(ws2, "BNB", "9.95", "200");
+    expectAssetAmount(ws2, "BTC", "0.05", "16000");
+  }
+
+  @Test
+  void testCoinToCoinWithoutFee() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    ws1.addAsset("BAKE", new Decimal("8"), new Decimal("10"));
+    CoinToCoinContext t = new CoinToCoinContext(ws1)
+        .sell("BAKE", "-7.5")
+        .buy("BUSD", "75");
+    WalletSnapshot ws2 = t.process();
+
+    expectWalletState(ws2, 2, "0", "0", "0", "0", "0");
+    expectAssetAmount(ws2, "BAKE", "0.5", "10");
+    expectAssetAmount(ws2, "BUSD", "75", "1");
+  }
+
+  @Test
+  void testSellWithoutFee() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    ws1.addAsset("BAKE", new Decimal("8"), new Decimal("10"));
+    WalletSnapshot ws2 = processSell(ws1, "BAKE", "7.5", "75", null, null);
+    expectWalletState(ws2, 2, "0", "0", "75", "0", "0");
+    expectAssetAmount(ws2, "BAKE", "0.5", "10");
+  }
+
+  @Test
+  void testBuyWithoutFee() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    ws1.addAsset("USDT", new Decimal("80"), new Decimal("1"));
+    WalletSnapshot ws2 = processBuy(ws1, "BAKE", "7.5", "75", "USDT", null, null);
+    expectWalletState(ws2, 2, "0", "0", "5", "0", "0");
+    expectAssetAmount(ws2, "BAKE", "7.5", "10");
+  }
+
   private WalletSnapshot processDeposit(WalletSnapshot startSnapshot,
                                         String asset, String amount, String obtainPrice) {
     transactionTime += 1000;
@@ -125,8 +178,10 @@ class ScenarioTest {
     t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
         Operation.TRANSACTION_RELATED, quoteCurrency, new Decimal(usedQuote).negate(),
         "Sell " + quoteCurrency));
-    t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
-        Operation.FEE, feeCurrency, new Decimal(fee).negate(), "Fee in " + feeCurrency));
+    if (fee != null) {
+      t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
+          Operation.FEE, feeCurrency, new Decimal(fee).negate(), "Fee in " + feeCurrency));
+    }
     BuyTransaction buy = new BuyTransaction(t);
     return buy.process(startSnapshot, null);
   }
@@ -139,8 +194,10 @@ class ScenarioTest {
         Operation.TRANSACTION_RELATED, asset, new Decimal(amount).negate(), "Sell coin"));
     t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
         Operation.BUY, "USDT", new Decimal(obtainedUsdtAmount), "Acquire USDT"));
-    t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
-        Operation.FEE, feeCurrency, new Decimal(fee).negate(), "Fee in " + feeCurrency));
+    if (fee != null) {
+      t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
+          Operation.FEE, feeCurrency, new Decimal(fee).negate(), "Fee in " + feeCurrency));
+    }
     SellTransaction sell = new SellTransaction(t);
     return sell.process(startSnapshot, null);
   }

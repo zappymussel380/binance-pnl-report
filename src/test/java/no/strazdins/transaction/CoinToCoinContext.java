@@ -1,6 +1,7 @@
 package no.strazdins.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,6 +88,7 @@ class CoinToCoinContext {
           new Decimal(feeAmount), ""));
     }
     Transaction coinToCoin = t.clarifyTransactionType();
+    assertNotNull(coinToCoin, "Transaction type can't be clarified");
     assertInstanceOf(CoinToCoinTransaction.class, coinToCoin);
 
     return coinToCoin.process(startSnapshot, null);
