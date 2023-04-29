@@ -31,12 +31,12 @@ class DustCollectionTest {
         "Dust transaction must be correctly interpreted");
     assertEquals("Convert dust to BNB", d.getType());
     assertEquals(time, d.getUtcTime());
-    assertEquals(new Decimal("0.1"), d.getQuoteAmount());
-    assertEquals("BNB", d.getQuoteCurrency());
-    assertEquals("SXP", d.getBaseCurrency());
+    assertEquals(new Decimal("0.1"), d.getBaseCurrencyAmount());
+    assertEquals("BNB", d.getBaseCurrency());
+    assertEquals("SXP", d.getQuoteCurrency());
     DustCollectionTransaction dust = (DustCollectionTransaction) d;
     assertEquals(1, dust.getDustAssetCount());
-    assertEquals(new Decimal("-8"), d.getBaseCurrencyAmount());
+    assertEquals(new Decimal("-8"), d.getQuoteAmount());
     assertEquals(Decimal.ZERO, d.getFee());
     assertEquals("", d.getFeeCurrency());
     assertNull(d.getNecessaryExtraInfo());
@@ -47,10 +47,10 @@ class DustCollectionTest {
     DustCollectionTransaction dust = createDustCollection("0.1", "BNB",
         "-3", "SXP", "-0.2", "LEND", "-82", "SHIB", "0.2", "BNB", "0.3", "BNB",
         "-1", "SXP", "-2", "SXP");
-    assertEquals("BNB", dust.getQuoteCurrency());
-    assertEquals(new Decimal("0.6"), dust.getQuoteAmount());
-    assertEquals(Decimal.ZERO, dust.getBaseCurrencyAmount());
-    assertEquals("LEND+SHIB+SXP", dust.getBaseCurrency());
+    assertEquals("BNB", dust.getBaseCurrency());
+    assertEquals(new Decimal("0.6"), dust.getBaseCurrencyAmount());
+    assertEquals(Decimal.ZERO, dust.getQuoteAmount());
+    assertEquals("LEND+SHIB+SXP", dust.getQuoteCurrency());
     assertEquals("Dust collect 0.6 BNB, -0.2 LEND, -82 SHIB, -6 SXP", dust.toString());
   }
 

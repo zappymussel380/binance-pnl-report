@@ -80,35 +80,67 @@ public class Transaction {
    * @return A transaction with specific type, with the same atomic operations
    */
   public final Transaction clarifyTransactionType() {
-    if (consistsOfMultiple(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)) {
+    if (consistsOfMultiple(Operation.BUY, Operation.TRANSACTION_RELATED, Operation.FEE)
+        || consistsOfMultiple(Operation.BUY, Operation.SELL, Operation.FEE)) {
       mergeRawChangesByType();
     }
 
-    if (consistsOf(Operation.DEPOSIT)) {
-      return new DepositTransaction(this);
-    } else if (consistsOf(Operation.WITHDRAW)) {
-      return new WithdrawTransaction(this);
-    } else if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)) {
-      if (isSell()) {
-        return new SellTransaction(this);
-      } else if (isBuy()) {
-        return new BuyTransaction(this);
-      }
-    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)
-        || consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION,
-        Operation.SAVINGS_DISTRIBUTION)) {
-      return new SavingsSubscriptionTransaction(this);
+    Transaction t = tryToConvertToBuyOrSell();
+    if (t == null) {
+      t = tryToConvertToDepositOrWithdraw();
+    }
+    if (t == null) {
+      t = tryToConvertToSavingsRelated();
+    }
+    return t;
+
+  }
+
+  private Transaction tryToConvertToSavingsRelated() {
+    Transaction t = null;
+    if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
+        || consistsOf(Operation.SAVINGS_DISTRIBUTION)
+        || consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)) {
+      t = new SavingsSubscriptionTransaction(this);
     } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)
         || consistsOfMultiple(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)) {
-      return new SavingsRedemptionTransaction(this);
+      t = new SavingsRedemptionTransaction(this);
     } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST)) {
-      return new SavingsInterestTransaction(this);
+      t = new SavingsInterestTransaction(this);
     } else if (consistsOf(Operation.DISTRIBUTION)) {
-      return new DistributionTransaction(this);
+      t = new DistributionTransaction(this);
     } else if (consistsOfMultiple(Operation.SMALL_ASSETS_EXCHANGE_BNB)) {
-      return new DustCollectionTransaction(this);
+      t = new DustCollectionTransaction(this);
     }
-    return null;
+    return t;
+  }
+
+  private Transaction tryToConvertToBuyOrSell() {
+    Transaction t = null;
+    if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)
+        || consistsOf(Operation.BUY, Operation.FEE, Operation.SELL)
+        || consistsOf(Operation.BUY, Operation.SELL)) {
+      if (isSell()) {
+        t = new SellTransaction(this);
+      } else if (isBuyWithUsd()) {
+        t = new BuyTransaction(this);
+      } else if (isCoinToCoinBuy()) {
+        t = new CoinToCoinTransaction(this);
+      } else {
+        throw new IllegalArgumentException("Neither buy nor sell? " + this);
+      }
+    }
+    return t;
+  }
+
+  private Transaction tryToConvertToDepositOrWithdraw() {
+    Transaction t = null;
+    if (consistsOf(Operation.DEPOSIT)) {
+      t = new DepositTransaction(this);
+    } else if (consistsOf(Operation.WITHDRAW)) {
+      t = new WithdrawTransaction(this);
+    }
+    return t;
   }
 
   private boolean isSell() {
@@ -116,9 +148,24 @@ public class Transaction {
     return bought != null && bought.getAsset().equals("USDT");
   }
 
-  private boolean isBuy() {
-    RawAccountChange sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+  private boolean isBuyWithUsd() {
+    RawAccountChange sold = getFirstChangeOfType(Operation.SELL);
+    if (sold == null) {
+      sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    }
     return sold != null && sold.getAsset().equals("USDT");
+  }
+
+  private boolean isCoinToCoinBuy() {
+    RawAccountChange sold = getFirstChangeOfType(Operation.SELL);
+    if (sold == null) {
+      sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    }
+    RawAccountChange bought = getFirstChangeOfType(Operation.BUY);
+
+    return sold != null && bought != null
+        && !bought.getAsset().equals("USDT")
+        && !sold.getAsset().equals("USDT");
   }
 
   /**
@@ -150,7 +197,12 @@ public class Transaction {
   }
 
 
-  private OperationMultiSet getOperationMultiSet() {
+  /**
+   * Get multiset containing the count of each operation type (not the operation itself).
+   *
+   * @return Multiset of all operations: count by type
+   */
+  public OperationMultiSet getOperationMultiSet() {
     OperationMultiSet operationMultiSet = new OperationMultiSet();
     for (Map.Entry<Operation, List<RawAccountChange>> entry : atomicAccountChanges.entrySet()) {
       operationMultiSet.add(entry.getKey(), entry.getValue().size());
@@ -325,13 +377,12 @@ public class Transaction {
    */
   protected final void calculateFeeInUsdt(Wallet wallet) throws IllegalStateException {
     RawAccountChange feeOp = getFirstChangeOfType(Operation.FEE);
-    if (feeOp == null) {
-      throw new IllegalStateException("Could not find fee operation!");
-    }
-    if (feeOp.getAsset().equals("USDT")) {
-      feeInUsdt = feeOp.getAmount();
-    } else {
-      feeInUsdt = feeOp.getAmount().multiply(wallet.getAvgObtainPrice(feeOp.getAsset()));
+    if (feeOp != null) {
+      if (feeOp.getAsset().equals("USDT")) {
+        feeInUsdt = feeOp.getAmount();
+      } else {
+        feeInUsdt = feeOp.getAmount().multiply(wallet.getAvgObtainPrice(feeOp.getAsset()));
+      }
     }
   }
 

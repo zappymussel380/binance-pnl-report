@@ -78,4 +78,16 @@ public class OperationMultiSet {
     Integer count = operationCounts.get(operation);
     return count != null ? count : 0;
   }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    for (Map.Entry<Operation, Integer> entry : operationCounts.entrySet()) {
+      sb.append(entry.getValue());
+      sb.append("x");
+      sb.append(entry.getKey());
+      sb.append("  ");
+    }
+    return sb.toString();
+  }
 }

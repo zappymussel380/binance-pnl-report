@@ -10,7 +10,7 @@ import no.strazdins.data.WalletSnapshot;
  * Transaction for depositing money in the savings (Earn) account.
  */
 public class SavingsSubscriptionTransaction extends Transaction {
-  final RawAccountChange deposit;
+  RawAccountChange deposit;
 
   /**
    * Create a "Savings deposit" transaction.
@@ -20,6 +20,9 @@ public class SavingsSubscriptionTransaction extends Transaction {
   public SavingsSubscriptionTransaction(Transaction transaction) {
     super(transaction);
     deposit = getFirstChangeOfType(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION);
+    if (deposit == null) {
+      deposit = getFirstChangeOfType(Operation.SAVINGS_DISTRIBUTION);
+    }
     if (deposit == null) {
       throw new IllegalStateException("Savings subscription without a required raw change");
     }

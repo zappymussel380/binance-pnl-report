@@ -26,10 +26,12 @@ public class SellTransaction extends Transaction {
   }
 
   private void initBaseAndQuote() {
-    base = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    base = getFirstChangeOfType(Operation.SELL);
+    if (base == null) {
+      base = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    }
     quote = getFirstChangeOfType(Operation.BUY);
-    feeOp = getFirstChangeOfType(Operation.FEE);
-    if (base == null || quote == null || feeOp == null) {
+    if (base == null || quote == null) {
       throw new IllegalStateException("Can't create a sell when some ops are missing!");
     }
     if (!quote.getAsset().equals(QUOTE_CURR)) {
@@ -40,8 +42,11 @@ public class SellTransaction extends Transaction {
     baseCurrencyAmount = base.getAmount();
     quoteAmount = quote.getAmount();
     quoteCurrency = "USDT";
-    fee = feeOp.getAmount();
-    feeCurrency = feeOp.getAsset();
+    feeOp = getFirstChangeOfType(Operation.FEE);
+    if (feeOp != null) {
+      fee = feeOp.getAmount();
+      feeCurrency = feeOp.getAsset();
+    }
   }
 
   @Override
@@ -65,8 +70,12 @@ public class SellTransaction extends Transaction {
 
     newSnapshot.addAsset(QUOTE_CURR, quote.getAmount(), Decimal.ONE);
     newSnapshot.decreaseAsset(base.getAsset(), base.getAmount().negate());
-    newSnapshot.decreaseAsset(feeOp.getAsset(), feeOp.getAmount().negate());
-
+    if (feeCurrency != null && fee != null && !fee.isZero()) {
+      if (fee.isPositive()) {
+        throw new IllegalStateException("Fee is expected to be negative!");
+      }
+      newSnapshot.decreaseAsset(feeCurrency, fee.negate());
+    }
 
     return newSnapshot;
   }
