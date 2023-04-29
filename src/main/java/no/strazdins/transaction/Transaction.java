@@ -118,11 +118,14 @@ public class Transaction {
   private Transaction tryToConvertToBuyOrSell() {
     Transaction t = null;
     if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)
-        || consistsOf(Operation.BUY, Operation.FEE, Operation.SELL)) {
+        || consistsOf(Operation.BUY, Operation.FEE, Operation.SELL)
+        || consistsOf(Operation.BUY, Operation.SELL)) {
       if (isSell()) {
         t = new SellTransaction(this);
-      } else if (isBuy()) {
+      } else if (isBuyWithUsd()) {
         t = new BuyTransaction(this);
+      } else if (isCoinToCoinBuy()) {
+        t = new CoinToCoinTransaction(this);
       } else {
         throw new IllegalArgumentException("Neither buy nor sell? " + this);
       }
@@ -145,12 +148,24 @@ public class Transaction {
     return bought != null && bought.getAsset().equals("USDT");
   }
 
-  private boolean isBuy() {
+  private boolean isBuyWithUsd() {
     RawAccountChange sold = getFirstChangeOfType(Operation.SELL);
     if (sold == null) {
       sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
     }
     return sold != null && sold.getAsset().equals("USDT");
+  }
+
+  private boolean isCoinToCoinBuy() {
+    RawAccountChange sold = getFirstChangeOfType(Operation.SELL);
+    if (sold == null) {
+      sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    }
+    RawAccountChange bought = getFirstChangeOfType(Operation.BUY);
+
+    return sold != null && bought != null
+        && !bought.getAsset().equals("USDT")
+        && !sold.getAsset().equals("USDT");
   }
 
   /**
@@ -362,13 +377,12 @@ public class Transaction {
    */
   protected final void calculateFeeInUsdt(Wallet wallet) throws IllegalStateException {
     RawAccountChange feeOp = getFirstChangeOfType(Operation.FEE);
-    if (feeOp == null) {
-      throw new IllegalStateException("Could not find fee operation!");
-    }
-    if (feeOp.getAsset().equals("USDT")) {
-      feeInUsdt = feeOp.getAmount();
-    } else {
-      feeInUsdt = feeOp.getAmount().multiply(wallet.getAvgObtainPrice(feeOp.getAsset()));
+    if (feeOp != null) {
+      if (feeOp.getAsset().equals("USDT")) {
+        feeInUsdt = feeOp.getAmount();
+      } else {
+        feeInUsdt = feeOp.getAmount().multiply(wallet.getAvgObtainPrice(feeOp.getAsset()));
+      }
     }
   }
 
