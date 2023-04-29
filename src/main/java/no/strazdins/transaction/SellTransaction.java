@@ -26,11 +26,8 @@ public class SellTransaction extends Transaction {
   }
 
   private void initBaseAndQuote() {
-    base = getFirstChangeOfType(Operation.SELL);
-    if (base == null) {
-      base = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
-    }
-    quote = getFirstChangeOfType(Operation.BUY);
+    base = getFirstSellTypeChange();
+    quote = getFirstBuyTypeChange();
     if (base == null || quote == null) {
       throw new IllegalStateException("Can't create a sell when some ops are missing!");
     }

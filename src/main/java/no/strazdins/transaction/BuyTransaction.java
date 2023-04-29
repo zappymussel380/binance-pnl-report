@@ -22,11 +22,8 @@ public class BuyTransaction extends Transaction {
   }
 
   private void initBaseAndQuote() {
-    base = getFirstChangeOfType(Operation.BUY);
-    quote = getFirstChangeOfType(Operation.SELL);
-    if (quote == null) {
-      quote = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
-    }
+    base = getFirstBuyTypeChange();
+    quote = getFirstSellTypeChange();
     if (base == null || quote == null) {
       throw new IllegalStateException("Can't create a buy when some ops are missing!");
     }
