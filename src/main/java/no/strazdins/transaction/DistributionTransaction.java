@@ -30,7 +30,13 @@ public class DistributionTransaction extends Transaction {
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
-    newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, Decimal.ZERO);
+    if (baseCurrencyAmount.isPositive()) {
+      newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, Decimal.ZERO);
+    } else if (baseCurrencyAmount.isNegative()) {
+      newSnapshot.decreaseAsset(baseCurrency, baseCurrencyAmount.negate());
+    } else {
+      throw new IllegalArgumentException("Can't have distribution with zero amount");
+    }
     return newSnapshot;
   }
 

@@ -1,6 +1,7 @@
 package no.strazdins.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
@@ -166,6 +167,18 @@ class ScenarioTest {
     expectWalletState(ws2, "0", "0", "5", "USDT", "1", "7.5", "BAKE", "10");
   }
 
+  /**
+   * At some point Binance distributed TWT and then took it away again. Test this scenario.
+   */
+  @Test
+  void testNegativeDistribution() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    WalletSnapshot ws2 = processDistribution(ws1, "100", "TWT");
+    expectWalletState(ws2, "0", "0", "100", "TWT", "0");
+    WalletSnapshot ws3 = processDistribution(ws2, "-100", "TWT");
+    expectWalletState(ws3, "0", "0");
+  }
+
   private WalletSnapshot processDeposit(WalletSnapshot startSnapshot,
                                         String asset, String amount, String obtainPrice) {
     transactionTime += 1000;
@@ -220,8 +233,20 @@ class ScenarioTest {
       t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
           Operation.FEE, feeCurrency, new Decimal(fee).negate(), "Fee in " + feeCurrency));
     }
-    SellTransaction sell = new SellTransaction(t);
+    Transaction sell = t.clarifyTransactionType();
+    assertInstanceOf(SellTransaction.class, sell);
     return sell.process(startSnapshot, null);
+  }
+
+  private WalletSnapshot processDistribution(WalletSnapshot startSnapshot,
+                                             String amount, String asset) {
+    transactionTime += 1000;
+    Transaction t = new Transaction(transactionTime);
+    t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.DISTRIBUTION, asset,
+        new Decimal(amount), "Distribute " + amount + " " + asset));
+    Transaction distribute = t.clarifyTransactionType();
+    assertInstanceOf(DistributionTransaction.class, distribute);
+    return distribute.process(startSnapshot, null);
   }
 
   private void expectWalletState(WalletSnapshot ws, String transactionPnl, String runningPnl,
