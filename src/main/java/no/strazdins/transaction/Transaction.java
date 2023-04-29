@@ -80,8 +80,7 @@ public class Transaction {
    * @return A transaction with specific type, with the same atomic operations
    */
   public final Transaction clarifyTransactionType() {
-    if (consistsOfMultiple(Operation.BUY, Operation.TRANSACTION_RELATED, Operation.FEE)
-        || consistsOfMultiple(Operation.BUY, Operation.SELL, Operation.FEE)) {
+    if (consistsOfMultipleBuySellOperations()) {
       mergeRawChangesByType();
     }
 
@@ -93,7 +92,19 @@ public class Transaction {
       t = tryToConvertToSavingsRelated();
     }
     return t;
+  }
 
+  private boolean consistsOfMultipleBuySellOperations() {
+    return consistsOfMultiple(Operation.BUY, Operation.TRANSACTION_RELATED, Operation.FEE)
+        || consistsOfMultiple(Operation.BUY, Operation.SELL, Operation.FEE)
+        || consistsOfMultiple(Operation.BUY, Operation.TRANSACTION_RELATED)
+        || consistsOfMultiple(Operation.BUY, Operation.SELL)
+        || consistsOfMultiple(Operation.TRANSACTION_BUY, Operation.TRANSACTION_SPEND)
+        || consistsOfMultiple(Operation.TRANSACTION_BUY, Operation.TRANSACTION_SPEND, Operation.FEE)
+        || consistsOfMultiple(Operation.TRANSACTION_SOLD, Operation.TRANSACTION_REVENUE)
+        || consistsOfMultiple(Operation.TRANSACTION_SOLD, Operation.TRANSACTION_REVENUE,
+        Operation.FEE)
+        ;
   }
 
   private Transaction tryToConvertToSavingsRelated() {

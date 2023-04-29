@@ -115,6 +115,32 @@ class TransactionClarifyTest {
     expectResult(BuyTransaction.class, "3000", "ARDR", "-300", "USDT", "0", "");
   }
 
+  @Test
+  void testSlpMultiBuy() {
+    setupOperations(
+        Operation.FEE, Operation.FEE, Operation.TRANSACTION_SPEND,
+        Operation.TRANSACTION_BUY, Operation.TRANSACTION_SPEND, Operation.FEE,
+        Operation.TRANSACTION_BUY, Operation.FEE, Operation.TRANSACTION_BUY,
+        Operation.TRANSACTION_BUY, Operation.TRANSACTION_SPEND, Operation.TRANSACTION_BUY,
+        Operation.TRANSACTION_SPEND, Operation.TRANSACTION_SPEND, Operation.FEE
+    );
+    setupAssets(
+        "BNB", "BNB", "USDT",
+        "SLP", "USDT", "BNB",
+        "SLP", "BNB", "SLP",
+        "SLP", "USDT", "SLP",
+        "USDT", "USDT", "BNB"
+    );
+    setupAmounts(
+        "-0.00012394", "-0.00009588", "-49.5656",
+        "40", "-38.3432", "-0.00002805",
+        "164", "-0.00002338", "172",
+        "48", "-11.2224", "212",
+        "-40.2136", "-9.352", "-0.00010056"
+    );
+    expectResult(BuyTransaction.class, "636", "SLP", "-148.6968", "USDT", "-0.00037181", "BNB");
+  }
+
 
   private void setupOperations(Operation... operations) {
     this.operations.addAll(Arrays.asList(operations));
