@@ -117,9 +117,9 @@ public class Transaction {
 
   private Transaction tryToConvertToBuyOrSell() {
     Transaction t = null;
-    if (consistsOf(Operation.BUY, Operation.FEE, Operation.TRANSACTION_RELATED)
-        || consistsOf(Operation.BUY, Operation.FEE, Operation.SELL)
-        || consistsOf(Operation.BUY, Operation.SELL)) {
+    RawAccountChange buy = getFirstBuyTypeChange();
+    RawAccountChange sell = getFirstSellTypeChange();
+    if (buy != null && sell != null) {
       if (isSell()) {
         t = new SellTransaction(this);
       } else if (isBuyWithUsd()) {
@@ -144,25 +144,18 @@ public class Transaction {
   }
 
   private boolean isSell() {
-    RawAccountChange bought = getFirstChangeOfType(Operation.BUY);
+    RawAccountChange bought = getFirstBuyTypeChange();
     return bought != null && bought.getAsset().equals("USDT");
   }
 
   private boolean isBuyWithUsd() {
-    RawAccountChange sold = getFirstChangeOfType(Operation.SELL);
-    if (sold == null) {
-      sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
-    }
+    RawAccountChange sold = getFirstSellTypeChange();
     return sold != null && sold.getAsset().equals("USDT");
   }
 
   private boolean isCoinToCoinBuy() {
-    RawAccountChange sold = getFirstChangeOfType(Operation.SELL);
-    if (sold == null) {
-      sold = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
-    }
-    RawAccountChange bought = getFirstChangeOfType(Operation.BUY);
-
+    RawAccountChange sold = getFirstSellTypeChange();
+    RawAccountChange bought = getFirstBuyTypeChange();
     return sold != null && bought != null
         && !bought.getAsset().equals("USDT")
         && !sold.getAsset().equals("USDT");
@@ -235,6 +228,41 @@ public class Transaction {
   protected final RawAccountChange getFirstChangeOfType(Operation operation) {
     List<RawAccountChange> changes = atomicAccountChanges.get(operation);
     return changes != null && !changes.isEmpty() ? changes.get(0) : null;
+  }
+
+  /**
+   * Get the first account change which is sell-like type (including Transaction_Sold, etc).
+   *
+   * @return The first change or null if no change of this type is found.
+   */
+  protected final RawAccountChange getFirstSellTypeChange() {
+    RawAccountChange sell = getFirstChangeOfType(Operation.SELL);
+    if (sell == null) {
+      sell = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
+    }
+    if (sell == null) {
+      sell = getFirstChangeOfType(Operation.TRANSACTION_SOLD);
+    }
+    if (sell == null) {
+      sell = getFirstChangeOfType(Operation.TRANSACTION_SPEND);
+    }
+    return sell;
+  }
+
+  /**
+   * Get the first account change which is buy-like type (including Transaction_Revenue, etc).
+   *
+   * @return The first change or null if no change of this type is found.
+   */
+  protected final RawAccountChange getFirstBuyTypeChange() {
+    RawAccountChange bought = getFirstChangeOfType(Operation.BUY);
+    if (bought == null) {
+      bought = getFirstChangeOfType(Operation.TRANSACTION_REVENUE);
+    }
+    if (bought == null) {
+      bought = getFirstChangeOfType(Operation.TRANSACTION_BUY);
+    }
+    return bought;
   }
 
   /**

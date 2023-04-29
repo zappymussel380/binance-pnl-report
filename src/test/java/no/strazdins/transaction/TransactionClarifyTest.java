@@ -75,6 +75,47 @@ class TransactionClarifyTest {
     expectResult(CoinToCoinTransaction.class, "15", "BUSD", "-7.5", "BAKE", "0", "");
   }
 
+  @Test
+  void testSellWithSoldAndRevenueAndFee() {
+    setupOperations(Operation.TRANSACTION_SOLD, Operation.TRANSACTION_REVENUE, Operation.FEE);
+    setupAmounts("-3000", "318", "-0.0008");
+    setupAssets("ARDR", "USDT", "BNB");
+    expectResult(SellTransaction.class, "-3000", "ARDR", "318", "USDT", "-0.0008", "BNB");
+  }
+
+  @Test
+  void testSellWithSoldAndRevenueAndNoFee() {
+    setupOperations(Operation.TRANSACTION_SOLD, Operation.TRANSACTION_REVENUE);
+    setupAmounts("-3000", "318");
+    setupAssets("ARDR", "USDT");
+    expectResult(SellTransaction.class, "-3000", "ARDR", "318", "USDT", "0", "");
+  }
+
+  @Test
+  void testBuyWithSpendAndFee() {
+    setupOperations(Operation.TRANSACTION_SPEND, Operation.TRANSACTION_BUY, Operation.FEE);
+    setupAmounts("-300", "3000", "-0.0008");
+    setupAssets("USDT", "ARDR", "BNB");
+    expectResult(BuyTransaction.class, "3000", "ARDR", "-300", "USDT", "-0.0008", "BNB");
+  }
+
+  @Test
+  void testBuyBusd() {
+    setupOperations(Operation.TRANSACTION_RELATED, Operation.TRANSACTION_BUY);
+    setupAmounts("-100", "100");
+    setupAssets("USD", "BUSD");
+    expectResult(CoinToCoinTransaction.class, "100", "BUSD", "-100", "USD", "0", "");
+  }
+
+  @Test
+  void testBuyWithSpend() {
+    setupOperations(Operation.TRANSACTION_SPEND, Operation.TRANSACTION_BUY);
+    setupAmounts("-300", "3000");
+    setupAssets("USDT", "ARDR");
+    expectResult(BuyTransaction.class, "3000", "ARDR", "-300", "USDT", "0", "");
+  }
+
+
   private void setupOperations(Operation... operations) {
     this.operations.addAll(Arrays.asList(operations));
   }
