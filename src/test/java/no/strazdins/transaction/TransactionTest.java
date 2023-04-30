@@ -1,5 +1,8 @@
 package no.strazdins.transaction;
 
+import static no.strazdins.data.Operation.BUY;
+import static no.strazdins.data.Operation.FEE;
+import static no.strazdins.data.Operation.TRANSACTION_RELATED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,24 +31,15 @@ class TransactionTest {
   void testMerge() {
     long thisTime = System.currentTimeMillis();
     Transaction t = new Transaction(thisTime);
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.FEE, "BNB",
-        new Decimal("-1"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.BUY, "BTC",
-        new Decimal("0.1"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.TRANSACTION_RELATED, "USDT",
-        new Decimal("-2000"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.BUY, "BTC",
-        new Decimal("0.2"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.TRANSACTION_RELATED, "USDT",
-        new Decimal("-6000"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.TRANSACTION_RELATED, "USDT",
-        new Decimal("-4000"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.BUY, "BTC",
-        new Decimal("0.3"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.FEE, "BNB",
-        new Decimal("-2"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.FEE, "BNB",
-        new Decimal("-3"), ""));
+    appendOperation(t, FEE, "-1", "BNB");
+    appendOperation(t, BUY, "0.1", "BTC");
+    appendOperation(t, TRANSACTION_RELATED, "-2000", "USDT");
+    appendOperation(t, BUY, "0.2", "BTC");
+    appendOperation(t, TRANSACTION_RELATED, "-6000", "USDT");
+    appendOperation(t, TRANSACTION_RELATED, "-4000", "USDT");
+    appendOperation(t, BUY, "0.3", "BTC");
+    appendOperation(t, FEE, "-2", "BNB");
+    appendOperation(t, FEE, "-3", "BNB");
     Transaction merged = t.clarifyTransactionType();
     assertNotNull(merged);
     assertInstanceOf(BuyTransaction.class, merged);
@@ -56,5 +50,10 @@ class TransactionTest {
     assertEquals(new Decimal("0.6"), merged.getBaseCurrencyAmount());
     assertEquals(new Decimal("-12000"), merged.getQuoteAmount());
     assertEquals(new Decimal("-6"), merged.getFee());
+  }
+
+  private void appendOperation(Transaction t, Operation operation, String amount, String asset) {
+    t.append(new RawAccountChange(t.utcTime, AccountType.SPOT, operation, asset,
+        new Decimal(amount), ""));
   }
 }
