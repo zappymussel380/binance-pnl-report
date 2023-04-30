@@ -109,9 +109,9 @@ public class ReportFileWriter {
                                               String homeCurrency) throws IOException {
     String[] header = new String[]{
         "Date",
-        "Annual PNL in USD",
+        "Running PNL in USD",
         homeCurrency + "/USD exchange rate",
-        "Annual PNL in " + homeCurrency,
+        "Running PNL in " + homeCurrency,
         "Held asset value in USD",
         "Held asset value in " + homeCurrency
     };

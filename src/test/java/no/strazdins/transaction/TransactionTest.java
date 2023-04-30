@@ -1,5 +1,8 @@
 package no.strazdins.transaction;
 
+import static no.strazdins.data.Operation.BUY;
+import static no.strazdins.data.Operation.FEE;
+import static no.strazdins.data.Operation.SELL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,6 +12,7 @@ import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.WalletDiff;
 import org.junit.jupiter.api.Test;
 
 class TransactionTest {
@@ -28,24 +32,15 @@ class TransactionTest {
   void testMerge() {
     long thisTime = System.currentTimeMillis();
     Transaction t = new Transaction(thisTime);
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.FEE, "BNB",
-        new Decimal("-1"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.BUY, "BTC",
-        new Decimal("0.1"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.TRANSACTION_RELATED, "USDT",
-        new Decimal("-2000"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.BUY, "BTC",
-        new Decimal("0.2"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.TRANSACTION_RELATED, "USDT",
-        new Decimal("-6000"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.TRANSACTION_RELATED, "USDT",
-        new Decimal("-4000"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.BUY, "BTC",
-        new Decimal("0.3"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.FEE, "BNB",
-        new Decimal("-2"), ""));
-    t.append(new RawAccountChange(thisTime, AccountType.SPOT, Operation.FEE, "BNB",
-        new Decimal("-3"), ""));
+    appendOperation(t, FEE, "-1", "BNB");
+    appendOperation(t, BUY, "0.1", "BTC");
+    appendOperation(t, SELL, "-2000", "USDT");
+    appendOperation(t, BUY, "0.2", "BTC");
+    appendOperation(t, SELL, "-6000", "USDT");
+    appendOperation(t, SELL, "-4000", "USDT");
+    appendOperation(t, BUY, "0.3", "BTC");
+    appendOperation(t, FEE, "-2", "BNB");
+    appendOperation(t, FEE, "-3", "BNB");
     Transaction merged = t.clarifyTransactionType();
     assertNotNull(merged);
     assertInstanceOf(BuyTransaction.class, merged);
@@ -56,5 +51,41 @@ class TransactionTest {
     assertEquals(new Decimal("0.6"), merged.getBaseCurrencyAmount());
     assertEquals(new Decimal("-12000"), merged.getQuoteAmount());
     assertEquals(new Decimal("-6"), merged.getFee());
+  }
+
+  @Test
+  void testOperationDiff() {
+    long thisTime = System.currentTimeMillis();
+    Transaction t = new Transaction(thisTime);
+    appendOperation(t, FEE, "-1", "BNB");
+    appendOperation(t, BUY, "0.1", "BTC");
+    appendOperation(t, SELL, "-2000", "USDT");
+    appendOperation(t, BUY, "0.2", "BTC");
+    appendOperation(t, SELL, "-6000", "USDT");
+    appendOperation(t, BUY, "0.3", "BTC");
+    WalletDiff diff = t.getOperationDiff();
+    WalletDiff expectedDiff = new WalletDiff()
+        .add("BNB", new Decimal("-1"))
+        .add("BTC", new Decimal("0.6"))
+        .add("USDT", new Decimal("-8000"));
+    assertEquals(expectedDiff, diff);
+  }
+
+  @Test
+  void testOperationCount() {
+    long thisTime = System.currentTimeMillis();
+    Transaction t = new Transaction(thisTime);
+    appendOperation(t, FEE, "-1", "BNB");
+    appendOperation(t, BUY, "0.1", "BTC");
+    appendOperation(t, SELL, "-2000", "USDT");
+    appendOperation(t, BUY, "0.2", "BTC");
+    appendOperation(t, SELL, "-6000", "USDT");
+    appendOperation(t, BUY, "0.3", "BTC");
+    assertEquals(6, t.getTotalOperationCount());
+  }
+
+  private void appendOperation(Transaction t, Operation operation, String amount, String asset) {
+    t.append(new RawAccountChange(t.utcTime, AccountType.SPOT, operation, asset,
+        new Decimal(amount), ""));
   }
 }

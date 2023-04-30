@@ -211,7 +211,7 @@ class ScenarioTest {
     t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
         Operation.BUY, asset, new Decimal(amount), "Buy coin"));
     t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
-        Operation.TRANSACTION_RELATED, quoteCurrency, new Decimal(usedQuote).negate(),
+        Operation.SELL, quoteCurrency, new Decimal(usedQuote).negate(),
         "Sell " + quoteCurrency));
     if (fee != null) {
       t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
@@ -226,7 +226,7 @@ class ScenarioTest {
     transactionTime += 1000;
     Transaction t = new Transaction(transactionTime);
     t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
-        Operation.TRANSACTION_RELATED, asset, new Decimal(amount).negate(), "Sell coin"));
+        Operation.SELL, asset, new Decimal(amount).negate(), "Sell coin"));
     t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
         Operation.BUY, "USDT", new Decimal(obtainedUsdtAmount), "Acquire USDT"));
     if (fee != null) {

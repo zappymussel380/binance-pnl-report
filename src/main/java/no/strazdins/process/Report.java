@@ -8,10 +8,13 @@ import no.strazdins.data.ExtraInfo;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.ExtraInfoType;
 import no.strazdins.data.Wallet;
+import no.strazdins.data.WalletDiff;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.BinanceApiClient;
 import no.strazdins.tool.ReportHelper;
 import no.strazdins.tool.TimeConverter;
+import no.strazdins.transaction.SavingsRedemptionTransaction;
+import no.strazdins.transaction.SavingsSubscriptionTransaction;
 import no.strazdins.transaction.Transaction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,9 +37,37 @@ public class Report implements Iterable<WalletSnapshot> {
     this.currentWalletSnapshot = WalletSnapshot.createEmpty();
   }
 
+  /**
+   * Process the transaction, generate a new wallet snapshot.
+   *
+   * @param transaction The transaction to process
+   */
   public void process(Transaction transaction) {
-    currentWalletSnapshot = transaction.process(currentWalletSnapshot, getExtraInfo(transaction));
-    walletSnapshots.add(currentWalletSnapshot);
+    WalletSnapshot newSnapshot = transaction.process(currentWalletSnapshot,
+        getExtraInfo(transaction));
+    WalletDiff snapshotDiff = newSnapshot.getDiffFrom(currentWalletSnapshot);
+    WalletDiff rawOperationDiff = transaction.getOperationDiff();
+    if (!snapshotDiff.equals(rawOperationDiff) && !isDiffDiscrepancyAllowed(transaction)) {
+      logger.warn("Wallet changes for {} differ from operation changes:", transaction);
+      logger.warn("   Operation diff: {}", rawOperationDiff);
+      logger.warn("   Snapshot  diff: {}", snapshotDiff);
+    }
+    walletSnapshots.add(newSnapshot);
+    currentWalletSnapshot = newSnapshot;
+  }
+
+  /**
+   * Return true if it is OK for the transaction to have a wallet diff other than the sum of
+   * raw operation changes. This can be OK, for example, for savings subscriptions and
+   * savings withdrawals operations.
+   *
+   * @param transaction The transaction to check
+   * @return true if it is OK for this transaction to have a diff which is not the same as sum
+   *     of individual operation diffs
+   */
+  private boolean isDiffDiscrepancyAllowed(Transaction transaction) {
+    return transaction instanceof SavingsSubscriptionTransaction
+        || transaction instanceof SavingsRedemptionTransaction;
   }
 
   private ExtraInfoEntry getExtraInfo(Transaction transaction) {
@@ -137,7 +168,7 @@ public class Report implements Iterable<WalletSnapshot> {
    * Check whether extra info has been updated with some prices from Binance API.
    *
    * @return True when extra info has been updated, false if extra info contains only previously
-   *         provided values (those loaded at the start of the script)
+   *     provided values (those loaded at the start of the script)
    */
   public boolean isExtraInfoUpdated() {
     return extraInfoUpdated;

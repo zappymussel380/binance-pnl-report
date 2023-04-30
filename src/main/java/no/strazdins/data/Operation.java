@@ -6,11 +6,10 @@ import java.io.IOException;
  * Possible account-change operations.
  */
 public enum Operation {
-  BUY, SELL, FEE, DEPOSIT, WITHDRAW, TRANSACTION_RELATED, DISTRIBUTION, SAVINGS_DISTRIBUTION,
+  BUY, SELL, FEE, DEPOSIT, WITHDRAW, DISTRIBUTION, SAVINGS_DISTRIBUTION,
   BNB_VAULT_REWARDS, BUY_CRYPTO, CASHBACK_VOUCHER, COMMISSION_REBATE, FIAT_DEPOSIT,
   SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION, SIMPLE_EARN_FLEXIBLE_REDEMPTION, SIMPLE_EARN_FLEXIBLE_INTEREST,
-  SMALL_ASSETS_EXCHANGE_BNB, AUTO_INVEST_TRANSACTION,
-  TRANSACTION_SOLD, TRANSACTION_REVENUE, TRANSACTION_SPEND, TRANSACTION_BUY;
+  SMALL_ASSETS_EXCHANGE_BNB, AUTO_INVEST_TRANSACTION;
 
   /**
    * Convert a capitalized string to a corresponding enum.
@@ -21,16 +20,11 @@ public enum Operation {
    */
   public static Operation fromString(String s) throws IOException {
     return switch (s) {
-      case "Buy" -> BUY;
-      case "Sell" -> SELL;
-      case "Transaction Buy" -> TRANSACTION_BUY;
-      case "Transaction Sold" -> TRANSACTION_SOLD;
-      case "Transaction Spend" -> TRANSACTION_SPEND;
-      case "Transaction Revenue" -> TRANSACTION_REVENUE;
+      case "Buy", "Transaction Buy", "Transaction Revenue" -> BUY;
+      case "Sell", "Transaction Sold", "Transaction Spend", "Transaction Related" -> SELL;
       case "Fee" -> FEE;
       case "Deposit" -> DEPOSIT;
       case "Withdraw" -> WITHDRAW;
-      case "Transaction Related" -> TRANSACTION_RELATED;
       case "Distribution" -> DISTRIBUTION;
       case "Savings Distribution" -> SAVINGS_DISTRIBUTION;
       case "BNB Vault Rewards" -> BNB_VAULT_REWARDS;

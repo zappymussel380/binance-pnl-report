@@ -9,6 +9,16 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class RawAccountChangeTest {
+
+  @Test
+  void testAmountAssertions() {
+    long thisTime = System.currentTimeMillis();
+    assertThrows(IllegalArgumentException.class, () -> new RawAccountChange(
+        thisTime, AccountType.SPOT, Operation.BUY, "BTC", new Decimal("-1"), "Negative buy"));
+    assertThrows(IllegalArgumentException.class, () -> new RawAccountChange(
+        thisTime, AccountType.SPOT, Operation.SELL, "BTC", new Decimal("2"), "Positve sell"));
+  }
+
   @Test
   void testMergeDifferentOpTypes() {
     long thisTime = System.currentTimeMillis();
@@ -16,14 +26,14 @@ class RawAccountChangeTest {
     changes.add(new RawAccountChange(thisTime, AccountType.SPOT,
         Operation.BUY, "BTC", Decimal.ONE, ""));
     changes.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        Operation.SELL, "BTC", Decimal.ONE, ""));
+        Operation.SELL, "BTC", new Decimal("-0.5"), ""));
     assertThrows(IllegalArgumentException.class, () -> RawAccountChange.merge(changes));
 
     changes.clear();
     changes.add(new RawAccountChange(thisTime, AccountType.SPOT,
         Operation.BUY, "BTC", Decimal.ONE, ""));
     changes.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        Operation.SELL, "BTC", Decimal.ONE, ""));
+        Operation.SELL, "BTC", new Decimal("-1"), ""));
     changes.add(new RawAccountChange(thisTime, AccountType.SPOT,
         Operation.BUY, "BTC", Decimal.ONE, ""));
     assertThrows(IllegalArgumentException.class, () -> RawAccountChange.merge(changes));
@@ -36,12 +46,12 @@ class RawAccountChangeTest {
     changes.add(new RawAccountChange(thisTime, AccountType.SPOT,
         Operation.BUY, "BTC", Decimal.ONE, ""));
     changes.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        Operation.SELL, "BTC", Decimal.ONE, ""));
+        Operation.SELL, "BTC", new Decimal("-1"), ""));
     assertThrows(IllegalArgumentException.class, () -> RawAccountChange.merge(changes));
 
     changes.clear();
     changes.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        Operation.SELL, "BTC", Decimal.ONE, ""));
+        Operation.SELL, "BTC", new Decimal("-1"), ""));
     changes.add(new RawAccountChange(thisTime, AccountType.SPOT,
         Operation.BUY, "BTC", Decimal.ONE, ""));
     changes.add(new RawAccountChange(thisTime, AccountType.SPOT,
@@ -131,31 +141,6 @@ class RawAccountChangeTest {
     RawAccountChange merged = RawAccountChange.merge(originalChanges);
     RawAccountChange expected = new RawAccountChange(thisTime, AccountType.SPOT,
         Operation.BUY, "BTC", new Decimal("1.0"), "");
-    assertEquals(expected, merged);
-  }
-
-  @Test
-  void testMergeNegative() {
-    long thisTime = System.currentTimeMillis();
-    List<RawAccountChange> originalChanges = new LinkedList<>();
-    originalChanges.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        Operation.BUY, "BTC", new Decimal("0.1"), ""));
-    originalChanges.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        Operation.BUY, "BTC", new Decimal("-0.2"), ""));
-
-    RawAccountChange merged = RawAccountChange.merge(originalChanges);
-    RawAccountChange expected = new RawAccountChange(thisTime, AccountType.SPOT,
-        Operation.BUY, "BTC", new Decimal("-0.1"), "");
-    assertEquals(expected, merged);
-
-    originalChanges.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        Operation.BUY, "BTC", new Decimal("0.5"), ""));
-    originalChanges.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        Operation.BUY, "BTC", new Decimal("-0.1"), ""));
-
-    merged = RawAccountChange.merge(originalChanges);
-    expected = new RawAccountChange(thisTime, AccountType.SPOT,
-        Operation.BUY, "BTC", new Decimal("0.3"), "");
     assertEquals(expected, merged);
   }
 

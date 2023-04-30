@@ -160,4 +160,14 @@ public class WalletSnapshot {
   public int hashCode() {
     return Objects.hash(transaction, wallet, pnl);
   }
+
+  /**
+   * Get wallet difference between this and the old snapshot.
+   *
+   * @param oldSnapshot The old snapshot to compare against
+   * @return The wallet difference: the change of amount for each asset
+   */
+  public WalletDiff getDiffFrom(WalletSnapshot oldSnapshot) {
+    return wallet.getDiffFrom(oldSnapshot.wallet);
+  }
 }
