@@ -34,6 +34,16 @@ public class RawAccountChange {
     this.asset = asset;
     this.changeAmount = changeAmount;
     this.remark = remark;
+    runAssertions();
+  }
+
+  private void runAssertions() {
+    if (operation == Operation.BUY && !changeAmount.isPositive()) {
+      throw new IllegalArgumentException("Amount must be positive for all buy-type changes");
+    }
+    if (operation == Operation.SELL && !changeAmount.isNegative()) {
+      throw new IllegalArgumentException("Amount must be negative for all sell-type changes");
+    }
   }
 
   /**
