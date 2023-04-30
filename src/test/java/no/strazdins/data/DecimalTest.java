@@ -221,4 +221,12 @@ class DecimalTest {
     assertThrows(IllegalArgumentException.class, () -> Decimal.removeMinusSign("--8"));
     assertThrows(IllegalArgumentException.class, () -> Decimal.removeMinusSign(" -8"));
   }
+
+  @Test
+  void testScientificNotation() {
+    assertEquals(new Decimal("0.00000007"), new Decimal("7E-8"));
+    assertEquals(new Decimal("0.00000005"), new Decimal("5E-8"));
+    assertEquals(new Decimal("0.000007"), new Decimal("7E-6"));
+    assertEquals(new Decimal("0.000005"), new Decimal("5E-6"));
+  }
 }
