@@ -6,9 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.Test;
 
 class WalletDiffTest {
-  // TODO - test Wallet Diff generation from transaction - operation log
-  // TODO - test wallet diff generation from snapshot comparison
-
   @Test
   void testSimpleEquality() {
     assertEquals(new WalletDiff(), new WalletDiff());
@@ -80,6 +77,43 @@ class WalletDiffTest {
     d1 = createDiff("1", "LTC", "2", "BTC", "3", "LTC", "0.1", "BTC", "0.80000001", "BNB");
     d2 = createDiff("1", "LTC", "2", "BTC", "3", "LTC", "0.1", "BTC", "0.8", "BNB");
     assertNotEquals(d1, d2);
+  }
+
+  @Test
+  void testAddAll() {
+    Wallet w = WalletTest.createWalletWith(
+        "1.1", "BTC", "10000",
+        "20", "LTC", "100",
+        "2", "BNB", "10"
+    );
+    WalletDiff diff = new WalletDiff().addAll(w);
+    WalletDiff expectedDiff = createDiff(
+        "1.1", "BTC",
+        "20", "LTC",
+        "2", "BNB"
+    );
+    assertEquals(expectedDiff, diff);
+  }
+
+  @Test
+  void testRemoveAll() {
+    WalletDiff diff = createDiff(
+        "1.1", "BTC",
+        "20", "LTC",
+        "2", "BNB"
+    );
+    Wallet w = WalletTest.createWalletWith(
+        "0.1", "BTC", "10000",
+        "2", "LTC", "100"
+    );
+    diff.removeAll(w);
+
+    WalletDiff expectedDiff = createDiff(
+        "1", "BTC",
+        "18", "LTC",
+        "2", "BNB"
+    );
+    assertEquals(expectedDiff, diff);
   }
 
   /**

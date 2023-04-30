@@ -58,4 +58,30 @@ public class WalletDiff {
   public String toString() {
     return assetDiffs.toString();
   }
+
+  /**
+   * Add all assets from the given wallet.
+   *
+   * @param wallet The wallet to add the assets from
+   * @return This object, for chained calls
+   */
+  public WalletDiff addAll(Wallet wallet) {
+    for (String asset : wallet) {
+      add(asset, wallet.getAssetAmount(asset));
+    }
+    return this;
+  }
+
+  /**
+   * Subtract all the assets in the wallet from this difference.
+   *
+   * @param wallet The wallet holding the assets to subtract
+   * @return This object, for chained calls
+   */
+  public WalletDiff removeAll(Wallet wallet) {
+    for (String asset : wallet) {
+      add(asset, wallet.getAssetAmount(asset).negate());
+    }
+    return this;
+  }
 }

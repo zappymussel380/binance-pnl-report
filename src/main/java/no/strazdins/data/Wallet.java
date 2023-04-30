@@ -120,4 +120,15 @@ public class Wallet implements Iterable<String> {
     return assets.keySet().iterator();
   }
 
+  /**
+   * Get wallet difference between this and another wallet.
+   *
+   * @param previous The previous wallet to compare against
+   * @return The wallet difference: the change of amount for each asset
+   */
+  public WalletDiff getDiffFrom(Wallet previous) {
+    return new WalletDiff()
+        .addAll(this)
+        .removeAll(previous);
+  }
 }
