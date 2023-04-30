@@ -78,7 +78,7 @@ class WalletDiffTest {
     assertNotEquals(d1, d2);
 
     d1 = createDiff("1", "LTC", "2", "BTC", "3", "LTC", "0.1", "BTC", "0.80000001", "BNB");
-    d2 = createDiff("1.1", "BTC", "8", "LTC", "1", "BTC", "-4", "LTC", "0.8", "BNB");
+    d2 = createDiff("1", "LTC", "2", "BTC", "3", "LTC", "0.1", "BTC", "0.8", "BNB");
     assertNotEquals(d1, d2);
   }
 
