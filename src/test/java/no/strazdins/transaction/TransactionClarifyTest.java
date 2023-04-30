@@ -1,5 +1,8 @@
 package no.strazdins.transaction;
 
+import static no.strazdins.data.Operation.BUY;
+import static no.strazdins.data.Operation.FEE;
+import static no.strazdins.data.Operation.SELL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,7 +31,7 @@ class TransactionClarifyTest {
 
   @Test
   void testSellWithBuy() {
-    setupOperations(Operation.BUY, Operation.SELL, Operation.FEE);
+    setupOperations(BUY, SELL, FEE);
     setupAmounts("12.52", "-0.09", "-0.00025");
     setupAssets("USDT", "LTC", "BNB");
     expectResult(SellTransaction.class, "-0.09", "LTC", "12.52", "USDT", "-0.00025", "BNB");
@@ -36,7 +39,7 @@ class TransactionClarifyTest {
 
   @Test
   void testSellWithTransactionRelated() {
-    setupOperations(Operation.BUY, Operation.TRANSACTION_RELATED, Operation.FEE);
+    setupOperations(BUY, SELL, FEE);
     setupAmounts("12.52", "-0.09", "-0.00025");
     setupAssets("USDT", "LTC", "BNB");
     expectResult(SellTransaction.class, "-0.09", "LTC", "12.52", "USDT", "-0.00025", "BNB");
@@ -45,7 +48,7 @@ class TransactionClarifyTest {
 
   @Test
   void testBuyWithSell() {
-    setupOperations(Operation.SELL, Operation.BUY, Operation.FEE);
+    setupOperations(SELL, BUY, FEE);
     setupAmounts("-12.52", "0.1", "-0.00025");
     setupAssets("USDT", "LTC", "BNB");
     expectResult(BuyTransaction.class, "0.1", "LTC", "-12.52", "USDT", "-0.00025", "BNB");
@@ -53,7 +56,7 @@ class TransactionClarifyTest {
 
   @Test
   void testBuyWithTransactionRelated() {
-    setupOperations(Operation.TRANSACTION_RELATED, Operation.BUY, Operation.FEE);
+    setupOperations(SELL, BUY, FEE);
     setupAmounts("-12.52", "0.1", "-0.00025");
     setupAssets("USDT", "LTC", "BNB");
     expectResult(BuyTransaction.class, "0.1", "LTC", "-12.52", "USDT", "-0.00025", "BNB");
@@ -61,7 +64,7 @@ class TransactionClarifyTest {
 
   @Test
   void testSellWithoutFee() {
-    setupOperations(Operation.SELL, Operation.BUY);
+    setupOperations(SELL, BUY);
     setupAmounts("-7.5", "15");
     setupAssets("BAKE", "USDT");
     expectResult(SellTransaction.class, "-7.5", "BAKE", "15", "USDT", "0", "");
@@ -69,7 +72,7 @@ class TransactionClarifyTest {
 
   @Test
   void testCoinToCoinWithoutFee() {
-    setupOperations(Operation.SELL, Operation.BUY);
+    setupOperations(SELL, BUY);
     setupAmounts("-7.5", "15");
     setupAssets("BAKE", "BUSD");
     expectResult(CoinToCoinTransaction.class, "15", "BUSD", "-7.5", "BAKE", "0", "");
@@ -77,31 +80,15 @@ class TransactionClarifyTest {
 
   @Test
   void testSellWithSoldAndRevenueAndFee() {
-    setupOperations(Operation.TRANSACTION_SOLD, Operation.TRANSACTION_REVENUE, Operation.FEE);
+    setupOperations(SELL, BUY, FEE);
     setupAmounts("-3000", "318", "-0.0008");
     setupAssets("ARDR", "USDT", "BNB");
     expectResult(SellTransaction.class, "-3000", "ARDR", "318", "USDT", "-0.0008", "BNB");
   }
 
   @Test
-  void testSellWithSoldAndRevenueAndNoFee() {
-    setupOperations(Operation.TRANSACTION_SOLD, Operation.TRANSACTION_REVENUE);
-    setupAmounts("-3000", "318");
-    setupAssets("ARDR", "USDT");
-    expectResult(SellTransaction.class, "-3000", "ARDR", "318", "USDT", "0", "");
-  }
-
-  @Test
-  void testBuyWithSpendAndFee() {
-    setupOperations(Operation.TRANSACTION_SPEND, Operation.TRANSACTION_BUY, Operation.FEE);
-    setupAmounts("-300", "3000", "-0.0008");
-    setupAssets("USDT", "ARDR", "BNB");
-    expectResult(BuyTransaction.class, "3000", "ARDR", "-300", "USDT", "-0.0008", "BNB");
-  }
-
-  @Test
   void testBuyBusd() {
-    setupOperations(Operation.TRANSACTION_RELATED, Operation.TRANSACTION_BUY);
+    setupOperations(SELL, BUY);
     setupAmounts("-100", "100");
     setupAssets("USD", "BUSD");
     expectResult(CoinToCoinTransaction.class, "100", "BUSD", "-100", "USD", "0", "");
@@ -109,7 +96,7 @@ class TransactionClarifyTest {
 
   @Test
   void testBuyWithSpend() {
-    setupOperations(Operation.TRANSACTION_SPEND, Operation.TRANSACTION_BUY);
+    setupOperations(SELL, BUY);
     setupAmounts("-300", "3000");
     setupAssets("USDT", "ARDR");
     expectResult(BuyTransaction.class, "3000", "ARDR", "-300", "USDT", "0", "");
@@ -118,11 +105,11 @@ class TransactionClarifyTest {
   @Test
   void testSlpMultiBuy() {
     setupOperations(
-        Operation.FEE, Operation.FEE, Operation.TRANSACTION_SPEND,
-        Operation.TRANSACTION_BUY, Operation.TRANSACTION_SPEND, Operation.FEE,
-        Operation.TRANSACTION_BUY, Operation.FEE, Operation.TRANSACTION_BUY,
-        Operation.TRANSACTION_BUY, Operation.TRANSACTION_SPEND, Operation.TRANSACTION_BUY,
-        Operation.TRANSACTION_SPEND, Operation.TRANSACTION_SPEND, Operation.FEE
+        FEE, FEE, SELL,
+        BUY, SELL, FEE,
+        BUY, FEE, BUY,
+        BUY, SELL, BUY,
+        SELL, SELL, FEE
     );
     setupAssets(
         "BNB", "BNB", "USDT",

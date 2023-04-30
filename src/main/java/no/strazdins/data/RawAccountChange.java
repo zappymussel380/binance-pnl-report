@@ -39,10 +39,12 @@ public class RawAccountChange {
 
   private void runAssertions() {
     if (operation == Operation.BUY && !changeAmount.isPositive()) {
-      throw new IllegalArgumentException("Amount must be positive for all buy-type changes");
+      throw new IllegalArgumentException("Amount must be positive for all buy-type changes @ "
+       + TimeConverter.utcTimeToString(utcTime));
     }
     if (operation == Operation.SELL && !changeAmount.isNegative()) {
-      throw new IllegalArgumentException("Amount must be negative for all sell-type changes");
+      throw new IllegalArgumentException("Amount must be negative for all sell-type changes @ "
+          + TimeConverter.utcTimeToString(utcTime));
     }
   }
 

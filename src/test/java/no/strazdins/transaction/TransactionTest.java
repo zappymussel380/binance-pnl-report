@@ -2,7 +2,7 @@ package no.strazdins.transaction;
 
 import static no.strazdins.data.Operation.BUY;
 import static no.strazdins.data.Operation.FEE;
-import static no.strazdins.data.Operation.TRANSACTION_RELATED;
+import static no.strazdins.data.Operation.SELL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,10 +34,10 @@ class TransactionTest {
     Transaction t = new Transaction(thisTime);
     appendOperation(t, FEE, "-1", "BNB");
     appendOperation(t, BUY, "0.1", "BTC");
-    appendOperation(t, TRANSACTION_RELATED, "-2000", "USDT");
+    appendOperation(t, SELL, "-2000", "USDT");
     appendOperation(t, BUY, "0.2", "BTC");
-    appendOperation(t, TRANSACTION_RELATED, "-6000", "USDT");
-    appendOperation(t, TRANSACTION_RELATED, "-4000", "USDT");
+    appendOperation(t, SELL, "-6000", "USDT");
+    appendOperation(t, SELL, "-4000", "USDT");
     appendOperation(t, BUY, "0.3", "BTC");
     appendOperation(t, FEE, "-2", "BNB");
     appendOperation(t, FEE, "-3", "BNB");
@@ -59,9 +59,9 @@ class TransactionTest {
     Transaction t = new Transaction(thisTime);
     appendOperation(t, FEE, "-1", "BNB");
     appendOperation(t, BUY, "0.1", "BTC");
-    appendOperation(t, TRANSACTION_RELATED, "-2000", "USDT");
+    appendOperation(t, SELL, "-2000", "USDT");
     appendOperation(t, BUY, "0.2", "BTC");
-    appendOperation(t, TRANSACTION_RELATED, "-6000", "USDT");
+    appendOperation(t, SELL, "-6000", "USDT");
     appendOperation(t, BUY, "0.3", "BTC");
     WalletDiff diff = t.getOperationDiff();
     WalletDiff expectedDiff = new WalletDiff()
@@ -69,6 +69,19 @@ class TransactionTest {
         .add("BTC", new Decimal("0.6"))
         .add("USDT", new Decimal("-8000"));
     assertEquals(expectedDiff, diff);
+  }
+
+  @Test
+  void testOperationCount() {
+    long thisTime = System.currentTimeMillis();
+    Transaction t = new Transaction(thisTime);
+    appendOperation(t, FEE, "-1", "BNB");
+    appendOperation(t, BUY, "0.1", "BTC");
+    appendOperation(t, SELL, "-2000", "USDT");
+    appendOperation(t, BUY, "0.2", "BTC");
+    appendOperation(t, SELL, "-6000", "USDT");
+    appendOperation(t, BUY, "0.3", "BTC");
+    assertEquals(6, t.getTotalOperationCount());
   }
 
   private void appendOperation(Transaction t, Operation operation, String amount, String asset) {
