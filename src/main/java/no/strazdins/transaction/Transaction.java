@@ -12,6 +12,7 @@ import no.strazdins.data.Operation;
 import no.strazdins.data.OperationMultiSet;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.Wallet;
+import no.strazdins.data.WalletDiff;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.TimeConverter;
 
@@ -80,8 +81,7 @@ public class Transaction {
    * @return A transaction with specific type, with the same atomic operations
    */
   public final Transaction clarifyTransactionType() {
-    if (consistsOfMultiple(Operation.BUY, Operation.TRANSACTION_RELATED, Operation.FEE)
-        || consistsOfMultiple(Operation.BUY, Operation.SELL, Operation.FEE)) {
+    if (consistsOfMultipleBuySellOperations()) {
       mergeRawChangesByType();
     }
 
@@ -93,7 +93,11 @@ public class Transaction {
       t = tryToConvertToSavingsRelated();
     }
     return t;
+  }
 
+  private boolean consistsOfMultipleBuySellOperations() {
+    return consistsOfMultiple(Operation.BUY, Operation.SELL, Operation.FEE)
+        || consistsOfMultiple(Operation.BUY, Operation.SELL);
   }
 
   private Transaction tryToConvertToSavingsRelated() {
@@ -116,9 +120,15 @@ public class Transaction {
   }
 
   private Transaction tryToConvertToBuyOrSell() {
-    Transaction t = null;
     RawAccountChange buy = getFirstBuyTypeChange();
     RawAccountChange sell = getFirstSellTypeChange();
+    boolean hasFee = getFirstChangeOfType(Operation.FEE) != null;
+    int expectedOpCount = hasFee ? 3 : 2;
+    if (getTotalOperationCount() != expectedOpCount) {
+      return null;
+    }
+
+    Transaction t = null;
     if (buy != null && sell != null) {
       if (isSell()) {
         t = new SellTransaction(this);
@@ -131,6 +141,19 @@ public class Transaction {
       }
     }
     return t;
+  }
+
+  /**
+   * Get the total number of operations (raw changes).
+   *
+   * @return The total number of raw changes for this transaction.
+   */
+  public final int getTotalOperationCount() {
+    int count = 0;
+    for (List<RawAccountChange> changes : atomicAccountChanges.values()) {
+      count += changes.size();
+    }
+    return count;
   }
 
   private Transaction tryToConvertToDepositOrWithdraw() {
@@ -231,38 +254,21 @@ public class Transaction {
   }
 
   /**
-   * Get the first account change which is sell-like type (including Transaction_Sold, etc).
+   * Get the first account change which is sell-like type (including SELL, etc).
    *
    * @return The first change or null if no change of this type is found.
    */
   protected final RawAccountChange getFirstSellTypeChange() {
-    RawAccountChange sell = getFirstChangeOfType(Operation.SELL);
-    if (sell == null) {
-      sell = getFirstChangeOfType(Operation.TRANSACTION_RELATED);
-    }
-    if (sell == null) {
-      sell = getFirstChangeOfType(Operation.TRANSACTION_SOLD);
-    }
-    if (sell == null) {
-      sell = getFirstChangeOfType(Operation.TRANSACTION_SPEND);
-    }
-    return sell;
+    return getFirstChangeOfType(Operation.SELL);
   }
 
   /**
-   * Get the first account change which is buy-like type (including Transaction_Revenue, etc).
+   * Get the first account change which is buy-like type (including BUY, etc).
    *
    * @return The first change or null if no change of this type is found.
    */
   protected final RawAccountChange getFirstBuyTypeChange() {
-    RawAccountChange bought = getFirstChangeOfType(Operation.BUY);
-    if (bought == null) {
-      bought = getFirstChangeOfType(Operation.TRANSACTION_REVENUE);
-    }
-    if (bought == null) {
-      bought = getFirstChangeOfType(Operation.TRANSACTION_BUY);
-    }
-    return bought;
+    return getFirstChangeOfType(Operation.BUY);
   }
 
   /**
@@ -452,5 +458,21 @@ public class Transaction {
    */
   protected List<RawAccountChange> getChangesOfType(Operation type) {
     return atomicAccountChanges.getOrDefault(type, Collections.emptyList());
+  }
+
+  /**
+   * Create the summary of changes that this transaction makes to the wallet, based on asset
+   * changes in all the individual operations.
+   *
+   * @return The sum of all operation changes, as wallet difference
+   */
+  public WalletDiff getOperationDiff() {
+    WalletDiff diff = new WalletDiff();
+    for (List<RawAccountChange> changes : atomicAccountChanges.values()) {
+      for (RawAccountChange change : changes) {
+        diff.add(change.getAsset(), change.getAmount());
+      }
+    }
+    return diff;
   }
 }

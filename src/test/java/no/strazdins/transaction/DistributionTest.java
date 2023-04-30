@@ -39,7 +39,7 @@ class DistributionTest {
     assertEquals(Decimal.ZERO, ws2.getPnl());
 
     Transaction t2 = new Transaction(time + 1000);
-    t2.append(new RawAccountChange(time + 1000, AccountType.SPOT, Operation.TRANSACTION_RELATED,
+    t2.append(new RawAccountChange(time + 1000, AccountType.SPOT, Operation.SELL,
         "BNB", new Decimal("-0.38"), "Sell 0.38 BNB"));
     t2.append(new RawAccountChange(time + 1000, AccountType.SPOT, Operation.BUY, "USDT",
         new Decimal("380.2"), "Get $380.20"));

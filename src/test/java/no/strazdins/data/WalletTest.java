@@ -46,4 +46,60 @@ class WalletTest {
     assertEquals(0, w.getAssetCount());
     assertEquals(Decimal.ZERO, w.getAvgObtainPrice("BTC"));
   }
+
+  @Test
+  void testDiffEmpty() {
+    assertEquals(new WalletDiff(), new Wallet().getDiffFrom(new Wallet()));
+  }
+
+  @Test
+  void testDiff() {
+    Wallet w1 = createWalletWith(
+        "1.1", "BTC", "10000",
+        "0.2", "BTC", "9000",
+        "0.8", "BTC", "8000",
+        "20", "LTC", "100",
+        "10", "LTC", "120",
+        "200", "USDT", "1",
+        "2", "BNB", "10",
+        "1", "BNB", "10"
+    );
+    Wallet w2 = createWalletWith(
+        "1.2", "BTC", "10000", // +0.1 BTC
+        "0.2", "BTC", "9000",
+        "0.8", "BTC", "8000",
+        "22", "LTC", "100", // -8 LTC, in one portion
+        "150", "USDT", "1", // Same amount of USDT, just in two portions
+        "50", "USDT", "1",
+        // All of BNB removed
+        // 15 XRP added, in one portion
+        "15", "XRP", "3",
+        // 400 SLP added, in three portions
+        "100", "SLP", "0.5",
+        "200", "SLP", "0.4",
+        "100", "SLP", "0.3"
+    );
+    WalletDiff expectedDiff = new WalletDiff()
+        .add("BTC", new Decimal("0.1"))
+        .add("LTC", new Decimal("-8"))
+        .add("BNB", new Decimal("-3"))
+        .add("XRP", new Decimal("15"))
+        .add("SLP", new Decimal("400"));
+    assertEquals(expectedDiff, w2.getDiffFrom(w1));
+  }
+
+  /**
+   * Create wallet with given assets.
+   *
+   * @param assets Each asset is specified as a triplet (amount, asset, obtainPrice)
+   * @return A new wallet with the given assets
+   */
+  public static Wallet createWalletWith(String... assets) {
+    assertEquals(0, assets.length % 3, "Each asset must be specified with three values");
+    Wallet w = new Wallet();
+    for (int i = 0; i < assets.length; i += 3) {
+      w.addAsset(assets[i + 1], new Decimal(assets[i]), new Decimal(assets[i + 2]));
+    }
+    return w;
+  }
 }

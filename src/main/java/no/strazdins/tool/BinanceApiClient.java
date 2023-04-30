@@ -46,10 +46,13 @@ public class BinanceApiClient {
   }
 
   private Decimal getClosePriceFromSingleCandleArray(List<List<Object>> rawResponse) {
-    if (rawResponse.size() != 1 || rawResponse.get(0).size() != 12
+    if (rawResponse == null || rawResponse.size() != 1 || rawResponse.get(0).size() != 12
         || !(rawResponse.get(0).get(4) instanceof String)) {
-      throw new IllegalStateException("Unexpected response received from daily candle REST API: "
-          + gson.toJson(rawResponse));
+      logger.error("Unexpected response received from daily candle REST API: {}",
+          gson.toJson(rawResponse));
+      logger.error("Assuming the coin price was zero (that is the best guess we can make)");
+      logger.error("If you know a better price, specify it manually in the extra info file");
+      return Decimal.ZERO;
     }
     return new Decimal((String) rawResponse.get(0).get(4));
   }
