@@ -12,6 +12,7 @@ import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.WalletDiff;
 import org.junit.jupiter.api.Test;
 
 class TransactionTest {
@@ -50,6 +51,24 @@ class TransactionTest {
     assertEquals(new Decimal("0.6"), merged.getBaseCurrencyAmount());
     assertEquals(new Decimal("-12000"), merged.getQuoteAmount());
     assertEquals(new Decimal("-6"), merged.getFee());
+  }
+
+  @Test
+  void testOperationDiff() {
+    long thisTime = System.currentTimeMillis();
+    Transaction t = new Transaction(thisTime);
+    appendOperation(t, FEE, "-1", "BNB");
+    appendOperation(t, BUY, "0.1", "BTC");
+    appendOperation(t, TRANSACTION_RELATED, "-2000", "USDT");
+    appendOperation(t, BUY, "0.2", "BTC");
+    appendOperation(t, TRANSACTION_RELATED, "-6000", "USDT");
+    appendOperation(t, BUY, "0.3", "BTC");
+    WalletDiff diff = t.getOperationDiff();
+    WalletDiff expectedDiff = new WalletDiff()
+        .add("BNB", new Decimal("-1"))
+        .add("BTC", new Decimal("0.6"))
+        .add("USDT", new Decimal("-8000"));
+    assertEquals(expectedDiff, diff);
   }
 
   private void appendOperation(Transaction t, Operation operation, String amount, String asset) {

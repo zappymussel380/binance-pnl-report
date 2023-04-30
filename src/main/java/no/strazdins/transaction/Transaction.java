@@ -12,6 +12,7 @@ import no.strazdins.data.Operation;
 import no.strazdins.data.OperationMultiSet;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.Wallet;
+import no.strazdins.data.WalletDiff;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.TimeConverter;
 
@@ -463,5 +464,21 @@ public class Transaction {
    */
   protected List<RawAccountChange> getChangesOfType(Operation type) {
     return atomicAccountChanges.getOrDefault(type, Collections.emptyList());
+  }
+
+  /**
+   * Create the summary of changes that this transaction makes to the wallet, based on asset
+   * changes in all the individual operations.
+   *
+   * @return The sum of all operation changes, as wallet difference
+   */
+  public WalletDiff getOperationDiff() {
+    WalletDiff diff = new WalletDiff();
+    for (List<RawAccountChange> changes : atomicAccountChanges.values()) {
+      for (RawAccountChange change : changes) {
+        diff.add(change.getAsset(), change.getAmount());
+      }
+    }
+    return diff;
   }
 }
