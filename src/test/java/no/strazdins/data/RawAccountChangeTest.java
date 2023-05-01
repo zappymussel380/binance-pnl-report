@@ -13,10 +13,11 @@ class RawAccountChangeTest {
   @Test
   void testAmountAssertions() {
     long thisTime = System.currentTimeMillis();
+    Decimal minusOne = new Decimal("-1");
     assertThrows(IllegalArgumentException.class, () -> new RawAccountChange(
-        thisTime, AccountType.SPOT, Operation.BUY, "BTC", new Decimal("-1"), "Negative buy"));
+        thisTime, AccountType.SPOT, Operation.BUY, "BTC", minusOne, "Negative buy"));
     assertThrows(IllegalArgumentException.class, () -> new RawAccountChange(
-        thisTime, AccountType.SPOT, Operation.SELL, "BTC", new Decimal("2"), "Positve sell"));
+        thisTime, AccountType.SPOT, Operation.SELL, "BTC", Decimal.ONE, "Positve sell"));
   }
 
   @Test
