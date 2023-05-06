@@ -24,6 +24,9 @@ public class DepositTransaction extends Transaction {
     super(t);
     deposit = getFirstChangeOfType(Operation.DEPOSIT);
     if (deposit == null) {
+      deposit = getFirstChangeOfType(Operation.FIAT_DEPOSIT);
+    }
+    if (deposit == null) {
       throw new IllegalStateException("Can't create a deposit transaction without a deposit op!");
     }
   }

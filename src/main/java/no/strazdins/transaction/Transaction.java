@@ -71,7 +71,7 @@ public class Transaction {
 
   @Override
   public String toString() {
-    return "Transaction@" + TimeConverter.utcTimeToString(utcTime);
+    return "Transaction[" + getType() + "]@" + TimeConverter.utcTimeToString(utcTime);
   }
 
   /**
@@ -104,13 +104,16 @@ public class Transaction {
     Transaction t = null;
     if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
         || consistsOf(Operation.SAVINGS_DISTRIBUTION)
-        || consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)) {
+        || consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)
+        || consistsOfMultiple(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)) {
       t = new SavingsSubscriptionTransaction(this);
     } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)
         || consistsOfMultiple(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)) {
       t = new SavingsRedemptionTransaction(this);
     } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST)) {
       t = new SavingsInterestTransaction(this);
+    } else if (consistsOf(Operation.COMMISSION_REBATE)) {
+      t = new CommissionTransaction(this);
     } else if (consistsOf(Operation.DISTRIBUTION)) {
       t = new DistributionTransaction(this);
     } else if (consistsOfMultiple(Operation.SMALL_ASSETS_EXCHANGE_BNB)) {
@@ -158,7 +161,7 @@ public class Transaction {
 
   private Transaction tryToConvertToDepositOrWithdraw() {
     Transaction t = null;
-    if (consistsOf(Operation.DEPOSIT)) {
+    if (consistsOf(Operation.DEPOSIT) || consistsOf(Operation.FIAT_DEPOSIT)) {
       t = new DepositTransaction(this);
     } else if (consistsOf(Operation.WITHDRAW)) {
       t = new WithdrawTransaction(this);
@@ -218,7 +221,7 @@ public class Transaction {
    *
    * @return Multiset of all operations: count by type
    */
-  public OperationMultiSet getOperationMultiSet() {
+  public final OperationMultiSet getOperationMultiSet() {
     OperationMultiSet operationMultiSet = new OperationMultiSet();
     for (Map.Entry<Operation, List<RawAccountChange>> entry : atomicAccountChanges.entrySet()) {
       operationMultiSet.add(entry.getKey(), entry.getValue().size());
@@ -309,8 +312,7 @@ public class Transaction {
    * @return A human-readable type of the transaction.
    */
   public String getType() {
-    throw new UnsupportedOperationException("getType not implemented for "
-        + this.getClass().getSimpleName());
+    return "";
   }
 
   /**
@@ -466,7 +468,7 @@ public class Transaction {
    *
    * @return The sum of all operation changes, as wallet difference
    */
-  public WalletDiff getOperationDiff() {
+  public final WalletDiff getOperationDiff() {
     WalletDiff diff = new WalletDiff();
     for (List<RawAccountChange> changes : atomicAccountChanges.values()) {
       for (RawAccountChange change : changes) {
