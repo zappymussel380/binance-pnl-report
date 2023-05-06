@@ -1,8 +1,11 @@
 package no.strazdins.process;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import no.strazdins.data.ExtraInfo;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
@@ -20,8 +23,6 @@ import org.apache.logging.log4j.Logger;
  */
 public class ReportGenerator {
   private static final Logger logger = LogManager.getLogger(ReportGenerator.class);
-
-  private final List<Transaction> transactions = new ArrayList<>();
 
   private AutoInvestSubscription autoInvestSubscription;
   private final List<AutoInvestTransaction> autoInvestTransactions = new LinkedList<>();
@@ -55,6 +56,7 @@ public class ReportGenerator {
   private List<Transaction> groupTransactionsByTimestamp(List<RawAccountChange> accountChanges) {
     RawAccountChange lastChange = null;
     Transaction transaction = null;
+    List<Transaction> transactions = new ArrayList<>();
     for (RawAccountChange change : accountChanges) {
       if (lastChange == null || lastChange.getUtcTime() != change.getUtcTime()) {
         transaction = new Transaction(change.getUtcTime());
@@ -63,7 +65,7 @@ public class ReportGenerator {
       if (AutoInvestTransaction.isAutoInvestOperation(change)) {
         Transaction updatedTransaction = updateAutoInvest(change, transaction);
         if (updatedTransaction != transaction) {
-          replaceLastTransactionWith(updatedTransaction);
+          replaceLastTransactionWith(transactions, updatedTransaction);
           transaction = updatedTransaction;
         }
       }
@@ -154,9 +156,10 @@ public class ReportGenerator {
         && change.getAmount().isPositive();
   }
 
-  private void replaceLastTransactionWith(Transaction t) {
+  private void replaceLastTransactionWith(List<Transaction> transactions,
+                                          Transaction newTransaction) {
     transactions.remove(transactions.size() - 1);
-    transactions.add(t);
+    transactions.add(newTransaction);
   }
 
   /**

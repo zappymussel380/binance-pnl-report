@@ -4,6 +4,7 @@ import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.process.AutoInvestSubscription;
 import no.strazdins.tool.TimeConverter;
+import java.util.Objects;
 
 /**
  * Auto-invest transaction. It is a bit special, because its parts (operations) can have
@@ -59,4 +60,25 @@ public class AutoInvestTransaction extends Transaction {
         + TimeConverter.utcTimeToString(utcTime);
   }
   // TODO - if invest and acquire (USDT and coin) in the same second - throw error
+
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    AutoInvestTransaction that = (AutoInvestTransaction) o;
+    return Objects.equals(subscription, that.subscription);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), subscription);
+  }
 }
