@@ -81,4 +81,32 @@ public class AutoInvestTransaction extends Transaction {
   public int hashCode() {
     return Objects.hash(super.hashCode(), subscription);
   }
+
+  /**
+   * Check whether this is an investment transaction - USDT was invested (spent) here.
+   *
+   * @return True when this is an investment, false when this is an asset acquisition
+   */
+  public boolean isInvestment() {
+    return getInvestedAsset() != null;
+  }
+
+  /**
+   * Check whether this is an asset acquisition - an asset was bought.
+   *
+   * @return True when this is an asset acquisition, false when this is an investment
+   */
+  public boolean isAcquisition() {
+    return getInvestedAsset() == null;
+  }
+
+  /**
+   * Get the invested asset.
+   *
+   * @return The invested asset or null if this is not an investment transaction
+   */
+  public String getInvestedAsset() {
+    RawAccountChange invest = getFirstChangeOfType(Operation.AUTO_INVEST);
+    return invest.getAmount().isNegative() ? invest.getAsset() : null;
+  }
 }
