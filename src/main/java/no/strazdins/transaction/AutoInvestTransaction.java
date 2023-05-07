@@ -1,10 +1,10 @@
 package no.strazdins.transaction;
 
+import java.util.Objects;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.process.AutoInvestSubscription;
 import no.strazdins.tool.TimeConverter;
-import java.util.Objects;
 
 /**
  * Auto-invest transaction. It is a bit special, because its parts (operations) can have
