@@ -96,24 +96,27 @@ public class ReportLogic {
     if (previousAutoInvestTransactions.isEmpty()) {
       return false;
     }
-    // TODO - include USDT and it's amount as well - if amount changes, that is a new subscription
-    Set<String> prevCoins = getCoins(previousAutoInvestTransactions);
-    Set<String> currentCoins = getCoins(autoInvestTransactions);
+    Set<String> prevCoins = getCoinsForComparison(previousAutoInvestTransactions);
+    Set<String> currentCoins = getCoinsForComparison(autoInvestTransactions);
     return !prevCoins.equals(currentCoins);
   }
 
   /**
-   * Get the coins involved in the last auto-invest transaction - the bought coins.
+   * Get the coins involved in the last auto-invest transaction - used for comparison.
    *
    * @param transactions The transactions for the previous auto-invest
    * @return The bought coins
    */
-  private static Set<String> getCoins(List<AutoInvestTransaction> transactions) {
+  private static Set<String> getCoinsForComparison(List<AutoInvestTransaction> transactions) {
     Set<String> coins = new HashSet<>();
     for (AutoInvestTransaction t : transactions) {
       String boughtAsset = t.getBoughtAsset();
       if (boughtAsset != null) {
         coins.add(boughtAsset);
+      } else {
+        // Include invested USD and its amount
+        String investment = t.getAmount().getNiceString() + " " + t.getInvestedAsset();
+        coins.add(investment);
       }
     }
     return coins;

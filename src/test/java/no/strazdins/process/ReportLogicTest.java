@@ -3,6 +3,7 @@ package no.strazdins.process;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -57,12 +58,49 @@ class ReportLogicTest {
 
   @Test
   void testAutoInvestSubscriptionChanges() {
-    // TODO
+    List<Transaction> transactions = createAutoInvestments(
+        "-5", "USDT",
+        "0.00141986", "BNB",
+        "0.00018789", "BTC",
+        "0.00030772", "ETH",
+        "-5", "USDT",
+        "0.00019", "BTC",
+        "0.0003", "ETH",
+        // We need to have one more instance of the second auto-invest, otherwise
+        // the change won't be detected
+        "-5", "USDT",
+        "0.00019", "BTC",
+        "0.0003", "ETH"
+    );
+    assertEquals(10, transactions.size());
+    expectNotSameSubscription(transactions.get(0), transactions.get(4));
+    expectSameSubscription(transactions.subList(0, 4));
+    expectSameSubscription(transactions.subList(4, 10));
   }
+
 
   @Test
   void testAutoInvestSubscriptionChangeByUsdAmount() {
-    // TODO
+    List<Transaction> transactions = createAutoInvestments(
+        "-5", "USDT",
+        "0.00141986", "BNB",
+        "0.00018789", "BTC",
+        "0.00030772", "ETH",
+        "-10", "USDT",
+        "0.0028", "BNB",
+        "0.0004", "BTC",
+        "0.0006", "ETH",
+        // We need to have one more instance of the second auto-invest, otherwise
+        // the change won't be detected
+        "-10", "USDT",
+        "0.0028", "BNB",
+        "0.0004", "BTC",
+        "0.0006", "ETH"
+    );
+    assertEquals(12, transactions.size());
+    expectNotSameSubscription(transactions.get(0), transactions.get(4));
+    expectSameSubscription(transactions.subList(0, 4));
+    expectSameSubscription(transactions.subList(4, 12));
   }
 
   /**
@@ -120,5 +158,14 @@ class ReportLogicTest {
         subscription = autoInvest.getSubscription();
       }
     }
+  }
+
+  private void expectNotSameSubscription(Transaction t1, Transaction t2) {
+    assertInstanceOf(AutoInvestTransaction.class, t1);
+    assertInstanceOf(AutoInvestTransaction.class, t2);
+    assertNotEquals(
+        ((AutoInvestTransaction) t1).getSubscription(),
+        ((AutoInvestTransaction) t2).getSubscription()
+    );
   }
 }
