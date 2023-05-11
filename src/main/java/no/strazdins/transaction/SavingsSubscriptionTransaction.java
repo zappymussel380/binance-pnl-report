@@ -19,7 +19,7 @@ public class SavingsSubscriptionTransaction extends Transaction {
    */
   public SavingsSubscriptionTransaction(Transaction transaction) {
     super(transaction);
-    deposit = getFirstChangeOfType(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION);
+    deposit = getFirstChangeOfType(Operation.EARN_SUBSCRIPTION);
     if (deposit == null) {
       deposit = getFirstChangeOfType(Operation.SAVINGS_DISTRIBUTION);
     }

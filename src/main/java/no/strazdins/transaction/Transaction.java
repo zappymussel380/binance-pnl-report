@@ -1,5 +1,8 @@
 package no.strazdins.transaction;
 
+import static no.strazdins.data.Operation.AUTO_INVEST;
+import static no.strazdins.data.Operation.EARN_SUBSCRIPTION;
+
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedList;
@@ -105,15 +108,15 @@ public class Transaction {
 
   private Transaction tryToConvertToSavingsRelated() {
     Transaction t = null;
-    if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
+    if (consistsOf(EARN_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
         || consistsOf(Operation.SAVINGS_DISTRIBUTION)
-        || consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)
-        || consistsOfMultiple(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)) {
+        || consistsOf(EARN_SUBSCRIPTION)
+        || consistsOfMultiple(EARN_SUBSCRIPTION)) {
       t = new SavingsSubscriptionTransaction(this);
-    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)
-        || consistsOfMultiple(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)) {
+    } else if (consistsOf(Operation.EARN_REDEMPTION)
+        || consistsOfMultiple(Operation.EARN_REDEMPTION)) {
       t = new SavingsRedemptionTransaction(this);
-    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST)) {
+    } else if (consistsOf(Operation.EARN_INTEREST)) {
       t = new SavingsInterestTransaction(this);
     } else if (consistsOf(Operation.COMMISSION_REBATE)) {
       t = new CommissionTransaction(this);
@@ -151,7 +154,9 @@ public class Transaction {
 
   private AutoInvestTransaction tryToConvertToAutoInvest() {
     AutoInvestTransaction t = null;
-    if (consistsOf(Operation.AUTO_INVEST)) {
+    if (consistsOf(AUTO_INVEST)
+        || consistsOf(AUTO_INVEST, EARN_SUBSCRIPTION)
+        || consistsOf(AUTO_INVEST, EARN_SUBSCRIPTION, EARN_SUBSCRIPTION)) {
       t = (AutoInvestTransaction) this;
     }
     return t;

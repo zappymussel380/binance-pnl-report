@@ -49,7 +49,7 @@ public class SavingsInterestTransaction extends Transaction {
    * @return The interest operation or null if none found
    */
   protected RawAccountChange getInterestOperation() {
-    return getFirstChangeOfType(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST);
+    return getFirstChangeOfType(Operation.EARN_INTEREST);
   }
 
   @Override

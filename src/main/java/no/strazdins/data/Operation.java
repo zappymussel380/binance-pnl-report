@@ -8,7 +8,7 @@ import java.io.IOException;
 public enum Operation {
   BUY, SELL, FEE, DEPOSIT, WITHDRAW, DISTRIBUTION, SAVINGS_DISTRIBUTION,
   BNB_VAULT_REWARDS, BUY_CRYPTO, CASHBACK_VOUCHER, COMMISSION_REBATE, FIAT_DEPOSIT,
-  SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION, SIMPLE_EARN_FLEXIBLE_REDEMPTION, SIMPLE_EARN_FLEXIBLE_INTEREST,
+  EARN_SUBSCRIPTION, EARN_REDEMPTION, EARN_INTEREST,
   SMALL_ASSETS_EXCHANGE_BNB, AUTO_INVEST;
 
   /**
@@ -32,9 +32,9 @@ public enum Operation {
       case "Cashback Voucher" -> CASHBACK_VOUCHER;
       case "Commission Rebate" -> COMMISSION_REBATE;
       case "Fiat Deposit" -> FIAT_DEPOSIT;
-      case "Simple Earn Flexible Subscription" -> SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION;
-      case "Simple Earn Flexible Redemption" -> SIMPLE_EARN_FLEXIBLE_REDEMPTION;
-      case "Simple Earn Flexible Interest" -> SIMPLE_EARN_FLEXIBLE_INTEREST;
+      case "Simple Earn Flexible Subscription" -> EARN_SUBSCRIPTION;
+      case "Simple Earn Flexible Redemption" -> EARN_REDEMPTION;
+      case "Simple Earn Flexible Interest" -> EARN_INTEREST;
       case "Small Assets Exchange BNB" -> SMALL_ASSETS_EXCHANGE_BNB;
       case "Auto-Invest Transaction" -> AUTO_INVEST;
       default -> throw new IOException("Invalid operation string: " + s);

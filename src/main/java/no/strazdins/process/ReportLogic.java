@@ -154,8 +154,9 @@ public class ReportLogic {
       if (transaction != null) {
         transactions.add(transaction);
       } else {
-        logger.error("Unknown transaction: {}", rawTransaction.getOperationMultiSet());
-        throw new IllegalStateException("Unknown transaction: " + rawTransaction);
+        logger.error("Unknown transaction: {} {}", rawTransaction,
+            rawTransaction.getOperationMultiSet());
+        // throw new IllegalStateException("Unknown transaction: " + rawTransaction);
       }
     }
     return transactions;
