@@ -1,6 +1,7 @@
 package no.strazdins.transaction;
 
 import java.util.Objects;
+import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.process.AutoInvestSubscription;
@@ -36,7 +37,7 @@ public class AutoInvestTransaction extends Transaction {
    */
   public String getBoughtAsset() {
     String boughtAsset = null;
-    RawAccountChange invest = getFirstChangeOfType(Operation.AUTO_INVEST);
+    RawAccountChange invest = getRawInvest();
     if (invest != null && invest.getAmount().isPositive()) {
       boughtAsset = invest.getAsset();
     }
@@ -54,7 +55,7 @@ public class AutoInvestTransaction extends Transaction {
 
   @Override
   public String toString() {
-    RawAccountChange op = getFirstChangeOfType(Operation.AUTO_INVEST);
+    RawAccountChange op = getRawInvest();
     String opDetails = op != null ? (op.getAmount().getNiceString() + " " + op.getAsset()) : "";
     return "Auto-Invest " + opDetails + " @ "
         + TimeConverter.utcTimeToString(utcTime);
@@ -106,7 +107,25 @@ public class AutoInvestTransaction extends Transaction {
    * @return The invested asset or null if this is not an investment transaction
    */
   public String getInvestedAsset() {
-    RawAccountChange invest = getFirstChangeOfType(Operation.AUTO_INVEST);
+    RawAccountChange invest = getRawInvest();
     return invest.getAmount().isNegative() ? invest.getAsset() : null;
+  }
+
+  /**
+   * Get the asset amount in this transaction.
+   *
+   * @return The amount or null if no asset is found
+   */
+  public Decimal getAmount() {
+    RawAccountChange invest = getRawInvest();
+    return invest != null ? invest.getAmount() : null;
+  }
+
+  private RawAccountChange getRawInvest() {
+    return getFirstChangeOfType(Operation.AUTO_INVEST);
+  }
+
+  public AutoInvestSubscription getSubscription() {
+    return subscription;
   }
 }

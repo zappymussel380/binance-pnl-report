@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 class ReportLogicTest {
   @Test
   void testAutoInvest() {
-    // TODO - simple auto-invest
     List<Transaction> transactions = createAutoInvestments(
         "-5", "USDT",
         "0.00141986", "BNB",
@@ -27,19 +26,33 @@ class ReportLogicTest {
         "0.00030772", "ETH"
     );
     assertEquals(4, transactions.size());
-    assertInstanceOf(AutoInvestTransaction.class, transactions.get(0));
-    AutoInvestTransaction firstTransaction = (AutoInvestTransaction) transactions.get(0);
-    assertTrue(firstTransaction.isInvestment());
-    assertFalse(firstTransaction.isAcquisition());
-    assertNull(firstTransaction.getBoughtAsset());
-    assertEquals("USDT", firstTransaction.getInvestedAsset());
-    assertEquals(new Decimal("-5"), firstTransaction.getBaseCurrencyAmount());
+    expectInvestment(transactions.get(0), "-5", "USDT");
+    expectSameSubscription(transactions);
   }
 
 
   @Test
   void testTwoAutoInvestments() {
-    // TODO
+    List<Transaction> transactions = createAutoInvestments(
+        "-5", "USDT",
+        "0.00141986", "BNB",
+        "0.00018789", "BTC",
+        "0.00030772", "ETH",
+        "-5", "USDT",
+        "0.00019", "BTC",
+        "0.0014", "BNB",
+        "0.0003", "ETH"
+    );
+    assertEquals(8, transactions.size());
+    expectInvestment(transactions.get(0), "-5", "USDT");
+    expectAcquisition(transactions.get(1), "0.00141986", "BNB");
+    expectAcquisition(transactions.get(2), "0.00018789", "BTC");
+    expectAcquisition(transactions.get(3), "0.00030772", "ETH");
+    expectInvestment(transactions.get(4), "-5", "USDT");
+    expectAcquisition(transactions.get(5), "0.00019", "BTC");
+    expectAcquisition(transactions.get(6), "0.0014", "BNB");
+    expectAcquisition(transactions.get(7), "0.0003", "ETH");
+    expectSameSubscription(transactions);
   }
 
   @Test
@@ -71,8 +84,41 @@ class ReportLogicTest {
     }
     ReportLogic logic = new ReportLogic();
     List<Transaction> rawTransactions = logic.groupTransactionsByTimestamp(changes);
-    // TODO - clarify transactionTypes
-    //    return logic.clarifyTransactionTypes(rawTransactions);
-    return rawTransactions;
+    return logic.clarifyTransactionTypes(rawTransactions);
+  }
+
+  private void expectInvestment(Transaction transaction, String amount, String asset) {
+    assertInstanceOf(AutoInvestTransaction.class, transaction);
+    AutoInvestTransaction investment = (AutoInvestTransaction) transaction;
+    assertTrue(investment.isInvestment());
+    assertFalse(investment.isAcquisition());
+    assertNull(investment.getBoughtAsset());
+    assertEquals(asset, investment.getInvestedAsset());
+    assertEquals(new Decimal(amount), investment.getAmount());
+  }
+
+  private void expectAcquisition(Transaction transaction, String amount, String asset) {
+    assertInstanceOf(AutoInvestTransaction.class, transaction);
+    AutoInvestTransaction acquisition = (AutoInvestTransaction) transaction;
+    assertTrue(acquisition.isAcquisition());
+    assertFalse(acquisition.isInvestment());
+    assertNull(acquisition.getInvestedAsset());
+    assertEquals(asset, acquisition.getBoughtAsset());
+    assertEquals(new Decimal(amount), acquisition.getAmount());
+
+  }
+
+  private void expectSameSubscription(List<Transaction> transactions) {
+    assertFalse(transactions.isEmpty());
+    AutoInvestSubscription subscription = null;
+    for (Transaction t : transactions) {
+      assertInstanceOf(AutoInvestTransaction.class, t);
+      AutoInvestTransaction autoInvest = (AutoInvestTransaction) t;
+      if (subscription != null) {
+        assertEquals(subscription, autoInvest.getSubscription());
+      } else {
+        subscription = autoInvest.getSubscription();
+      }
+    }
   }
 }

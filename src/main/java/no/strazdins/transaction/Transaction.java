@@ -92,6 +92,9 @@ public class Transaction {
     if (t == null) {
       t = tryToConvertToSavingsRelated();
     }
+    if (t == null) {
+      t = tryToConvertToAutoInvest();
+    }
     return t;
   }
 
@@ -142,6 +145,14 @@ public class Transaction {
       } else {
         throw new IllegalArgumentException("Neither buy nor sell? " + this);
       }
+    }
+    return t;
+  }
+
+  private AutoInvestTransaction tryToConvertToAutoInvest() {
+    AutoInvestTransaction t = null;
+    if (consistsOf(Operation.AUTO_INVEST)) {
+      t = (AutoInvestTransaction) this;
     }
     return t;
   }
