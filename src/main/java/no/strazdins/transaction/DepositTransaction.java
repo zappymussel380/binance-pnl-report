@@ -46,12 +46,29 @@ public class DepositTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    baseObtainPriceInUsdt = new Decimal(extraInfo.value());
+    baseObtainPriceInUsdt = findObtainPrice(extraInfo);
     baseCurrency = deposit.getAsset();
     baseCurrencyAmount = deposit.getAmount();
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, baseObtainPriceInUsdt);
     return newSnapshot;
+  }
+
+  /**
+   * Find the obtain-price from Extra info (or assume 1.0 for USD currency)
+   *
+   * @param extraInfo The user-provided extra-info
+   * @return The obtain-price
+   * @throws IllegalArgumentException When obtain-price can't be determined
+   */
+  private Decimal findObtainPrice(ExtraInfoEntry extraInfo) throws IllegalArgumentException {
+    if (isUsdLike(deposit.getAsset())) {
+      return Decimal.ONE;
+    } else if (extraInfo != null) {
+      return new Decimal(extraInfo.value());
+    } else {
+      throw new IllegalArgumentException("Obtain price must be specified for all deposited coins");
+    }
   }
 
   @Override

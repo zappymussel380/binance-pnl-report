@@ -204,30 +204,65 @@ public class TestTools {
     return t;
   }
 
+  /**
+   * Process a deposit transaction.
+   *
+   * @param startSnapshot The starting wallet snapshot, before the transaction
+   * @param asset         The deposited asset
+   * @param amount        The deposited amount
+   * @param obtainPrice   The obtain-price of the asset. When left null, no extra-info is provided
+   * @return The wallet snapshot after processing the transaction
+   */
   public static WalletSnapshot processDeposit(WalletSnapshot startSnapshot,
                                               String asset, String amount, String obtainPrice) {
     transactionTime += 1000;
     Transaction t = new Transaction(transactionTime);
     t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.DEPOSIT,
         asset, new Decimal(amount), "Deposit"));
-    ExtraInfoEntry ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE,
-        asset, obtainPrice);
+    ExtraInfoEntry ei = null;
+    if (obtainPrice != null) {
+      ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE, asset, obtainPrice);
+    }
     DepositTransaction deposit = new DepositTransaction(t);
     return deposit.process(startSnapshot, ei);
   }
 
+  /**
+   * Process a withdrawal transaction.
+   *
+   * @param startSnapshot    The starting wallet snapshot, before the transaction
+   * @param asset            The withdrawn asset
+   * @param amount           The withdrawn amount
+   * @param realizationPrice The price at which the asset is realized. When non-null, it is supplied
+   *                         to the transaction as ExtraInfo, when null, no ExtraInfo is supplied
+   * @return The wallet snapshot after processing the transaction
+   */
   public static WalletSnapshot processWithdraw(WalletSnapshot startSnapshot, String asset,
                                                String amount, String realizationPrice) {
     transactionTime += 1000;
     Transaction t = new Transaction(transactionTime);
     t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.WITHDRAW,
         asset, new Decimal(amount).negate(), "Withdraw"));
-    ExtraInfoEntry ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE,
-        asset, realizationPrice);
+    ExtraInfoEntry ei = null;
+    if (realizationPrice != null) {
+      ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE, asset, realizationPrice);
+    }
     WithdrawTransaction withdraw = new WithdrawTransaction(t);
     return withdraw.process(startSnapshot, ei);
   }
 
+  /**
+   * Process a buy-transaction.
+   *
+   * @param startSnapshot The starting wallet snapshot before the transaction
+   * @param asset         The bought asset
+   * @param amount        The bought amount
+   * @param usedQuote     The quote currency amount
+   * @param quoteCurrency The quote currency
+   * @param fee           Fee amount
+   * @param feeCurrency   Fee currency
+   * @return Wallet snapshot after processing the transaction
+   */
   public static WalletSnapshot processBuy(WalletSnapshot startSnapshot, String asset, String amount,
                                           String usedQuote, String quoteCurrency, String fee,
                                           String feeCurrency) {
@@ -246,6 +281,17 @@ public class TestTools {
     return buy.process(startSnapshot, null);
   }
 
+  /**
+   * Process a sell-transaction.
+   *
+   * @param startSnapshot      The wallet snapshot before the transaction
+   * @param asset              The sold asset
+   * @param amount             The sold amount
+   * @param obtainedUsdtAmount Obtained USDT
+   * @param fee                Fee amount
+   * @param feeCurrency        Fee currency
+   * @return Wallet snapshot after processing the transaction
+   */
   public static WalletSnapshot processSell(WalletSnapshot startSnapshot, String asset,
                                            String amount, String obtainedUsdtAmount, String fee,
                                            String feeCurrency) {
@@ -264,6 +310,14 @@ public class TestTools {
     return sell.process(startSnapshot, null);
   }
 
+  /**
+   * Process an asset-distribution transaction.
+   *
+   * @param startSnapshot Wallet snapshot before the transaction
+   * @param amount        Distributed amount
+   * @param asset         Distributed asset
+   * @return Wallet snapshot after processing the transaction
+   */
   public static WalletSnapshot processDistribution(WalletSnapshot startSnapshot,
                                                    String amount, String asset) {
     transactionTime += 1000;

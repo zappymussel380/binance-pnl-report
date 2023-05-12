@@ -6,6 +6,7 @@ import static no.strazdins.testtools.TestTools.processDeposit;
 import static no.strazdins.testtools.TestTools.processDistribution;
 import static no.strazdins.testtools.TestTools.processSell;
 import static no.strazdins.testtools.TestTools.processWithdraw;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import no.strazdins.data.Decimal;
 import no.strazdins.data.WalletSnapshot;
@@ -175,5 +176,63 @@ class ScenarioTest {
     expectWalletState(ws2, "0", "0", "100", "TWT", "0");
     WalletSnapshot ws3 = processDistribution(ws2, "-100", "TWT");
     expectWalletState(ws3, "0", "0");
+  }
+
+  @Test
+  void testDepositFailWhenAssetPriceMissing() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    assertThrows(IllegalArgumentException.class, () -> processDeposit(ws1, "LTC", "2", null));
+  }
+
+  @Test
+  void testWithdrawFailWhenAssetPriceMissing() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    ws1.addAsset("LTC", new Decimal("2"), new Decimal("200"));
+    assertThrows(IllegalArgumentException.class, () -> processWithdraw(ws1, "LTC", "2", null));
+  }
+
+  @Test
+  void testDepositUsdWithoutExtraInfo() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    WalletSnapshot ws2 = processDeposit(ws1, "USD", "2000", null);
+    expectWalletState(ws2, "0", "0", "2000", "USD", "1");
+
+    ws2 = processDeposit(ws1, "USDT", "2000", null);
+    expectWalletState(ws2, "0", "0", "2000", "USDT", "1");
+
+    ws2 = processDeposit(ws1, "BUSD", "2000", null);
+    expectWalletState(ws2, "0", "0", "2000", "BUSD", "1");
+  }
+
+  @Test
+  void testWithdrawUsdWithoutExtraInfo() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    ws1.addAsset("USD", new Decimal("1000"), Decimal.ONE);
+    ws1.addAsset("BUSD", new Decimal("2000"), Decimal.ONE);
+    ws1.addAsset("USDT", new Decimal("3000"), Decimal.ONE);
+
+    WalletSnapshot ws2 = processWithdraw(ws1, "USD", "500", null);
+    expectWalletState(
+        ws2, "0", "0",
+        "500", "USD", "1",
+        "2000", "BUSD", "1",
+        "3000", "USDT", "1"
+    );
+
+    ws2 = processWithdraw(ws1, "BUSD", "500", null);
+    expectWalletState(
+        ws2, "0", "0",
+        "1000", "USD", "1",
+        "1500", "BUSD", "1",
+        "3000", "USDT", "1"
+    );
+
+    ws2 = processWithdraw(ws1, "USDT", "500", null);
+    expectWalletState(
+        ws2, "0", "0",
+        "1000", "USD", "1",
+        "2000", "BUSD", "1",
+        "2500", "USDT", "1"
+    );
   }
 }

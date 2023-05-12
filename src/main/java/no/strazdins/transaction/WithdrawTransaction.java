@@ -45,7 +45,7 @@ public class WithdrawTransaction extends Transaction {
     baseCurrency = withdraw.getAsset();
     baseCurrencyAmount = withdraw.getAmount();
     Decimal assetAmount = withdraw.getAmount().negate();
-    Decimal realizationPrice = new Decimal(extraInfo.value());
+    Decimal realizationPrice = findRealizationPrice(extraInfo);
     avgPriceInUsdt = realizationPrice;
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     baseObtainPriceInUsdt = newSnapshot.getAvgBaseObtainPrice();
@@ -56,6 +56,25 @@ public class WithdrawTransaction extends Transaction {
     newSnapshot.decreaseAsset(baseCurrency, assetAmount);
 
     return newSnapshot;
+  }
+
+  /**
+   * Find out realization value of the withdrawn asset - either from the extra info or use 1.0 if
+   * it is a USD-like asset.
+   *
+   * @param extraInfo The user-provided extra info
+   * @return The realization price of hte withdrawn asset
+   * @throws IllegalArgumentException When price can neither be determined from ExtraInfo
+   *                                  nor inferred
+   */
+  private Decimal findRealizationPrice(ExtraInfoEntry extraInfo) throws IllegalArgumentException {
+    if (isUsdLike(withdraw.getAsset())) {
+      return Decimal.ONE;
+    } else if (extraInfo != null) {
+      return new Decimal(extraInfo.value());
+    } else {
+      throw new IllegalArgumentException("Realization price must be specified for withdrawals");
+    }
   }
 
   @Override

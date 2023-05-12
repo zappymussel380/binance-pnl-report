@@ -493,4 +493,14 @@ public class Transaction {
     }
     return diff;
   }
+
+  /**
+   * Check whether the provided asset is USD or one of it's coin-equivalents.
+   *
+   * @param asset The asset
+   * @return True when it is USD or alike (USDT, BUSD)
+   */
+  protected static boolean isUsdLike(String asset) {
+    return "USD".equals(asset) || "BUSD".equals(asset) || "USDT".equals(asset);
+  }
 }
