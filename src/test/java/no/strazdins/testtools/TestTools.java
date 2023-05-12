@@ -14,6 +14,8 @@ import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.Wallet;
+import no.strazdins.data.WalletDiff;
 import no.strazdins.process.AutoInvestSubscription;
 import no.strazdins.process.ReportLogic;
 import no.strazdins.transaction.AutoInvestTransaction;
@@ -144,5 +146,34 @@ public class TestTools {
           operation, asset, amount, ""));
     }
     return changeList;
+  }
+
+  /**
+   * Create a WalletDiff.
+   *
+   * @param assetAdditions The additions of assets as tuples (amount, asset)
+   * @return The corresponding WalletDiff
+   */
+  public static WalletDiff createWalletDiff(String... assetAdditions) {
+    WalletDiff diff = new WalletDiff();
+    for (int i = 0; i < assetAdditions.length; i += 2) {
+      diff.add(assetAdditions[i + 1], new Decimal(assetAdditions[i]));
+    }
+    return diff;
+  }
+
+  /**
+   * Create wallet with given assets.
+   *
+   * @param assets Each asset is specified as a triplet (amount, asset, obtainPrice)
+   * @return A new wallet with the given assets
+   */
+  public static Wallet createWalletWith(String... assets) {
+    assertEquals(0, assets.length % 3, "Each asset must be specified with three values");
+    Wallet w = new Wallet();
+    for (int i = 0; i < assets.length; i += 3) {
+      w.addAsset(assets[i + 1], new Decimal(assets[i]), new Decimal(assets[i + 2]));
+    }
+    return w;
   }
 }

@@ -115,15 +115,13 @@ class RawAccountChangeTest {
   @Test
   void testMergeMultiple() {
     long thisTime = System.currentTimeMillis();
-    List<RawAccountChange> originalChanges = new LinkedList<>();
-    originalChanges.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        BUY, "BTC", new Decimal("0.1"), ""));
-    originalChanges.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        BUY, "BTC", new Decimal("0.2"), ""));
-    originalChanges.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        BUY, "BTC", new Decimal("0.3"), ""));
-    originalChanges.add(new RawAccountChange(thisTime, AccountType.SPOT,
-        BUY, "BTC", new Decimal("0.4"), ""));
+    List<RawAccountChange> originalChanges = createSpotAccountChanges(
+        thisTime,
+        "Buy", "0.1", "BTC",
+        "Buy", "0.2", "BTC",
+        "Buy", "0.3", "BTC",
+        "Buy", "0.4", "BTC"
+    );
 
     RawAccountChange merged = RawAccountChange.merge(originalChanges);
     RawAccountChange expected = new RawAccountChange(thisTime, AccountType.SPOT,
