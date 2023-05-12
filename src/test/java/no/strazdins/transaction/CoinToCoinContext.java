@@ -18,11 +18,11 @@ import no.strazdins.data.WalletSnapshot;
 class CoinToCoinContext {
   private final WalletSnapshot startSnapshot;
   private String buyAsset;
-  private List<String> buyAmounts = new ArrayList<>();
+  private final List<String> buyAmounts = new ArrayList<>();
   private String sellAsset;
-  private List<String> sellAmounts = new ArrayList<>();
+  private final List<String> sellAmounts = new ArrayList<>();
   private String feeAsset;
-  private List<String> feeAmounts = new ArrayList<>();
+  private final List<String> feeAmounts = new ArrayList<>();
 
   /**
    * Create test for coin-to-coin transaction.
