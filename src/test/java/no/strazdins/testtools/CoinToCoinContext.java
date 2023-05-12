@@ -1,4 +1,4 @@
-package no.strazdins.transaction;
+package no.strazdins.testtools;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -11,11 +11,13 @@ import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletSnapshot;
+import no.strazdins.transaction.CoinToCoinTransaction;
+import no.strazdins.transaction.Transaction;
 
 /**
  * A context for temporary storing data for Coin-to-coin tests, and running the tests.
  */
-class CoinToCoinContext {
+public class CoinToCoinContext {
   private final WalletSnapshot startSnapshot;
   private String buyAsset;
   private final List<String> buyAmounts = new ArrayList<>();
@@ -29,7 +31,7 @@ class CoinToCoinContext {
    *
    * @param startSnapshot The starting wallet snapshot, before the transaction
    */
-  CoinToCoinContext(WalletSnapshot startSnapshot) {
+  public CoinToCoinContext(WalletSnapshot startSnapshot) {
     this.startSnapshot = startSnapshot;
   }
 

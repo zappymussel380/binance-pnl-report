@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import no.strazdins.data.Decimal;
 import no.strazdins.data.WalletSnapshot;
+import no.strazdins.testtools.CoinToCoinContext;
 import org.junit.jupiter.api.Test;
 
 /**
