@@ -1,19 +1,14 @@
 package no.strazdins.transaction;
 
-import java.util.Objects;
-import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
-import no.strazdins.data.ExtraInfoType;
 import no.strazdins.data.Operation;
-import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.TimeConverter;
 
 /**
  * A transaction of depositing a crypto to the Binance account.
  */
-public class DepositTransaction extends Transaction {
-  RawAccountChange deposit;
+public class DepositTransaction extends ExternalTransferTransaction {
 
   /**
    * Create a deposit transaction.
@@ -22,77 +17,33 @@ public class DepositTransaction extends Transaction {
    */
   public DepositTransaction(Transaction t) {
     super(t);
-    deposit = getFirstChangeOfType(Operation.DEPOSIT);
-    if (deposit == null) {
-      deposit = getFirstChangeOfType(Operation.FIAT_DEPOSIT);
+    change = getFirstChangeOfType(Operation.DEPOSIT);
+    if (change == null) {
+      change = getFirstChangeOfType(Operation.FIAT_DEPOSIT);
     }
-    if (deposit == null) {
+    if (change == null) {
       throw new IllegalStateException("Can't create a deposit transaction without a deposit op!");
     }
   }
 
   @Override
   public String toString() {
-    return "Deposit " + deposit.getAmount() + " " + deposit.getAsset()
+    return "Deposit " + change.getAmount() + " " + change.getAsset()
         + " @ " + TimeConverter.utcTimeToString(utcTime);
   }
 
   @Override
-  public ExtraInfoEntry getNecessaryExtraInfo() {
-    String date = TimeConverter.utcTimeToDateString(utcTime);
-    String hint = "<" + deposit.getAsset() + " price in USD on " + date + ">";
-    return new ExtraInfoEntry(utcTime, ExtraInfoType.ASSET_PRICE, deposit.getAsset(), hint);
-  }
-
-  @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    baseObtainPriceInUsdt = findObtainPrice(extraInfo);
-    baseCurrency = deposit.getAsset();
-    baseCurrencyAmount = deposit.getAmount();
+    baseObtainPriceInUsdt = findExternalPrice(extraInfo);
+    baseCurrency = change.getAsset();
+    baseCurrencyAmount = change.getAmount();
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
     newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, baseObtainPriceInUsdt);
     return newSnapshot;
   }
 
-  /**
-   * Find the obtain-price from Extra info (or assume 1.0 for USD currency)
-   *
-   * @param extraInfo The user-provided extra-info
-   * @return The obtain-price
-   * @throws IllegalArgumentException When obtain-price can't be determined
-   */
-  private Decimal findObtainPrice(ExtraInfoEntry extraInfo) throws IllegalArgumentException {
-    if (isUsdLike(deposit.getAsset())) {
-      return Decimal.ONE;
-    } else if (extraInfo != null) {
-      return new Decimal(extraInfo.value());
-    } else {
-      throw new IllegalArgumentException("Obtain price must be specified for all deposited coins");
-    }
-  }
-
   @Override
   public String getType() {
     return "Deposit";
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    if (!super.equals(o)) {
-      return false;
-    }
-    DepositTransaction that = (DepositTransaction) o;
-    return Objects.equals(deposit, that.deposit);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(super.hashCode(), deposit);
   }
 }

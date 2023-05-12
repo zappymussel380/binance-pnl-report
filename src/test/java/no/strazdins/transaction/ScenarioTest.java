@@ -82,7 +82,7 @@ class ScenarioTest {
         "0.99333005", "BNB", "20.30282712"
     );
 
-    WalletSnapshot ws9 = processWithdraw(ws8, "LTC", "2", "82.49245900");
+    WalletSnapshot ws9 = processWithdraw(ws8, "LTC", "-2", "82.49245900");
     expectWalletState(ws9, "20", "19.79157454",
         "9.98728861", "LTC", "72.49245900",
         "98.90777367", "USDT", "1",
@@ -212,7 +212,7 @@ class ScenarioTest {
     ws1.addAsset("BUSD", new Decimal("2000"), Decimal.ONE);
     ws1.addAsset("USDT", new Decimal("3000"), Decimal.ONE);
 
-    WalletSnapshot ws2 = processWithdraw(ws1, "USD", "500", null);
+    WalletSnapshot ws2 = processWithdraw(ws1, "USD", "-500", null);
     expectWalletState(
         ws2, "0", "0",
         "500", "USD", "1",
@@ -220,7 +220,7 @@ class ScenarioTest {
         "3000", "USDT", "1"
     );
 
-    ws2 = processWithdraw(ws1, "BUSD", "500", null);
+    ws2 = processWithdraw(ws1, "BUSD", "-500", null);
     expectWalletState(
         ws2, "0", "0",
         "1000", "USD", "1",
@@ -228,7 +228,7 @@ class ScenarioTest {
         "3000", "USDT", "1"
     );
 
-    ws2 = processWithdraw(ws1, "USDT", "500", null);
+    ws2 = processWithdraw(ws1, "USDT", "-500", null);
     expectWalletState(
         ws2, "0", "0",
         "1000", "USD", "1",

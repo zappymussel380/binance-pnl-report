@@ -74,6 +74,11 @@ public class CoinToCoinContext {
     return this;
   }
 
+  /**
+   * Process the buy/sell transaction, based on cached buy-amounts, sell-amounts and fee-amounts.
+   *
+   * @return WalletSnapshot after processing the buy/sell transaction
+   */
   public WalletSnapshot process() {
     long time = System.currentTimeMillis();
     Transaction t = new Transaction(time);

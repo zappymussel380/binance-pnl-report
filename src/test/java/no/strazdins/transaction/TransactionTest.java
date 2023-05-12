@@ -3,6 +3,8 @@ package no.strazdins.transaction;
 import static no.strazdins.data.Operation.BUY;
 import static no.strazdins.data.Operation.FEE;
 import static no.strazdins.data.Operation.SELL;
+import static no.strazdins.testtools.TestTools.createDeposit;
+import static no.strazdins.testtools.TestTools.createWithdrawal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -10,6 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
+import no.strazdins.data.ExtraInfoEntry;
+import no.strazdins.data.ExtraInfoType;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletDiff;
@@ -82,6 +86,46 @@ class TransactionTest {
     appendOperation(t, SELL, "-6000", "USDT");
     appendOperation(t, BUY, "0.3", "BTC");
     assertEquals(6, t.getTotalOperationCount());
+  }
+
+  @Test
+  void testDepositExtraInfo() {
+    DepositTransaction deposit = createDeposit("2", "LTC");
+    ExtraInfoEntry necessaryExtraInfo = deposit.getNecessaryExtraInfo();
+    assertNotNull(necessaryExtraInfo);
+    assertEquals("LTC", necessaryExtraInfo.asset());
+    assertEquals(deposit.getUtcTime(), necessaryExtraInfo.utcTimestamp());
+    assertEquals(ExtraInfoType.ASSET_PRICE, necessaryExtraInfo.type());
+  }
+
+  @Test
+  void testWithdrawalExtraInfo() {
+    WithdrawTransaction withdraw = createWithdrawal("2", "LTC");
+    ExtraInfoEntry necessaryExtraInfo = withdraw.getNecessaryExtraInfo();
+    assertNotNull(necessaryExtraInfo);
+    assertEquals("LTC", necessaryExtraInfo.asset());
+    assertEquals(withdraw.getUtcTime(), necessaryExtraInfo.utcTimestamp());
+    assertEquals(ExtraInfoType.ASSET_PRICE, necessaryExtraInfo.type());
+  }
+
+  @Test
+  void testUsdDepositDoesNotRequireExtraInfo() {
+    DepositTransaction usdDeposit = createDeposit("2000", "USD");
+    assertNull(usdDeposit.getNecessaryExtraInfo());
+    usdDeposit = createDeposit("2000", "USDT");
+    assertNull(usdDeposit.getNecessaryExtraInfo());
+    usdDeposit = createDeposit("2000", "BUSD");
+    assertNull(usdDeposit.getNecessaryExtraInfo());
+  }
+
+  @Test
+  void testUsdWithdrawalDoesNotRequireExtraInfo() {
+    WithdrawTransaction usdWithdrawal = createWithdrawal("2000", "USD");
+    assertNull(usdWithdrawal.getNecessaryExtraInfo());
+    usdWithdrawal = createWithdrawal("2000", "USDT");
+    assertNull(usdWithdrawal.getNecessaryExtraInfo());
+    usdWithdrawal = createWithdrawal("2000", "BUSD");
+    assertNull(usdWithdrawal.getNecessaryExtraInfo());
   }
 
   private void appendOperation(Transaction t, Operation operation, String amount, String asset) {

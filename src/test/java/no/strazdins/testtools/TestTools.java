@@ -215,16 +215,27 @@ public class TestTools {
    */
   public static WalletSnapshot processDeposit(WalletSnapshot startSnapshot,
                                               String asset, String amount, String obtainPrice) {
-    transactionTime += 1000;
-    Transaction t = new Transaction(transactionTime);
-    t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.DEPOSIT,
-        asset, new Decimal(amount), "Deposit"));
     ExtraInfoEntry ei = null;
     if (obtainPrice != null) {
       ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE, asset, obtainPrice);
     }
-    DepositTransaction deposit = new DepositTransaction(t);
+    DepositTransaction deposit = createDeposit(amount, asset);
     return deposit.process(startSnapshot, ei);
+  }
+
+  /**
+   * Create a deposit transaction.
+   *
+   * @param amount The deposited amount
+   * @param asset  The deposited asset
+   * @return Deposit transaction, with a new timestamp
+   */
+  public static DepositTransaction createDeposit(String amount, String asset) {
+    transactionTime += 1000;
+    Transaction t = new Transaction(transactionTime);
+    t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.DEPOSIT,
+        asset, new Decimal(amount), "Deposit"));
+    return new DepositTransaction(t);
   }
 
   /**
@@ -239,16 +250,27 @@ public class TestTools {
    */
   public static WalletSnapshot processWithdraw(WalletSnapshot startSnapshot, String asset,
                                                String amount, String realizationPrice) {
-    transactionTime += 1000;
-    Transaction t = new Transaction(transactionTime);
-    t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.WITHDRAW,
-        asset, new Decimal(amount).negate(), "Withdraw"));
+    WithdrawTransaction withdraw = createWithdrawal(amount, asset);
     ExtraInfoEntry ei = null;
     if (realizationPrice != null) {
       ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE, asset, realizationPrice);
     }
-    WithdrawTransaction withdraw = new WithdrawTransaction(t);
     return withdraw.process(startSnapshot, ei);
+  }
+
+  /**
+   * Create a withdrawal transaction.
+   *
+   * @param amount The withdrawn amount
+   * @param asset  The withdrawn asset
+   * @return Withdrawal transaction, with a new timestamp
+   */
+  public static WithdrawTransaction createWithdrawal(String amount, String asset) {
+    transactionTime += 1000;
+    Transaction t = new Transaction(transactionTime);
+    t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.WITHDRAW,
+        asset, new Decimal(amount), "Withdraw"));
+    return new WithdrawTransaction(t);
   }
 
   /**
