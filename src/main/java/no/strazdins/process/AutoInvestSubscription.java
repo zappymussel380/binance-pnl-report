@@ -51,6 +51,15 @@ public class AutoInvestSubscription {
         && allProportionsSumUpToOne();
   }
 
+  /**
+   * Get the investment amount for this subscription.
+   *
+   * @return Investment amount (for every step)
+   */
+  public Decimal getInvestmentAmount() {
+    return investmentAmount;
+  }
+
   private boolean allProportionsSumUpToOne() {
     Decimal proportionSum = Decimal.ZERO;
     for (Decimal proportion : assetProportions.values()) {

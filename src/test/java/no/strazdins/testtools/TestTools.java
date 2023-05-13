@@ -198,7 +198,7 @@ public class TestTools {
     long time = System.currentTimeMillis();
     Decimal changeAmount = new Decimal(amount);
     AutoInvestTransaction t = new AutoInvestTransaction(new Transaction(time),
-        new AutoInvestSubscription(changeAmount));
+        new AutoInvestSubscription(changeAmount.negate()));
     t.append(new RawAccountChange(time, AccountType.SPOT, Operation.AUTO_INVEST, asset,
         changeAmount, ""));
     return t;

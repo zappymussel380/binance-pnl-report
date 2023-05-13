@@ -2,8 +2,10 @@ package no.strazdins.transaction;
 
 import java.util.Objects;
 import no.strazdins.data.Decimal;
+import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.WalletSnapshot;
 import no.strazdins.process.AutoInvestSubscription;
 import no.strazdins.tool.TimeConverter;
 
@@ -37,7 +39,7 @@ public class AutoInvestTransaction extends Transaction {
    */
   public String getBoughtAsset() {
     String boughtAsset = null;
-    RawAccountChange invest = getRawInvest();
+    RawAccountChange invest = getRawAccountChange();
     if (invest != null && invest.getAmount().isPositive()) {
       boughtAsset = invest.getAsset();
     }
@@ -55,13 +57,35 @@ public class AutoInvestTransaction extends Transaction {
 
   @Override
   public String toString() {
-    RawAccountChange op = getRawInvest();
+    RawAccountChange op = getRawAccountChange();
     String opDetails = op != null ? (op.getAmount().getNiceString() + " " + op.getAsset()) : "";
     return "Auto-Invest " + opDetails + " @ "
         + TimeConverter.utcTimeToString(utcTime);
   }
   // TODO - if invest and acquire (USDT and coin) in the same second - throw error
 
+  // TODO - require extra info: proportions for each coin, as single entry, in format "asset1 proportion1|asset2 proportion2|..."
+
+  @Override
+  public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
+    if (!subscription.isValid()) {
+      tryConfigureSubscription(extraInfo);
+    }
+
+    WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);
+    RawAccountChange change = getRawAccountChange();
+    baseCurrency = change.getAsset();
+    baseCurrencyAmount = change.getAmount();
+    if (isInvestment()) {
+      newSnapshot.decreaseAsset(baseCurrency, baseCurrencyAmount.negate());
+    } else {
+      // TODO - for acquisition - check if the subscription is valid,
+      //    get the invested USDT for this coin,
+      //    calculate obtain price,
+      //    add it to wallet
+    }
+    return newSnapshot;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -107,7 +131,7 @@ public class AutoInvestTransaction extends Transaction {
    * @return The invested asset or null if this is not an investment transaction
    */
   public String getInvestedAsset() {
-    RawAccountChange invest = getRawInvest();
+    RawAccountChange invest = getRawAccountChange();
     return invest.getAmount().isNegative() ? invest.getAsset() : null;
   }
 
@@ -117,11 +141,11 @@ public class AutoInvestTransaction extends Transaction {
    * @return The amount or null if no asset is found
    */
   public Decimal getAmount() {
-    RawAccountChange invest = getRawInvest();
+    RawAccountChange invest = getRawAccountChange();
     return invest != null ? invest.getAmount() : null;
   }
 
-  private RawAccountChange getRawInvest() {
+  private RawAccountChange getRawAccountChange() {
     return getFirstChangeOfType(Operation.AUTO_INVEST);
   }
 
