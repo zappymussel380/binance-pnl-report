@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import no.strazdins.data.AccountType;
@@ -198,7 +200,7 @@ public class TestTools {
     long time = System.currentTimeMillis();
     Decimal changeAmount = new Decimal(amount);
     AutoInvestTransaction t = new AutoInvestTransaction(new Transaction(time),
-        new AutoInvestSubscription(changeAmount.negate()));
+        new AutoInvestSubscription(time, changeAmount.negate()));
     t.append(new RawAccountChange(time, AccountType.SPOT, Operation.AUTO_INVEST, asset,
         changeAmount, ""));
     return t;
@@ -393,5 +395,47 @@ public class TestTools {
   private static void expectPnl(WalletSnapshot ws, String transactionPnl, String runningPnl) {
     assertEquals(new Decimal(transactionPnl), ws.getTransaction().getPnl());
     assertEquals(new Decimal(runningPnl), ws.getPnl());
+  }
+
+  /**
+   * Create an extra-info entry for auto-invest subscription.
+   *
+   * @param utcTime          The UCT timestamp to use
+   * @param assetProportions The asset proportions in the investment. Each asset specified as
+   *                         a tuple (asset, proportion), where the proportion is a decimal in
+   *                         the range from "0.0" to "1.0".
+   * @return The extra info, as expected by the auto-invest subscription
+   */
+  public static ExtraInfoEntry createAutoInvestExtraInfo(long utcTime,
+                                                         String... assetProportions) {
+    List<String> assets = extractEvenElementsFrom(assetProportions);
+    List<String> proportions = extractOddElementsFrom(assetProportions);
+
+    return new ExtraInfoEntry(utcTime, ExtraInfoType.AUTO_INVEST_PROPORTIONS,
+        String.join("|", assets), String.join("|", proportions));
+  }
+
+  /**
+   * Create ExtraInfo as it would be expected for the given transaction.
+   *
+   * @param t      The auto-invest transaction which timestamp will be used
+   * @param assets The expected acquired assets
+   * @return The expected info entry necessary for the corresponding subscription
+   */
+  public static ExtraInfoEntry createExpectedAutoInvestExtraInfo(Transaction t,
+                                                                 String... assets) {
+    return new ExtraInfoEntry(t.getUtcTime(), ExtraInfoType.AUTO_INVEST_PROPORTIONS,
+        String.join("|", assets),
+        "Proportions for assets in format proportion1|proportion2|...");
+  }
+
+  private static List<String> extractEvenElementsFrom(String[] values) {
+    List<String> stringList = new ArrayList<>(Arrays.asList(values));
+    return stringList.stream().filter(s -> stringList.indexOf(s) % 2 == 0).toList();
+  }
+
+  private static List<String> extractOddElementsFrom(String[] values) {
+    List<String> stringList = new ArrayList<>(Arrays.asList(values));
+    return stringList.stream().filter(s -> stringList.indexOf(s) % 2 == 1).toList();
   }
 }

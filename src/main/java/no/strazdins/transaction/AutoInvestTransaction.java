@@ -64,12 +64,18 @@ public class AutoInvestTransaction extends Transaction {
   }
   // TODO - if invest and acquire (USDT and coin) in the same second - throw error
 
-  // TODO - require extra info: proportions for each coin, as single entry, in format "asset1 proportion1|asset2 proportion2|..."
+  @Override
+  public ExtraInfoEntry getNecessaryExtraInfo() {
+    return utcTime == subscription.getUtcTime()
+        ? subscription.getNecessaryExtraInfo()
+        : null;
+  }
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
-    if (!subscription.isValid()) {
-      tryConfigureSubscription(extraInfo);
+    if (!subscription.isValid() && !subscription.tryConfigure(extraInfo)) {
+      throw new IllegalStateException("Missing necessary extra info for auto-invest: "
+          + getNecessaryExtraInfo());
     }
 
     WalletSnapshot newSnapshot = walletSnapshot.prepareForTransaction(this);

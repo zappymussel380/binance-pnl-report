@@ -55,7 +55,9 @@ public class ReportLogic {
                                        Transaction transaction) {
     if (isAutoInvestSpendOperation(change)) {
       if (isNewAutoInvestSubscription()) {
-        autoInvestSubscription = new AutoInvestSubscription(change.getAmount().negate());
+        autoInvestSubscription = new AutoInvestSubscription(
+            getTimestampOfFirstCachedAutoInvestOrDefault(transaction.getUtcTime()),
+            change.getAmount().negate());
         updateSubscriptionForCachedAutoInvestTransactions();
       }
       rememberLastAutoInvestTransactions();
@@ -68,7 +70,17 @@ public class ReportLogic {
       autoInvestTransactions.add((AutoInvestTransaction) transaction);
     }
 
+    if (!Transaction.isUsdLike(change.getAsset())) {
+      autoInvestSubscription.registerAcquiredAsset(change.getAsset());
+    }
+
     return transaction;
+  }
+
+  private long getTimestampOfFirstCachedAutoInvestOrDefault(long defaultValue) {
+    return !autoInvestTransactions.isEmpty()
+        ? autoInvestTransactions.get(0).getUtcTime()
+        : defaultValue;
   }
 
   private void rememberLastAutoInvestTransactions() {

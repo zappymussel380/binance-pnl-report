@@ -1,8 +1,12 @@
 package no.strazdins.process;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import no.strazdins.data.Decimal;
+import no.strazdins.data.ExtraInfoEntry;
+import no.strazdins.data.ExtraInfoType;
 
 /**
  * Auto-invest subscription, with configuration specifying the investment amount and money
@@ -12,17 +16,24 @@ public class AutoInvestSubscription {
   private final Decimal investmentAmount;
   private final Map<String, Decimal> assetProportions = new HashMap<>();
 
+  private final Set<String> acquiredAssets = new HashSet<>();
+
+  private final long utcTime;
+
   /**
    * Create auto-invest subscription.
    *
+   * @param utcTime          UTC timestamp of the subscriptions first investment transaction
    * @param investmentAmount The investment amount, in USD
    * @throws IllegalArgumentException When investment amount is null or non-positive
    */
-  public AutoInvestSubscription(Decimal investmentAmount) throws IllegalArgumentException {
+  public AutoInvestSubscription(long utcTime, Decimal investmentAmount)
+      throws IllegalArgumentException {
     if (investmentAmount == null || !investmentAmount.isPositive()) {
       throw new IllegalArgumentException("Investment amount must be positive, "
           + investmentAmount + " provided");
     }
+    this.utcTime = utcTime;
     this.investmentAmount = investmentAmount;
   }
 
@@ -60,11 +71,52 @@ public class AutoInvestSubscription {
     return investmentAmount;
   }
 
+  /**
+   * Get UTC timestamp of the subscriptions first investment transaction.
+   *
+   * @return The UTC timestamp of the subscription (first transaction)
+   */
+  public long getUtcTime() {
+    return utcTime;
+  }
+
   private boolean allProportionsSumUpToOne() {
     Decimal proportionSum = Decimal.ZERO;
     for (Decimal proportion : assetProportions.values()) {
       proportionSum = proportionSum.add(proportion);
     }
     return proportionSum.equals(Decimal.ONE);
+  }
+
+  /**
+   * Get the ExtraInfo which is necessary for this transaction.
+   *
+   * @return The necessary extra info
+   */
+  public ExtraInfoEntry getNecessaryExtraInfo() {
+    String[] assets = acquiredAssets.toArray(new String[assetProportions.size()]);
+    String assetString = String.join("|", assets);
+    return new ExtraInfoEntry(utcTime, ExtraInfoType.AUTO_INVEST_PROPORTIONS, assetString,
+        "Proportions for assets in format proportion1|proportion2|...");
+  }
+
+  /**
+   * Register that an asset is acquired in an auto-invest transaction belonging to
+   * this subscription.
+   *
+   * @param asset The acquired asset, must be non-USD-like (not USD, USDT, BUSD, USDC)
+   */
+  public void registerAcquiredAsset(String asset) {
+    acquiredAssets.add(asset);
+  }
+
+  /**
+   * Try to configure this subscription with provided extra information.
+   *
+   * @param extraInfo The extra information
+   * @return True if the subscription is now valid after configuration
+   */
+  public boolean tryConfigure(ExtraInfoEntry extraInfo) {
+    return false;
   }
 }

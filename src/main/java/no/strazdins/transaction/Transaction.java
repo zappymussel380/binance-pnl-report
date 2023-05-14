@@ -1,6 +1,5 @@
 package no.strazdins.transaction;
 
-import static no.strazdins.data.Operation.AUTO_INVEST;
 import static no.strazdins.data.Operation.EARN_SUBSCRIPTION;
 
 import java.util.Collections;
@@ -153,13 +152,7 @@ public class Transaction {
   }
 
   private AutoInvestTransaction tryToConvertToAutoInvest() {
-    AutoInvestTransaction t = null;
-    if (consistsOf(AUTO_INVEST)
-        || consistsOf(AUTO_INVEST, EARN_SUBSCRIPTION)
-        || consistsOf(AUTO_INVEST, EARN_SUBSCRIPTION, EARN_SUBSCRIPTION)) {
-      t = (AutoInvestTransaction) this;
-    }
-    return t;
+    return this instanceof AutoInvestTransaction invest ? invest : null;
   }
 
   /**
@@ -500,7 +493,8 @@ public class Transaction {
    * @param asset The asset
    * @return True when it is USD or alike (USDT, BUSD)
    */
-  protected static boolean isUsdLike(String asset) {
-    return "USD".equals(asset) || "BUSD".equals(asset) || "USDT".equals(asset);
+  public static boolean isUsdLike(String asset) {
+    return "USD".equals(asset) || "BUSD".equals(asset) || "USDT".equals(asset)
+        || "USDC".equals(asset);
   }
 }

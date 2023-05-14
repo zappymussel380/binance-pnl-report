@@ -1,6 +1,8 @@
 package no.strazdins.transaction;
 
+import static no.strazdins.testtools.TestTools.createAutoInvestExtraInfo;
 import static no.strazdins.testtools.TestTools.createAutoInvestments;
+import static no.strazdins.testtools.TestTools.createExpectedAutoInvestExtraInfo;
 import static no.strazdins.testtools.TestTools.expectAcquisition;
 import static no.strazdins.testtools.TestTools.expectInvestment;
 import static no.strazdins.testtools.TestTools.expectNotSameSubscription;
@@ -8,12 +10,16 @@ import static no.strazdins.testtools.TestTools.expectSameSubscription;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
+import no.strazdins.data.ExtraInfo;
+import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.WalletSnapshot;
 import org.junit.jupiter.api.Test;
 
 class AutoInvestTransactionTest {
@@ -135,4 +141,92 @@ class AutoInvestTransactionTest {
     expectSameSubscription(transactions.subList(0, 4));
     expectSameSubscription(transactions.subList(4, 12));
   }
+
+  @Test
+  void testProcess() {
+    List<Transaction> transactions = createAutoInvestments(
+        "-5", "USDT",
+        "0.001", "BNB",
+        "0.0002", "BTC",
+        "0.0004", "ETH",
+        "-10", "USDT",
+        "0.0004", "BTC",
+        "0.0008", "ETH",
+        "-10", "USDT",
+        "0.0005", "BTC",
+        "0.001", "ETH",
+        "-5", "USDT",
+        "0.0002", "BTC",
+        "-5", "USDT",
+        "0.0002", "BTC"
+    );
+    WalletSnapshot walletSnapshot = WalletSnapshot.createEmpty();
+    walletSnapshot.addAsset("USDT", new Decimal("100"), Decimal.ONE);
+    Transaction t0 = transactions.get(0);
+    Transaction t4 = transactions.get(4);
+    ExtraInfo ei = new ExtraInfo();
+    ei.add(createAutoInvestExtraInfo(t0.getUtcTime(), "BTC", "0.5", "BNB", "0.3", "ETH", "0.2"));
+    ei.add(createAutoInvestExtraInfo(t4.getUtcTime(), "BTC", "0.5", "ETH", "0.5"));
+    walletSnapshot = t0.process(walletSnapshot, ei.getAtTime(t0.getUtcTime()));
+    // TODO - assertions
+    fail();
+  }
+
+  @Test
+  void testSubscriptionTimestamps() {
+    List<Transaction> transactions = createAutoInvestments(
+        "-5", "USDT",
+        "0.001", "BNB",
+        "0.0002", "BTC",
+        "0.0004", "ETH",
+        "-10", "USDT",
+        "0.0004", "BTC",
+        "0.0008", "ETH",
+        "-10", "USDT",
+        "0.0005", "BTC",
+        "0.001", "ETH",
+        "-5", "USDT",
+        "0.0002", "BTC",
+        "-5", "USDT",
+        "0.0002", "BTC"
+    );
+    AutoInvestTransaction t0 = (AutoInvestTransaction) transactions.get(0);
+    AutoInvestTransaction t4 = (AutoInvestTransaction) transactions.get(4);
+    AutoInvestTransaction t10 = (AutoInvestTransaction) transactions.get(10);
+    assertEquals(t0.getUtcTime(), t0.getSubscription().getUtcTime());
+    assertEquals(t4.getUtcTime(), t4.getSubscription().getUtcTime());
+    assertEquals(t10.getUtcTime(), t10.getSubscription().getUtcTime());
+  }
+
+  @Test
+  void testNecessaryExtraInfo() {
+    List<Transaction> transactions = createAutoInvestments(
+        "-5", "USDT",
+        "0.001", "BNB",
+        "0.0002", "BTC",
+        "0.0004", "ETH",
+        "-10", "USDT",
+        "0.0004", "BTC",
+        "0.0008", "ETH",
+        "-10", "USDT",
+        "0.0005", "BTC",
+        "0.001", "ETH",
+        "-5", "USDT",
+        "0.0002", "BTC",
+        "-5", "USDT",
+        "0.0002", "BTC"
+    );
+    for (int i = 0; i < transactions.size(); ++i) {
+      Transaction t = transactions.get(i);
+      ExtraInfoEntry expectedExtraInfo = switch (i) {
+        case 0 -> createExpectedAutoInvestExtraInfo(t, "BTC", "BNB", "ETH");
+        case 4 -> createExpectedAutoInvestExtraInfo(t, "BTC", "ETH");
+        case 10 -> createExpectedAutoInvestExtraInfo(t, "BTC");
+        default -> null;
+      };
+      assertEquals(expectedExtraInfo, t.getNecessaryExtraInfo(),
+          "Wrong extra info for transaction #" + i);
+    }
+  }
+
 }
