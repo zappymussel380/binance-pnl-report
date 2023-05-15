@@ -23,6 +23,12 @@ class DecimalTest {
   }
 
   @Test
+  void testCreateFromInvalidString() {
+    assertThrows(NumberFormatException.class, () -> new Decimal(""));
+    assertThrows(NumberFormatException.class, () -> new Decimal("abc"));
+  }
+
+  @Test
   void testPositive() {
     assertFalse(new Decimal("0").isPositive());
     assertFalse(new Decimal("-1").isPositive());

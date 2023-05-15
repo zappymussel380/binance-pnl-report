@@ -28,8 +28,9 @@ public class Decimal implements Comparable<Decimal> {
    * Initialize the number from a string.
    *
    * @param number Decimal String. For example "12.345"
+   * @throws NumberFormatException when the provided string is not a valid number
    */
-  public Decimal(String number) {
+  public Decimal(String number) throws NumberFormatException {
     this.number = new BigDecimal(number).setScale(DEFAULT_SCALE, DEFAULT_ROUNDING);
   }
 
