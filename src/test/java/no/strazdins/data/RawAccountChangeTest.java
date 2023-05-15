@@ -1,7 +1,6 @@
 package no.strazdins.data;
 
-import static no.strazdins.data.Operation.BUY;
-import static no.strazdins.data.Operation.SELL;
+import static no.strazdins.data.Operation.*;
 import static no.strazdins.testtools.TestTools.createSpotAccountChanges;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,7 +19,9 @@ class RawAccountChangeTest {
     assertThrows(IllegalArgumentException.class, () -> new RawAccountChange(
         thisTime, AccountType.SPOT, BUY, "BTC", minusOne, "Negative buy"));
     assertThrows(IllegalArgumentException.class, () -> new RawAccountChange(
-        thisTime, AccountType.SPOT, SELL, "BTC", Decimal.ONE, "Positve sell"));
+        thisTime, AccountType.SPOT, SELL, "BTC", Decimal.ONE, "Positive sell"));
+    assertThrows(IllegalArgumentException.class, () -> new RawAccountChange(
+        thisTime, AccountType.SPOT, WITHDRAW, "BTC", Decimal.ONE, "Positive withdraw"));
   }
 
   @Test

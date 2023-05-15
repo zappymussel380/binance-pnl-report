@@ -46,6 +46,10 @@ public class RawAccountChange {
       throw new IllegalArgumentException("Amount must be negative for all sell-type changes @ "
           + TimeConverter.utcTimeToString(utcTime) + "[" + this + "]");
     }
+    if (operation == Operation.WITHDRAW && !changeAmount.isNegative()) {
+      throw new IllegalArgumentException("Amount must be negative for all withdraw-type changes @ "
+          + TimeConverter.utcTimeToString(utcTime) + "[" + this + "]");
+    }
   }
 
   /**

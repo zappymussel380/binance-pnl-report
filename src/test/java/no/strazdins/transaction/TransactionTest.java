@@ -100,7 +100,7 @@ class TransactionTest {
 
   @Test
   void testWithdrawalExtraInfo() {
-    WithdrawTransaction withdraw = createWithdrawal("2", "LTC");
+    WithdrawTransaction withdraw = createWithdrawal("-2", "LTC");
     ExtraInfoEntry necessaryExtraInfo = withdraw.getNecessaryExtraInfo();
     assertNotNull(necessaryExtraInfo);
     assertEquals("LTC", necessaryExtraInfo.asset());
@@ -120,11 +120,11 @@ class TransactionTest {
 
   @Test
   void testUsdWithdrawalDoesNotRequireExtraInfo() {
-    WithdrawTransaction usdWithdrawal = createWithdrawal("2000", "USD");
+    WithdrawTransaction usdWithdrawal = createWithdrawal("-2000", "USD");
     assertNull(usdWithdrawal.getNecessaryExtraInfo());
-    usdWithdrawal = createWithdrawal("2000", "USDT");
+    usdWithdrawal = createWithdrawal("-2000", "USDT");
     assertNull(usdWithdrawal.getNecessaryExtraInfo());
-    usdWithdrawal = createWithdrawal("2000", "BUSD");
+    usdWithdrawal = createWithdrawal("-2000", "BUSD");
     assertNull(usdWithdrawal.getNecessaryExtraInfo());
   }
 
