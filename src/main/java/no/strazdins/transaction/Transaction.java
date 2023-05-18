@@ -1,5 +1,7 @@
 package no.strazdins.transaction;
 
+import static no.strazdins.data.Operation.EARN_SUBSCRIPTION;
+
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedList;
@@ -71,7 +73,7 @@ public class Transaction {
 
   @Override
   public String toString() {
-    return "Transaction@" + TimeConverter.utcTimeToString(utcTime);
+    return "Transaction[" + getType() + "]@" + TimeConverter.utcTimeToString(utcTime);
   }
 
   /**
@@ -92,6 +94,9 @@ public class Transaction {
     if (t == null) {
       t = tryToConvertToSavingsRelated();
     }
+    if (t == null) {
+      t = tryToConvertToAutoInvest();
+    }
     return t;
   }
 
@@ -102,15 +107,20 @@ public class Transaction {
 
   private Transaction tryToConvertToSavingsRelated() {
     Transaction t = null;
-    if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
+    if (consistsOf(EARN_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
         || consistsOf(Operation.SAVINGS_DISTRIBUTION)
-        || consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_SUBSCRIPTION)) {
+        || consistsOf(EARN_SUBSCRIPTION)
+        || consistsOfMultiple(EARN_SUBSCRIPTION)) {
       t = new SavingsSubscriptionTransaction(this);
-    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)
-        || consistsOfMultiple(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION)) {
+    } else if (consistsOf(Operation.EARN_REDEMPTION)
+        || consistsOfMultiple(Operation.EARN_REDEMPTION)) {
       t = new SavingsRedemptionTransaction(this);
-    } else if (consistsOf(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST)) {
+    } else if (consistsOf(Operation.EARN_INTEREST)) {
       t = new SavingsInterestTransaction(this);
+    } else if (consistsOf(Operation.CASHBACK_VOUCHER) || consistsOf(Operation.BNB_VAULT_REWARDS)) {
+      t = new RewardTransaction(this);
+    } else if (consistsOf(Operation.COMMISSION_REBATE)) {
+      t = new CommissionTransaction(this);
     } else if (consistsOf(Operation.DISTRIBUTION)) {
       t = new DistributionTransaction(this);
     } else if (consistsOfMultiple(Operation.SMALL_ASSETS_EXCHANGE_BNB)) {
@@ -143,6 +153,10 @@ public class Transaction {
     return t;
   }
 
+  private AutoInvestTransaction tryToConvertToAutoInvest() {
+    return this instanceof AutoInvestTransaction invest ? invest : null;
+  }
+
   /**
    * Get the total number of operations (raw changes).
    *
@@ -158,7 +172,7 @@ public class Transaction {
 
   private Transaction tryToConvertToDepositOrWithdraw() {
     Transaction t = null;
-    if (consistsOf(Operation.DEPOSIT)) {
+    if (consistsOf(Operation.DEPOSIT) || consistsOf(Operation.FIAT_DEPOSIT)) {
       t = new DepositTransaction(this);
     } else if (consistsOf(Operation.WITHDRAW)) {
       t = new WithdrawTransaction(this);
@@ -218,7 +232,7 @@ public class Transaction {
    *
    * @return Multiset of all operations: count by type
    */
-  public OperationMultiSet getOperationMultiSet() {
+  public final OperationMultiSet getOperationMultiSet() {
     OperationMultiSet operationMultiSet = new OperationMultiSet();
     for (Map.Entry<Operation, List<RawAccountChange>> entry : atomicAccountChanges.entrySet()) {
       operationMultiSet.add(entry.getKey(), entry.getValue().size());
@@ -309,8 +323,7 @@ public class Transaction {
    * @return A human-readable type of the transaction.
    */
   public String getType() {
-    throw new UnsupportedOperationException("getType not implemented for "
-        + this.getClass().getSimpleName());
+    return "";
   }
 
   /**
@@ -466,7 +479,7 @@ public class Transaction {
    *
    * @return The sum of all operation changes, as wallet difference
    */
-  public WalletDiff getOperationDiff() {
+  public final WalletDiff getOperationDiff() {
     WalletDiff diff = new WalletDiff();
     for (List<RawAccountChange> changes : atomicAccountChanges.values()) {
       for (RawAccountChange change : changes) {
@@ -474,5 +487,26 @@ public class Transaction {
       }
     }
     return diff;
+  }
+
+  /**
+   * Get the number of atomic changes of specific type stores inside this transaction.
+   *
+   * @param type The type of operation which is of interest
+   * @return The number of changes of this type, 0 if none
+   */
+  public int getCountForChangesOfType(Operation type) {
+    return getChangesOfType(type).size();
+  }
+
+  /**
+   * Check whether the provided asset is USD or one of it's coin-equivalents.
+   *
+   * @param asset The asset
+   * @return True when it is USD or alike (USDT, BUSD)
+   */
+  public static boolean isUsdLike(String asset) {
+    return "USD".equals(asset) || "BUSD".equals(asset) || "USDT".equals(asset)
+        || "USDC".equals(asset);
   }
 }

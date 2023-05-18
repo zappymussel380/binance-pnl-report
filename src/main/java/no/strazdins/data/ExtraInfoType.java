@@ -6,7 +6,7 @@ import java.io.IOException;
  * The different types of necessary extra-information.
  */
 public enum ExtraInfoType {
-  ASSET_PRICE;
+  ASSET_PRICE, AUTO_INVEST_PROPORTIONS;
 
   /**
    * Construct an ExtraInfoType from a string.
@@ -18,6 +18,7 @@ public enum ExtraInfoType {
   public static ExtraInfoType fromString(String s) throws IOException {
     return switch (s) {
       case "ASSET_PRICE" -> ASSET_PRICE;
+      case "AUTO_INVEST_PROPORTIONS" -> AUTO_INVEST_PROPORTIONS;
       default -> throw new IOException("Invalid extra-info string: " + s);
     };
   }

@@ -1,22 +1,22 @@
 package no.strazdins.transaction;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static no.strazdins.testtools.TestTools.expectWalletState;
+import static no.strazdins.testtools.TestTools.processBuy;
+import static no.strazdins.testtools.TestTools.processDeposit;
+import static no.strazdins.testtools.TestTools.processDistribution;
+import static no.strazdins.testtools.TestTools.processSell;
+import static no.strazdins.testtools.TestTools.processWithdraw;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
-import no.strazdins.data.ExtraInfoEntry;
-import no.strazdins.data.ExtraInfoType;
-import no.strazdins.data.Operation;
-import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletSnapshot;
+import no.strazdins.testtools.CoinToCoinContext;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test realistic scenario(s) - list of transactions.
  */
 class ScenarioTest {
-  private static long transactionTime = System.currentTimeMillis();
 
   @Test
   void testRealisticScenario() {
@@ -82,7 +82,7 @@ class ScenarioTest {
         "0.99333005", "BNB", "20.30282712"
     );
 
-    WalletSnapshot ws9 = processWithdraw(ws8, "LTC", "2", "82.49245900");
+    WalletSnapshot ws9 = processWithdraw(ws8, "LTC", "-2", "82.49245900");
     expectWalletState(ws9, "20", "19.79157454",
         "9.98728861", "LTC", "72.49245900",
         "98.90777367", "USDT", "1",
@@ -179,102 +179,61 @@ class ScenarioTest {
     expectWalletState(ws3, "0", "0");
   }
 
-  private WalletSnapshot processDeposit(WalletSnapshot startSnapshot,
-                                        String asset, String amount, String obtainPrice) {
-    transactionTime += 1000;
-    Transaction t = new Transaction(transactionTime);
-    t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.DEPOSIT,
-        asset, new Decimal(amount), "Deposit"));
-    ExtraInfoEntry ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE,
-        asset, obtainPrice);
-    DepositTransaction deposit = new DepositTransaction(t);
-    return deposit.process(startSnapshot, ei);
+  @Test
+  void testDepositFailWhenAssetPriceMissing() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    assertThrows(IllegalArgumentException.class, () -> processDeposit(ws1, "LTC", "2", null));
   }
 
-  private WalletSnapshot processWithdraw(WalletSnapshot startSnapshot, String asset, String amount,
-                                         String realizationPrice) {
-    transactionTime += 1000;
-    Transaction t = new Transaction(transactionTime);
-    t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.WITHDRAW,
-        asset, new Decimal(amount).negate(), "Withdraw"));
-    ExtraInfoEntry ei = new ExtraInfoEntry(transactionTime, ExtraInfoType.ASSET_PRICE,
-        asset, realizationPrice);
-    WithdrawTransaction withdraw = new WithdrawTransaction(t);
-    return withdraw.process(startSnapshot, ei);
+  @Test
+  void testWithdrawFailWhenAssetPriceMissing() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    ws1.addAsset("LTC", new Decimal("2"), new Decimal("200"));
+    assertThrows(IllegalArgumentException.class, () -> processWithdraw(ws1, "LTC", "2", null));
   }
 
-  private WalletSnapshot processBuy(WalletSnapshot startSnapshot, String asset, String amount,
-                                    String usedQuote, String quoteCurrency, String fee,
-                                    String feeCurrency) {
-    transactionTime += 1000;
-    Transaction t = new Transaction(transactionTime);
-    t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
-        Operation.BUY, asset, new Decimal(amount), "Buy coin"));
-    t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
-        Operation.SELL, quoteCurrency, new Decimal(usedQuote).negate(),
-        "Sell " + quoteCurrency));
-    if (fee != null) {
-      t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
-          Operation.FEE, feeCurrency, new Decimal(fee).negate(), "Fee in " + feeCurrency));
-    }
-    BuyTransaction buy = new BuyTransaction(t);
-    return buy.process(startSnapshot, null);
+  @Test
+  void testDepositUsdWithoutExtraInfo() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    WalletSnapshot ws2 = processDeposit(ws1, "USD", "2000", null);
+    expectWalletState(ws2, "0", "0", "2000", "USD", "1");
+
+    ws2 = processDeposit(ws1, "USDT", "2000", null);
+    expectWalletState(ws2, "0", "0", "2000", "USDT", "1");
+
+    ws2 = processDeposit(ws1, "BUSD", "2000", null);
+    expectWalletState(ws2, "0", "0", "2000", "BUSD", "1");
   }
 
-  private WalletSnapshot processSell(WalletSnapshot startSnapshot, String asset, String amount,
-                                     String obtainedUsdtAmount, String fee, String feeCurrency) {
-    transactionTime += 1000;
-    Transaction t = new Transaction(transactionTime);
-    t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
-        Operation.SELL, asset, new Decimal(amount).negate(), "Sell coin"));
-    t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
-        Operation.BUY, "USDT", new Decimal(obtainedUsdtAmount), "Acquire USDT"));
-    if (fee != null) {
-      t.append(new RawAccountChange(transactionTime, AccountType.SPOT,
-          Operation.FEE, feeCurrency, new Decimal(fee).negate(), "Fee in " + feeCurrency));
-    }
-    Transaction sell = t.clarifyTransactionType();
-    assertInstanceOf(SellTransaction.class, sell);
-    return sell.process(startSnapshot, null);
-  }
+  @Test
+  void testWithdrawUsdWithoutExtraInfo() {
+    WalletSnapshot ws1 = WalletSnapshot.createEmpty();
+    ws1.addAsset("USD", new Decimal("1000"), Decimal.ONE);
+    ws1.addAsset("BUSD", new Decimal("2000"), Decimal.ONE);
+    ws1.addAsset("USDT", new Decimal("3000"), Decimal.ONE);
 
-  private WalletSnapshot processDistribution(WalletSnapshot startSnapshot,
-                                             String amount, String asset) {
-    transactionTime += 1000;
-    Transaction t = new Transaction(transactionTime);
-    t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.DISTRIBUTION, asset,
-        new Decimal(amount), "Distribute " + amount + " " + asset));
-    Transaction distribute = t.clarifyTransactionType();
-    assertInstanceOf(DistributionTransaction.class, distribute);
-    return distribute.process(startSnapshot, null);
-  }
+    WalletSnapshot ws2 = processWithdraw(ws1, "USD", "-500", null);
+    expectWalletState(
+        ws2, "0", "0",
+        "500", "USD", "1",
+        "2000", "BUSD", "1",
+        "3000", "USDT", "1"
+    );
 
-  private void expectWalletState(WalletSnapshot ws, String transactionPnl, String runningPnl,
-                                 String... assets) {
-    assertEquals(0, assets.length % 3,
-        "Assets must be specified with triplets (amount, asset, obtainPrice)");
-    int expectedAssetCount = assets.length / 3;
-    assertEquals(expectedAssetCount, ws.getWallet().getAssetCount());
-    for (int i = 0; i < assets.length; i += 3) {
-      String amount = assets[i];
-      String asset = assets[i + 1];
-      String obtainPrice = assets[i + 2];
-      expectAssetAmount(ws, asset, amount, obtainPrice);
-    }
-    expectPnl(ws, transactionPnl, runningPnl);
-  }
+    ws2 = processWithdraw(ws1, "BUSD", "-500", null);
+    expectWalletState(
+        ws2, "0", "0",
+        "1000", "USD", "1",
+        "1500", "BUSD", "1",
+        "3000", "USDT", "1"
+    );
 
-  private void expectAssetAmount(WalletSnapshot ws, String asset, String amount,
-                                 String obtainPrice) {
-    Decimal expectedAmount = new Decimal(amount);
-    assertEquals(new Decimal(amount), ws.getWallet().getAssetAmount(asset));
-    if (expectedAmount.isPositive()) {
-      assertEquals(new Decimal(obtainPrice), ws.getWallet().getAvgObtainPrice(asset));
-    }
-  }
-
-  private void expectPnl(WalletSnapshot ws, String transactionPnl, String runningPnl) {
-    assertEquals(new Decimal(transactionPnl), ws.getTransaction().getPnl());
-    assertEquals(new Decimal(runningPnl), ws.getPnl());
+    ws2 = processWithdraw(ws1, "USDT", "-500", null);
+    expectWalletState(
+        ws2, "0", "0",
+        "1000", "USD", "1",
+        "2000", "BUSD", "1",
+        "2500", "USDT", "1"
+    );
   }
 }

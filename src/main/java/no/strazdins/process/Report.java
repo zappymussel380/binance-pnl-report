@@ -30,7 +30,7 @@ public class Report implements Iterable<WalletSnapshot> {
   private final List<WalletSnapshot> walletSnapshots = new LinkedList<>();
   private WalletSnapshot currentWalletSnapshot;
 
-  private BinanceApiClient apiClient = new BinanceApiClient();
+  private final BinanceApiClient apiClient = new BinanceApiClient();
 
   public Report(ExtraInfo extraInfo) {
     this.extraInfo = extraInfo;

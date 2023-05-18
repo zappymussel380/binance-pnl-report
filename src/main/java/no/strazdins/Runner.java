@@ -28,7 +28,8 @@ public class Runner {
       String inputFilePath = getInputFilePath(args);
       String homeCurrency = getCurrency(args);
       String extraFilePath = getExtraFilePath(args);
-      Report report = ReportGenerator.createReport(inputFilePath, extraFilePath, homeCurrency);
+      ReportGenerator reportGenerator = new ReportGenerator();
+      Report report = reportGenerator.createReport(inputFilePath, extraFilePath, homeCurrency);
       ReportFileWriter.writeTransactionLogToFile(report, TRANSACTION_LOG_CSV_FILE);
       logger.info("Transaction log written to file {}", TRANSACTION_LOG_CSV_FILE);
       ReportFileWriter.writeBalanceLogToFile(report, BALANCE_LOG_CSV_FILE);

@@ -13,7 +13,7 @@ import no.strazdins.tool.TimeConverter;
  * A transaction of receiving interest on savings.
  */
 public class SavingsInterestTransaction extends Transaction {
-  private final RawAccountChange interest;
+  protected final RawAccountChange interest;
 
   /**
    * Create a Savings interest transaction.
@@ -22,16 +22,34 @@ public class SavingsInterestTransaction extends Transaction {
    */
   public SavingsInterestTransaction(Transaction t) {
     super(t);
-    interest = getFirstChangeOfType(Operation.SIMPLE_EARN_FLEXIBLE_INTEREST);
+    interest = getInterestOperation();
     if (interest == null) {
       throw new IllegalStateException("Savings interest without a required raw change");
     }
-    if (!interest.getAccount().equals(AccountType.EARN)) {
-      throw new IllegalArgumentException("Interest must be added to earnings account");
-    }
+    checkAccountType();
     baseCurrency = interest.getAsset();
     baseCurrencyAmount = interest.getAmount();
     baseObtainPriceInUsdt = Decimal.ZERO;
+  }
+
+  /**
+   * Check whether correct account type is used.
+   *
+   * @throws IllegalArgumentException When incorrect account type is used
+   */
+  protected void checkAccountType() throws IllegalArgumentException {
+    if (interest == null || !interest.getAccount().equals(AccountType.EARN)) {
+      throw new IllegalArgumentException("Interest must be added to earnings account");
+    }
+  }
+
+  /**
+   * Get the raw-change where the interest is received.
+   *
+   * @return The interest operation or null if none found
+   */
+  protected RawAccountChange getInterestOperation() {
+    return getFirstChangeOfType(Operation.EARN_INTEREST);
   }
 
   @Override
