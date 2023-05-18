@@ -1,6 +1,8 @@
 package no.strazdins.data;
 
-import static no.strazdins.data.Operation.*;
+import static no.strazdins.data.Operation.BUY;
+import static no.strazdins.data.Operation.SELL;
+import static no.strazdins.data.Operation.WITHDRAW;
 import static no.strazdins.testtools.TestTools.createSpotAccountChanges;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

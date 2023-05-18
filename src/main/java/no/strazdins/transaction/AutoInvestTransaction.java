@@ -85,10 +85,9 @@ public class AutoInvestTransaction extends Transaction {
     if (isInvestment()) {
       newSnapshot.decreaseAsset(baseCurrency, baseCurrencyAmount.negate());
     } else {
-      // TODO - for acquisition - check if the subscription is valid,
-      //    get the invested USDT for this coin,
-      //    calculate obtain price,
-      //    add it to wallet
+      Decimal investedUsdt = subscription.getInvestmentForAsset(baseCurrency);
+      Decimal obtainPrice = investedUsdt.divide(baseCurrencyAmount);
+      newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, obtainPrice);
     }
     return newSnapshot;
   }

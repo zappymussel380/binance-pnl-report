@@ -1,5 +1,6 @@
 package no.strazdins.process;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -75,5 +76,31 @@ class AutoInvestSubscriptionTest {
     subscription.addAssetProportion("LTC", new Decimal("0.3"));
     subscription.addAssetProportion("ETH", new Decimal("0.2"));
     assertTrue(subscription.isValid());
+  }
+
+  @Test
+  void testGetValidInvestmentForAsset() {
+    AutoInvestSubscription subscription = new AutoInvestSubscription(1000L, new Decimal("5"));
+    subscription.addAssetProportion("BTC", new Decimal("0.5"));
+    subscription.addAssetProportion("LTC", new Decimal("0.3"));
+    subscription.addAssetProportion("ETH", new Decimal("0.2"));
+    assertEquals(new Decimal("2.5"), subscription.getInvestmentForAsset("BTC"));
+    assertEquals(new Decimal("1.5"), subscription.getInvestmentForAsset("LTC"));
+    assertEquals(new Decimal("1"), subscription.getInvestmentForAsset("ETH"));
+  }
+
+  @Test
+  void testGetInvalidInvestmentForAsset() {
+    // TODO - try subscription.getInvestmentForAsset for asset which is NOT configured
+    AutoInvestSubscription subscription = new AutoInvestSubscription(1000L, new Decimal("5"));
+    assertThrows(IllegalArgumentException.class, () -> subscription.getInvestmentForAsset("BTC"),
+        "Invalid subscription, proportions not registered");
+    subscription.addAssetProportion("BTC", new Decimal("0.5"));
+    subscription.addAssetProportion("LTC", new Decimal("0.3"));
+    assertThrows(IllegalArgumentException.class, () -> subscription.getInvestmentForAsset("BTC"),
+        "Invalid subscription, proportion sum < 1");
+    subscription.addAssetProportion("ETH", new Decimal("0.2"));
+    assertThrows(IllegalArgumentException.class, () -> subscription.getInvestmentForAsset("BNB"),
+        "Unknown coin");
   }
 }

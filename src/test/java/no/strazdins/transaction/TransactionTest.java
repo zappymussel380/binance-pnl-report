@@ -1,8 +1,10 @@
 package no.strazdins.transaction;
 
+import static no.strazdins.data.Operation.AUTO_INVEST;
 import static no.strazdins.data.Operation.BUY;
 import static no.strazdins.data.Operation.FEE;
 import static no.strazdins.data.Operation.SELL;
+import static no.strazdins.data.Operation.WITHDRAW;
 import static no.strazdins.testtools.TestTools.createDeposit;
 import static no.strazdins.testtools.TestTools.createWithdrawal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -126,6 +128,22 @@ class TransactionTest {
     assertNull(usdWithdrawal.getNecessaryExtraInfo());
     usdWithdrawal = createWithdrawal("-2000", "BUSD");
     assertNull(usdWithdrawal.getNecessaryExtraInfo());
+  }
+
+  @Test
+  void testChangeCount() {
+    Transaction t = new Transaction(System.currentTimeMillis());
+    appendOperation(t, BUY, "0.2", "BTC");
+    appendOperation(t, BUY, "0.3", "BTC");
+    appendOperation(t, SELL, "-0.2", "LTC");
+    appendOperation(t, WITHDRAW, "-12", "BNB");
+    appendOperation(t, WITHDRAW, "-1", "ETH");
+    appendOperation(t, WITHDRAW, "-2", "XRP");
+    assertEquals(2, t.getCountForChangesOfType(BUY));
+    assertEquals(1, t.getCountForChangesOfType(SELL));
+    assertEquals(3, t.getCountForChangesOfType(WITHDRAW));
+    assertEquals(0, t.getCountForChangesOfType(AUTO_INVEST));
+    assertEquals(0, t.getCountForChangesOfType(FEE));
   }
 
   private void appendOperation(Transaction t, Operation operation, String amount, String asset) {

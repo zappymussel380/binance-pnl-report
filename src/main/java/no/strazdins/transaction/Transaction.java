@@ -488,6 +488,16 @@ public class Transaction {
   }
 
   /**
+   * Get the number of atomic changes of specific type stores inside this transaction.
+   *
+   * @param type The type of operation which is of interest
+   * @return The number of changes of this type, 0 if none
+   */
+  public int getCountForChangesOfType(Operation type) {
+    return getChangesOfType(type).size();
+  }
+
+  /**
    * Check whether the provided asset is USD or one of it's coin-equivalents.
    *
    * @param asset The asset

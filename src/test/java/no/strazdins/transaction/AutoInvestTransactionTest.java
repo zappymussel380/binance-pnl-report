@@ -7,10 +7,10 @@ import static no.strazdins.testtools.TestTools.expectAcquisition;
 import static no.strazdins.testtools.TestTools.expectInvestment;
 import static no.strazdins.testtools.TestTools.expectNotSameSubscription;
 import static no.strazdins.testtools.TestTools.expectSameSubscription;
+import static no.strazdins.testtools.TestTools.expectWalletState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 import no.strazdins.data.AccountType;
@@ -146,14 +146,14 @@ class AutoInvestTransactionTest {
   void testProcess() {
     List<Transaction> transactions = createAutoInvestments(
         "-5", "USDT",
-        "0.001", "BNB",
+        "0.01", "BNB",
         "0.0002", "BTC",
         "0.0004", "ETH",
         "-10", "USDT",
         "0.0004", "BTC",
         "0.0008", "ETH",
         "-10", "USDT",
-        "0.0005", "BTC",
+        "0.00065", "BTC",
         "0.001", "ETH",
         "-5", "USDT",
         "0.0002", "BTC",
@@ -164,12 +164,112 @@ class AutoInvestTransactionTest {
     walletSnapshot.addAsset("USDT", new Decimal("100"), Decimal.ONE);
     Transaction t0 = transactions.get(0);
     Transaction t4 = transactions.get(4);
+    Transaction t10 = transactions.get(10);
     ExtraInfo ei = new ExtraInfo();
     ei.add(createAutoInvestExtraInfo(t0.getUtcTime(), "BTC", "0.5", "BNB", "0.3", "ETH", "0.2"));
     ei.add(createAutoInvestExtraInfo(t4.getUtcTime(), "BTC", "0.5", "ETH", "0.5"));
+    ei.add(createAutoInvestExtraInfo(t10.getUtcTime(), "BTC", "1"));
+
     walletSnapshot = t0.process(walletSnapshot, ei.getAtTime(t0.getUtcTime()));
-    // TODO - assertions
-    fail();
+    expectWalletState(walletSnapshot, "0", "0", "95", "USDT", "1");
+
+    Transaction t1 = transactions.get(1);
+    walletSnapshot = t1.process(walletSnapshot, ei.getAtTime(t1.getUtcTime()));
+    expectWalletState(walletSnapshot, "0", "0", "95", "USDT", "1", "0.01", "BNB", "150");
+
+    walletSnapshot = transactions.get(2).process(walletSnapshot, null);
+    expectWalletState(walletSnapshot, "0", "0",
+        "95", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.0002", "BTC", "12500"
+    );
+
+    walletSnapshot = transactions.get(3).process(walletSnapshot, null);
+    expectWalletState(walletSnapshot, "0", "0",
+        "95", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.0002", "BTC", "12500",
+        "0.0004", "ETH", "2500"
+    );
+
+    walletSnapshot = t4.process(walletSnapshot, ei.getAtTime(t4.getUtcTime()));
+    expectWalletState(walletSnapshot, "0", "0",
+        "85", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.0002", "BTC", "12500",
+        "0.0004", "ETH", "2500"
+    );
+
+    walletSnapshot = transactions.get(5).process(walletSnapshot, null);
+    expectWalletState(walletSnapshot, "0", "0",
+        "85", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.0006", "BTC", "12500",
+        "0.0004", "ETH", "2500"
+    );
+
+    walletSnapshot = transactions.get(6).process(walletSnapshot, null);
+    expectWalletState(walletSnapshot, "0", "0",
+        "85", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.0006", "BTC", "12500",
+        "0.0012", "ETH", "5000"
+    );
+
+    walletSnapshot = transactions.get(7).process(walletSnapshot, null);
+    expectWalletState(walletSnapshot, "0", "0",
+        "75", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.0006", "BTC", "12500",
+        "0.0012", "ETH", "5000"
+    );
+
+    walletSnapshot = transactions.get(8).process(walletSnapshot, null);
+    expectWalletState(walletSnapshot, "0", "0",
+        "75", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.00125", "BTC", "10000",
+        "0.0012", "ETH", "5000"
+    );
+
+    walletSnapshot = transactions.get(9).process(walletSnapshot, null);
+    expectWalletState(walletSnapshot, "0", "0",
+        "75", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.00125", "BTC", "10000",
+        "0.0022", "ETH", "5000"
+    );
+
+    walletSnapshot = transactions.get(10).process(walletSnapshot, ei.getAtTime(t10.getUtcTime()));
+    expectWalletState(walletSnapshot, "0", "0",
+        "70", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.00125", "BTC", "10000",
+        "0.0022", "ETH", "5000"
+    );
+
+    walletSnapshot = transactions.get(11).process(walletSnapshot, null);
+    expectWalletState(walletSnapshot, "0", "0",
+        "70", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.00145", "BTC", "12068.96551724",
+        "0.0022", "ETH", "5000"
+    );
+
+    walletSnapshot = transactions.get(12).process(walletSnapshot, null);
+    expectWalletState(walletSnapshot, "0", "0",
+        "65", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.00145", "BTC", "12068.96551724",
+        "0.0022", "ETH", "5000"
+    );
+    walletSnapshot = transactions.get(13).process(walletSnapshot, null);
+    expectWalletState(walletSnapshot, "0", "0",
+        "65", "USDT", "1",
+        "0.01", "BNB", "150",
+        "0.00165", "BTC", "13636.36363636",
+        "0.0022", "ETH", "5000"
+    );
   }
 
   @Test

@@ -117,6 +117,35 @@ public class AutoInvestSubscription {
    * @return True if the subscription is now valid after configuration
    */
   public boolean tryConfigure(ExtraInfoEntry extraInfo) {
-    return false;
+    String[] assets = extraInfo.asset().split("\\|");
+    String[] proportions = extraInfo.value().split("\\|");
+    if (assets.length == 0 || assets.length != proportions.length) {
+      throw new IllegalArgumentException("Incorrect extra info format: " + extraInfo);
+    }
+    for (int i = 0; i < assets.length; ++i) {
+      try {
+        addAssetProportion(assets[i], new Decimal(proportions[i]));
+      } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Invalid proportion: " + proportions[i]);
+      }
+    }
+    return isValid();
+  }
+
+  /**
+   * Get the amount of quote currency (USDT) used to obtain the provided asset, in each investment
+   * step. This is calculated based on provided investment amount and proportions.
+   *
+   * @param asset The asset in question
+   * @return The USDT amount used to acquire this asset in each investment step
+   * @throws IllegalArgumentException If there is no configuration for the asset or when the
+   *                                  subscription is invalid
+   */
+  public Decimal getInvestmentForAsset(String asset) throws IllegalArgumentException {
+    if (!isValid() || !assetProportions.containsKey(asset)) {
+      throw new IllegalArgumentException("Subscription can't determine investment amount for "
+          + asset);
+    }
+    return investmentAmount.multiply(assetProportions.get(asset));
   }
 }
