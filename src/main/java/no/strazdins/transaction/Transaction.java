@@ -117,8 +117,8 @@ public class Transaction {
       t = new SavingsRedemptionTransaction(this);
     } else if (consistsOf(Operation.EARN_INTEREST)) {
       t = new SavingsInterestTransaction(this);
-    } else if (consistsOf(Operation.CASHBACK_VOUCHER)) {
-      t = new CashbackTransaction(this);
+    } else if (consistsOf(Operation.CASHBACK_VOUCHER) || consistsOf(Operation.BNB_VAULT_REWARDS)) {
+      t = new RewardTransaction(this);
     } else if (consistsOf(Operation.COMMISSION_REBATE)) {
       t = new CommissionTransaction(this);
     } else if (consistsOf(Operation.DISTRIBUTION)) {

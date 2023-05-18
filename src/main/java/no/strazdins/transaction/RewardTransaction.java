@@ -6,33 +6,36 @@ import no.strazdins.data.RawAccountChange;
 import no.strazdins.tool.TimeConverter;
 
 /**
- * A cash-back transaction - handled the same way as savings interest - we acquire and
- * asset "for free".
+ * A transaction where an asset is earned "for free" as a some kind of reward.
  */
-public class CashbackTransaction extends SavingsInterestTransaction {
+public class RewardTransaction extends SavingsInterestTransaction {
   /**
-   * Create a Cashback transaction.
+   * Create a Reward transaction.
    *
    * @param t The base transaction
    */
-  public CashbackTransaction(Transaction t) {
+  public RewardTransaction(Transaction t) {
     super(t);
   }
 
   @Override
   protected RawAccountChange getInterestOperation() {
-    return getFirstChangeOfType(Operation.CASHBACK_VOUCHER);
+    RawAccountChange change = getFirstChangeOfType(Operation.CASHBACK_VOUCHER);
+    if (change == null) {
+      change = getFirstChangeOfType(Operation.BNB_VAULT_REWARDS);
+    }
+    return change;
   }
 
   @Override
   public String toString() {
-    return "Cashback " + baseCurrencyAmount + " " + baseCurrency
+    return "Reward " + baseCurrencyAmount + " " + baseCurrency
         + " @ " + TimeConverter.utcTimeToString(utcTime);
   }
 
   @Override
   public String getType() {
-    return "Cashback";
+    return "Reward";
   }
 
   /**
