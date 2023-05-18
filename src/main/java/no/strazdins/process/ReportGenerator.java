@@ -6,6 +6,7 @@ import no.strazdins.data.ExtraInfo;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.file.TransactionFileReader;
+import no.strazdins.tool.TimeConverter;
 import no.strazdins.transaction.Transaction;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -56,7 +57,8 @@ public class ReportGenerator {
     logger.error("Provide the necessary information in the extra-info file `{}`:", extraFilePath);
     if (logger.isEnabled(Level.ERROR)) {
       for (ExtraInfoEntry mi : missingInfo.getAllEntries()) {
-        logger.error("{},{},{},{}", mi.utcTimestamp(), mi.type(), mi.asset(), mi.value());
+        logger.error("{},{},{},{},{}", mi.utcTimestamp(),
+            TimeConverter.utcTimeToString(mi.utcTimestamp()), mi.type(), mi.asset(), mi.value());
       }
     }
   }
