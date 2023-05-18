@@ -1,5 +1,6 @@
 package no.strazdins.data;
 
+import static no.strazdins.testtools.TestTools.createWalletWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -86,20 +87,5 @@ class WalletTest {
         .add("XRP", new Decimal("15"))
         .add("SLP", new Decimal("400"));
     assertEquals(expectedDiff, w2.getDiffFrom(w1));
-  }
-
-  /**
-   * Create wallet with given assets.
-   *
-   * @param assets Each asset is specified as a triplet (amount, asset, obtainPrice)
-   * @return A new wallet with the given assets
-   */
-  public static Wallet createWalletWith(String... assets) {
-    assertEquals(0, assets.length % 3, "Each asset must be specified with three values");
-    Wallet w = new Wallet();
-    for (int i = 0; i < assets.length; i += 3) {
-      w.addAsset(assets[i + 1], new Decimal(assets[i]), new Decimal(assets[i + 2]));
-    }
-    return w;
   }
 }

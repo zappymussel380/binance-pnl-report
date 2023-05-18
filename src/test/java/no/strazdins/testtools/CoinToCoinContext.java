@@ -1,4 +1,4 @@
-package no.strazdins.transaction;
+package no.strazdins.testtools;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -11,25 +11,27 @@ import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletSnapshot;
+import no.strazdins.transaction.CoinToCoinTransaction;
+import no.strazdins.transaction.Transaction;
 
 /**
  * A context for temporary storing data for Coin-to-coin tests, and running the tests.
  */
-class CoinToCoinContext {
+public class CoinToCoinContext {
   private final WalletSnapshot startSnapshot;
   private String buyAsset;
-  private List<String> buyAmounts = new ArrayList<>();
+  private final List<String> buyAmounts = new ArrayList<>();
   private String sellAsset;
-  private List<String> sellAmounts = new ArrayList<>();
+  private final List<String> sellAmounts = new ArrayList<>();
   private String feeAsset;
-  private List<String> feeAmounts = new ArrayList<>();
+  private final List<String> feeAmounts = new ArrayList<>();
 
   /**
    * Create test for coin-to-coin transaction.
    *
    * @param startSnapshot The starting wallet snapshot, before the transaction
    */
-  CoinToCoinContext(WalletSnapshot startSnapshot) {
+  public CoinToCoinContext(WalletSnapshot startSnapshot) {
     this.startSnapshot = startSnapshot;
   }
 
@@ -72,6 +74,11 @@ class CoinToCoinContext {
     return this;
   }
 
+  /**
+   * Process the buy/sell transaction, based on cached buy-amounts, sell-amounts and fee-amounts.
+   *
+   * @return WalletSnapshot after processing the buy/sell transaction
+   */
   public WalletSnapshot process() {
     long time = System.currentTimeMillis();
     Transaction t = new Transaction(time);

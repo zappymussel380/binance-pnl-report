@@ -17,7 +17,7 @@ public class SavingsRedemptionTransaction extends Transaction {
    */
   public SavingsRedemptionTransaction(Transaction t) {
     super(t);
-    withdraw = getFirstChangeOfType(Operation.SIMPLE_EARN_FLEXIBLE_REDEMPTION);
+    withdraw = getFirstChangeOfType(Operation.EARN_REDEMPTION);
     if (withdraw == null) {
       throw new IllegalStateException("Savings withdrawal without a required raw change");
     }

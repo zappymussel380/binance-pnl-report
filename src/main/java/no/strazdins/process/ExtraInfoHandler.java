@@ -110,12 +110,42 @@ public class ExtraInfoHandler {
   }
 
   private ExtraInfoEntry createExtraInfoEntryFromCsvRow(String[] csvRow) throws IOException {
+    String value = parseOneOrMultipleDecimalValues(csvRow[4]);
     return new ExtraInfoEntry(
         TimeConverter.parseLong(csvRow[0]),
         ExtraInfoType.fromString(csvRow[2]),
         csvRow[3],
-        TimeConverter.parseDecimalString(csvRow[4])
+        value
     );
+  }
+
+  /**
+   * Try to interpret the value either as a single decimal value, or several decimal values
+   * separated by | character.
+   *
+   * @param s A string to check
+   * @return The original value if it is either a decimal or a list of decimals
+   * @throws IOException When the value is neither a single decimal, nor multiple decimals
+   *                     separated by |
+   */
+  private String parseOneOrMultipleDecimalValues(String s) throws IOException {
+    boolean valid;
+
+    try {
+      TimeConverter.parseDecimalString(s);
+      valid = true;
+    } catch (IOException e) {
+      valid = false;
+    }
+
+    if (!valid) {
+      String[] values = s.split("\\|");
+      for (String value : values) {
+        TimeConverter.parseDecimalString(value);
+      }
+    }
+
+    return s;
   }
 
   /**

@@ -35,9 +35,13 @@ public class CoinToCoinTransaction extends BuyTransaction {
     Decimal avgBuyPrice = usdUsed.divide(baseCurrencyAmount);
     newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, avgBuyPrice);
 
-    newSnapshot.decreaseAsset(quoteCurrency, quoteAmount.negate());
-    if (fee != null && fee.isNegative()) {
-      newSnapshot.decreaseAsset(feeCurrency, fee.negate());
+    try {
+      newSnapshot.decreaseAsset(quoteCurrency, quoteAmount.negate());
+      if (fee != null && fee.isNegative()) {
+        newSnapshot.decreaseAsset(feeCurrency, fee.negate());
+      }
+    } catch (IllegalStateException e) {
+      throw new IllegalStateException(this + ": " + e.getMessage());
     }
 
     return newSnapshot;

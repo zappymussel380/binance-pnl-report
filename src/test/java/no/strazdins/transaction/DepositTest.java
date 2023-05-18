@@ -50,4 +50,6 @@ class DepositTest {
     assertEquals(new Decimal("653.44092084"), ws3.getWallet().getAvgObtainPrice("LTC"));
     assertEquals(Decimal.ZERO, ws3.getWallet().getAssetAmount("BTC"));
   }
+
+  // TODO - when depositing USD, auto-assume acquire price 1.0, don't ask for extra info
 }

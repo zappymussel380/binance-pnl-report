@@ -19,7 +19,7 @@ class SavingsInterestTest {
 
     long time = System.currentTimeMillis();
     Transaction t = new Transaction(time);
-    t.append(new RawAccountChange(time, AccountType.EARN, Operation.SIMPLE_EARN_FLEXIBLE_INTEREST,
+    t.append(new RawAccountChange(time, AccountType.EARN, Operation.EARN_INTEREST,
         "USDT", new Decimal("1.38"), "Got 1.38 USD in interest"));
     SavingsInterestTransaction interest = new SavingsInterestTransaction(t);
     WalletSnapshot ws2 = interest.process(ws1, null);
