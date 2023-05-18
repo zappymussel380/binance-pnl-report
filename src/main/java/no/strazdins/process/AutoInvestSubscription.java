@@ -117,16 +117,18 @@ public class AutoInvestSubscription {
    * @return True if the subscription is now valid after configuration
    */
   public boolean tryConfigure(ExtraInfoEntry extraInfo) {
-    String[] assets = extraInfo.asset().split("\\|");
-    String[] proportions = extraInfo.value().split("\\|");
-    if (assets.length == 0 || assets.length != proportions.length) {
-      throw new IllegalArgumentException("Incorrect extra info format: " + extraInfo);
-    }
-    for (int i = 0; i < assets.length; ++i) {
-      try {
-        addAssetProportion(assets[i], new Decimal(proportions[i]));
-      } catch (NumberFormatException e) {
-        throw new IllegalArgumentException("Invalid proportion: " + proportions[i]);
+    if (extraInfo != null) {
+      String[] assets = extraInfo.asset().split("\\|");
+      String[] proportions = extraInfo.value().split("\\|");
+      if (assets.length == 0 || assets.length != proportions.length) {
+        throw new IllegalArgumentException("Incorrect extra info format: " + extraInfo);
+      }
+      for (int i = 0; i < assets.length; ++i) {
+        try {
+          addAssetProportion(assets[i], new Decimal(proportions[i]));
+        } catch (NumberFormatException e) {
+          throw new IllegalArgumentException("Invalid proportion: " + proportions[i]);
+        }
       }
     }
     return isValid();

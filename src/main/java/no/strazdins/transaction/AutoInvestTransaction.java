@@ -73,6 +73,9 @@ public class AutoInvestTransaction extends Transaction {
 
   @Override
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
+    if (containsMultipleAutoInvestChanges()) {
+      throw new IllegalStateException("Can't have multiple auto-invest changes at the same time");
+    }
     if (!subscription.isValid() && !subscription.tryConfigure(extraInfo)) {
       throw new IllegalStateException("Missing necessary extra info for auto-invest: "
           + getNecessaryExtraInfo());
@@ -90,6 +93,16 @@ public class AutoInvestTransaction extends Transaction {
       newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, obtainPrice);
     }
     return newSnapshot;
+  }
+
+  /**
+   * Check whether this transaction contains multiple raw account changes of type auto-invest -
+   * this should never happen.
+   *
+   * @return True if multiple auto-invest changes are stored in this transaction
+   */
+  private boolean containsMultipleAutoInvestChanges() {
+    return getCountForChangesOfType(Operation.AUTO_INVEST) > 1;
   }
 
   @Override

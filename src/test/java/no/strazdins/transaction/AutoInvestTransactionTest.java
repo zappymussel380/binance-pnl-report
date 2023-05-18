@@ -9,7 +9,9 @@ import static no.strazdins.testtools.TestTools.expectNotSameSubscription;
 import static no.strazdins.testtools.TestTools.expectSameSubscription;
 import static no.strazdins.testtools.TestTools.expectWalletState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import no.strazdins.data.AccountType;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfo;
 import no.strazdins.data.ExtraInfoEntry;
+import no.strazdins.data.ExtraInfoType;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletSnapshot;
@@ -329,4 +332,24 @@ class AutoInvestTransactionTest {
     }
   }
 
+  @Test
+  void testMultiAutoInvestChangesFail() {
+    List<Transaction> transactions = createAutoInvestments(
+        "-5", "USDT",
+        "0.001", "BNB"
+    );
+    assertInstanceOf(AutoInvestTransaction.class, transactions.get(0));
+    AutoInvestTransaction t0 = (AutoInvestTransaction) transactions.get(0);
+    t0.append(new RawAccountChange(t0.getUtcTime(), AccountType.SPOT, Operation.AUTO_INVEST,
+        "BTC", new Decimal("0.0001"),
+        "Should fail to add BTC in the same second as USDT is spent")
+    );
+    WalletSnapshot walletSnapshot = WalletSnapshot.createEmpty();
+    walletSnapshot.addAsset("USDT", new Decimal("20"), Decimal.ONE);
+    ExtraInfo ei = new ExtraInfo();
+    ei.add(new ExtraInfoEntry(t0.getUtcTime(), ExtraInfoType.AUTO_INVEST_PROPORTIONS,
+        "BNB", "1.0"));
+    ExtraInfoEntry extraInfoEntry = ei.getAtTime(t0.getUtcTime());
+    assertThrows(IllegalStateException.class, () -> t0.process(walletSnapshot, extraInfoEntry));
+  }
 }
