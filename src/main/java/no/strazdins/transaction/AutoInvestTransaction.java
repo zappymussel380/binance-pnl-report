@@ -89,8 +89,8 @@ public class AutoInvestTransaction extends Transaction {
       newSnapshot.decreaseAsset(baseCurrency, baseCurrencyAmount.negate());
     } else {
       Decimal investedUsdt = subscription.getInvestmentForAsset(baseCurrency);
-      Decimal obtainPrice = investedUsdt.divide(baseCurrencyAmount);
-      newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, obtainPrice);
+      baseObtainPriceInUsdt = investedUsdt.divide(baseCurrencyAmount);
+      newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, baseObtainPriceInUsdt);
     }
     return newSnapshot;
   }
