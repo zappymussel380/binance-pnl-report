@@ -11,7 +11,7 @@ public class RawAccountChange {
   private final long utcTime;
   private final AccountType account;
   private final Operation operation;
-  private final String asset;
+  private String asset;
   private Decimal changeAmount;
   private final String remark;
 
@@ -40,7 +40,7 @@ public class RawAccountChange {
   private void runAssertions() {
     if (operation == Operation.BUY && !changeAmount.isPositive()) {
       throw new IllegalArgumentException("Amount must be positive for all buy-type changes @ "
-       + TimeConverter.utcTimeToString(utcTime));
+          + TimeConverter.utcTimeToString(utcTime));
     }
     if (operation == Operation.SELL && !changeAmount.isNegative()) {
       throw new IllegalArgumentException("Amount must be negative for all sell-type changes @ "
@@ -170,5 +170,18 @@ public class RawAccountChange {
    */
   public AccountType getAccount() {
     return account;
+  }
+
+  /**
+   * Set the asset for the change.
+   *
+   * @param asset The asset involved in this account change
+   * @throws IllegalArgumentException When the asset is null
+   */
+  public void setAsset(String asset) throws IllegalArgumentException {
+    if (asset == null) {
+      throw new IllegalArgumentException("Asset can't be null");
+    }
+    this.asset = asset;
   }
 }

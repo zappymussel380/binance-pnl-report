@@ -173,4 +173,19 @@ public class ReportLogic {
     }
     return transactions;
   }
+
+  /**
+   * Check all the assets, rename all the LDxxx assets to xxx
+   * (example: LDUSDT -> USDT, LDBTC -> BTC).
+   *
+   * @param changes Raw account changes to check and update in-place
+   */
+  public void updateLendingAssets(List<RawAccountChange> changes) {
+    for (RawAccountChange change : changes) {
+      String asset = change.getAsset();
+      if (asset != null && asset.length() >= 3 && asset.startsWith("LD")) {
+        change.setAsset(asset.substring(2));
+      }
+    }
+  }
 }
