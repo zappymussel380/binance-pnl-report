@@ -1,13 +1,16 @@
 package no.strazdins.transaction;
 
+import static no.strazdins.data.Operation.BUY_CRYPTO;
 import static no.strazdins.data.Operation.EARN_SUBSCRIPTION;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.Operation;
@@ -25,6 +28,9 @@ import no.strazdins.tool.TimeConverter;
 public class Transaction {
   // All PNL is calculated in this currency
   public static final String QUOTE_CURR = "USDT";
+
+  private static final Set<String> fiatCurrencies = new HashSet<>();
+  private static final Set<String> usdCurrencies = new HashSet<>();
 
   Map<Operation, List<RawAccountChange>> atomicAccountChanges = new EnumMap<>(Operation.class);
   protected final long utcTime;
@@ -87,15 +93,18 @@ public class Transaction {
       mergeRawChangesByType();
     }
 
-    Transaction t = tryToConvertToBuyOrSell();
+    Transaction t = convertToBuyOrSell();
     if (t == null) {
-      t = tryToConvertToDepositOrWithdraw();
+      t = convertToDepositOrWithdraw();
     }
     if (t == null) {
-      t = tryToConvertToSavingsRelated();
+      t = convertToSavingsRelated();
     }
     if (t == null) {
-      t = tryToConvertToAutoInvest();
+      t = convertToAutoInvest();
+    }
+    if (t == null) {
+      t = convertToCardPurchase();
     }
     return t;
   }
@@ -105,7 +114,7 @@ public class Transaction {
         || consistsOfMultiple(Operation.BUY, Operation.SELL);
   }
 
-  private Transaction tryToConvertToSavingsRelated() {
+  private Transaction convertToSavingsRelated() {
     Transaction t = null;
     if (consistsOf(EARN_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
         || consistsOf(Operation.SAVINGS_DISTRIBUTION)
@@ -129,7 +138,7 @@ public class Transaction {
     return t;
   }
 
-  private Transaction tryToConvertToBuyOrSell() {
+  private Transaction convertToBuyOrSell() {
     RawAccountChange buy = getFirstBuyTypeChange();
     RawAccountChange sell = getFirstSellTypeChange();
     boolean hasFee = getFirstChangeOfType(Operation.FEE) != null;
@@ -153,8 +162,16 @@ public class Transaction {
     return t;
   }
 
-  private AutoInvestTransaction tryToConvertToAutoInvest() {
+  private AutoInvestTransaction convertToAutoInvest() {
     return this instanceof AutoInvestTransaction invest ? invest : null;
+  }
+
+  private CardPurchaseTransaction convertToCardPurchase() {
+    CardPurchaseTransaction t = null;
+    if (consistsOfMultiple(BUY_CRYPTO)) {
+      t = new CardPurchaseTransaction(this);
+    }
+    return t;
   }
 
   /**
@@ -170,7 +187,7 @@ public class Transaction {
     return count;
   }
 
-  private Transaction tryToConvertToDepositOrWithdraw() {
+  private Transaction convertToDepositOrWithdraw() {
     Transaction t = null;
     if (consistsOf(Operation.DEPOSIT) || consistsOf(Operation.FIAT_DEPOSIT)) {
       t = new DepositTransaction(this);
@@ -506,7 +523,39 @@ public class Transaction {
    * @return True when it is USD or alike (USDT, BUSD)
    */
   public static boolean isUsdLike(String asset) {
-    return "USD".equals(asset) || "BUSD".equals(asset) || "USDT".equals(asset)
-        || "USDC".equals(asset);
+    lazyInitFiatCurrencies();
+    return usdCurrencies.contains(asset);
+  }
+
+  public static boolean isFiat(String asset) {
+    lazyInitFiatCurrencies();
+    return fiatCurrencies.contains(asset);
+  }
+
+  private static void lazyInitFiatCurrencies() {
+    if (fiatCurrencies.isEmpty()) {
+      fiatCurrencies.add("USD");
+      fiatCurrencies.add("USDT");
+      fiatCurrencies.add("USDC");
+      fiatCurrencies.add("BUSD");
+      fiatCurrencies.add("EUR");
+      fiatCurrencies.add("RUB");
+      fiatCurrencies.add("AUD");
+      fiatCurrencies.add("TRY");
+      fiatCurrencies.add("NGN");
+      fiatCurrencies.add("UAH");
+      fiatCurrencies.add("KZT");
+      fiatCurrencies.add("INR");
+      fiatCurrencies.add("BRL");
+      fiatCurrencies.add("GBP");
+      fiatCurrencies.add("ZAR");
+      fiatCurrencies.add("PLN");
+    }
+    if (usdCurrencies.isEmpty()) {
+      usdCurrencies.add("USD");
+      usdCurrencies.add("USDT");
+      usdCurrencies.add("USDC");
+      usdCurrencies.add("BUSD");
+    }
   }
 }
