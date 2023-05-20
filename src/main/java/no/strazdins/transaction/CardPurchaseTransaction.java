@@ -1,10 +1,12 @@
 package no.strazdins.transaction;
 
 import java.util.Iterator;
+import no.strazdins.data.Decimal;
 import no.strazdins.data.ExtraInfoEntry;
 import no.strazdins.data.ExtraInfoType;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
+import no.strazdins.data.WalletSnapshot;
 
 /**
  * Purchase crypto with card.
@@ -100,5 +102,24 @@ public class CardPurchaseTransaction extends Transaction {
           quoteCurrency + " price in USD");
     }
     return ei;
+  }
+
+  @Override
+  public WalletSnapshot process(WalletSnapshot startSnapshot, ExtraInfoEntry extraInfo) {
+    WalletSnapshot newSnapshot = startSnapshot.prepareForTransaction(this);
+    Decimal quotePriceInUsdt;
+    if (isUsdLike(quoteCurrency)) {
+      quotePriceInUsdt = Decimal.ONE;
+    } else {
+      if (extraInfo == null) {
+        throw new IllegalStateException("Missing exchange rate in extra info!");
+      }
+      quotePriceInUsdt = new Decimal(extraInfo.value());
+    }
+    Decimal usedUsd = quoteAmount.negate().multiply(quotePriceInUsdt);
+    avgPriceInUsdt = usedUsd.divide(baseCurrencyAmount);
+    newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, avgPriceInUsdt);
+    baseObtainPriceInUsdt = newSnapshot.getAvgBaseObtainPrice();
+    return newSnapshot;
   }
 }
