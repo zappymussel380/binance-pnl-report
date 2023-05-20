@@ -16,12 +16,19 @@ public class BuyTransaction extends Transaction {
   protected RawAccountChange quote;
   protected RawAccountChange feeOp;
 
-  public BuyTransaction(Transaction transaction) {
+
+  /**
+   * Create a Buy-transaction.
+   *
+   * @param transaction The base transaction data
+   * @throws IllegalStateException When some information is missing
+   */
+  public BuyTransaction(Transaction transaction) throws IllegalStateException {
     super(transaction);
     initBaseAndQuote();
   }
 
-  private void initBaseAndQuote() {
+  private void initBaseAndQuote() throws IllegalStateException {
     base = getFirstBuyTypeChange();
     quote = getFirstSellTypeChange();
     if (base == null || quote == null) {
