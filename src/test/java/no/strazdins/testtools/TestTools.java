@@ -366,7 +366,8 @@ public class TestTools {
     assertEquals(0, assets.length % 3,
         "Assets must be specified with triplets (amount, asset, obtainPrice)");
     int expectedAssetCount = assets.length / 3;
-    assertEquals(expectedAssetCount, ws.getWallet().getAssetCount());
+    assertEquals(expectedAssetCount, ws.getWallet().getAssetCount(),
+        "Expect " + expectedAssetCount + " asset(s) in the wallet");
     for (int i = 0; i < assets.length; i += 3) {
       String amount = assets[i];
       String asset = assets[i + 1];
@@ -379,9 +380,11 @@ public class TestTools {
   private static void expectAssetAmount(WalletSnapshot ws, String asset, String amount,
                                         String obtainPrice) {
     Decimal expectedAmount = new Decimal(amount);
-    assertEquals(new Decimal(amount), ws.getWallet().getAssetAmount(asset));
+    assertEquals(new Decimal(amount), ws.getWallet().getAssetAmount(asset),
+        "Expected " + asset + " amount");
     if (expectedAmount.isPositive()) {
-      assertEquals(new Decimal(obtainPrice), ws.getWallet().getAvgObtainPrice(asset));
+      assertEquals(new Decimal(obtainPrice), ws.getWallet().getAvgObtainPrice(asset),
+          "Expected " + asset + " obtain price");
     }
   }
 

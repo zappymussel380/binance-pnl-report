@@ -168,7 +168,7 @@ public class ReportLogic {
       } else {
         logger.error("Unknown transaction: {} {}", rawTransaction,
             rawTransaction.getOperationMultiSet());
-        // throw new IllegalStateException("Unknown transaction: " + rawTransaction);
+        throw new IllegalStateException("Unknown transaction: " + rawTransaction);
       }
     }
     return transactions;
