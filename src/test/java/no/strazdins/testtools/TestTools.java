@@ -429,6 +429,32 @@ public class TestTools {
         "Proportions for assets in format proportion1|proportion2|...");
   }
 
+  /**
+   * Create raw account changes.
+   *
+   * @param changes Information for the changes. Each change is specified as a tuple
+   *                (accountType, operation, amount, asset)
+   * @return List of account changes
+   * @throws IllegalArgumentException When some of the values in `changes` is wrong
+   */
+  public static List<RawAccountChange> createChanges(String... changes)
+      throws IllegalArgumentException {
+    List<RawAccountChange> changeList = new ArrayList<>();
+    long time = System.currentTimeMillis();
+    try {
+      for (int i = 0; i < changes.length; i += 4) {
+        AccountType accountType = AccountType.fromString(changes[i]);
+        Operation operation = Operation.fromString(changes[i + 1]);
+        Decimal amount = new Decimal(changes[i + 2]);
+        String asset = changes[i + 3];
+        changeList.add(new RawAccountChange(time, accountType, operation, asset, amount, ""));
+      }
+    } catch (IOException e) {
+      throw new IllegalArgumentException(e.getMessage());
+    }
+    return changeList;
+  }
+
   private static List<String> extractEvenElementsFrom(String[] values) {
     List<String> stringList = new ArrayList<>(Arrays.asList(values));
     return stringList.stream().filter(s -> stringList.indexOf(s) % 2 == 0).toList();

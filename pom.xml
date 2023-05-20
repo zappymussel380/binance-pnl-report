@@ -9,7 +9,7 @@
     <description>Command-line tool for generating Profit/Loss (PNL) report from the Transaction log
         CSV files provided by Binance.
     </description>
-    <version>0.14.0</version>
+    <version>0.15.0</version>
 
     <dependencies>
         <dependency>

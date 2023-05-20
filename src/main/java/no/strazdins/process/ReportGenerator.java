@@ -41,6 +41,7 @@ public class ReportGenerator {
   private List<Transaction> readTransactions(String inputFilePath) throws IOException {
     List<RawAccountChange> accountChanges = TransactionFileReader.readAccountChanges(inputFilePath);
     ReportLogic logic = new ReportLogic();
+    logic.updateLendingAssets(accountChanges);
     List<Transaction> rawTransactions = logic.groupTransactionsByTimestamp(accountChanges);
     return logic.clarifyTransactionTypes(rawTransactions);
   }

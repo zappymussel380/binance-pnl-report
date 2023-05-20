@@ -62,7 +62,6 @@ public class AutoInvestTransaction extends Transaction {
     return "Auto-Invest " + opDetails + " @ "
         + TimeConverter.utcTimeToString(utcTime);
   }
-  // TODO - if invest and acquire (USDT and coin) in the same second - throw error
 
   @Override
   public ExtraInfoEntry getNecessaryExtraInfo() {
