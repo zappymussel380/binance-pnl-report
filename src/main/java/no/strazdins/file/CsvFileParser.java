@@ -76,23 +76,21 @@ public class CsvFileParser {
 
     String[] result = null;
     if (nextRow != null) {
-      result = removeEmptyDoubleQuotes(nextRow.split(","));
+      result = removeDoubleQuotes(nextRow.split(","));
       nextRow = null; // Clear the cached row
     }
     return result;
   }
 
   /**
-   * Go through all values, if a value is "", replace it with a simple empty string.
+   * Go through all values, remove the double quotes.
    *
    * @param values The CSV-values to check
-   * @return The same values, where "\"\"" is replaced with ""
+   * @return The same values, where double quotes are removed
    */
-  private String[] removeEmptyDoubleQuotes(String[] values) {
+  private String[] removeDoubleQuotes(String[] values) {
     for (int i = 0; i < values.length; ++i) {
-      if ("\"\"".equals(values[i])) {
-        values[i] = "";
-      }
+      values[i] = values[i].replace("\"", "");
     }
     return values;
   }
