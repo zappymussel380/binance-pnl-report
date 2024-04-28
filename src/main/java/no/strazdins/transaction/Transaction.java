@@ -1,7 +1,6 @@
 package no.strazdins.transaction;
 
-import static no.strazdins.data.Operation.BUY_CRYPTO;
-import static no.strazdins.data.Operation.EARN_SUBSCRIPTION;
+import static no.strazdins.data.Operation.*;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -20,6 +19,8 @@ import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletDiff;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.TimeConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Contains one financial asset transaction, consisting of several AccountChanges.
@@ -31,6 +32,7 @@ public class Transaction {
 
   private static final Set<String> fiatCurrencies = new HashSet<>();
   private static final Set<String> usdCurrencies = new HashSet<>();
+  private static final Logger log = LogManager.getLogger(Transaction.class);
 
   Map<Operation, List<RawAccountChange>> atomicAccountChanges = new EnumMap<>(Operation.class);
   protected final long utcTime;
@@ -106,6 +108,9 @@ public class Transaction {
     if (t == null) {
       t = convertToCardPurchase();
     }
+    if (t == null) {
+      t = convertToCurrencyExchange();
+    }
     return t;
   }
 
@@ -174,6 +179,14 @@ public class Transaction {
     return t;
   }
 
+  private CurrencyExchangeTransaction convertToCurrencyExchange() {
+    CurrencyExchangeTransaction t = null;
+    if (consistsOfTwoConversions()) {
+      t = new CurrencyExchangeTransaction(this);
+    }
+    return t;
+  }
+
   /**
    * Get the total number of operations (raw changes).
    *
@@ -237,6 +250,12 @@ public class Transaction {
     int n = getCountOfOperationsWithType(operations[0]);
     return n > 1 && getOperationMultiSet().equals(new OperationMultiSet(n, operations));
   }
+
+  private boolean consistsOfTwoConversions() {
+    int n = getCountOfOperationsWithType(CONVERT);
+    return n == 2 && consistsOfMultiple(CONVERT);
+  }
+
 
   private int getCountOfOperationsWithType(Operation operation) {
     List<RawAccountChange> changes = atomicAccountChanges.get(operation);
@@ -331,6 +350,7 @@ public class Transaction {
    * @return The new wallet snapshot after processing this transaction
    */
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
+    log.error("Need to implement the process() method for {}", getClass().getSimpleName());
     throw new UnsupportedOperationException();
   }
 

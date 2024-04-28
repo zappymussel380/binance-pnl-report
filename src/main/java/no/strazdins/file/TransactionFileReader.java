@@ -8,12 +8,16 @@ import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.tool.TimeConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
  * Reads transactions from the Binance-generated CSV file.
  */
 public class TransactionFileReader {
+  private static final Logger log = LogManager.getLogger(TransactionFileReader.class);
+
   /**
    * Not allowed to create instances of the class.
    */
@@ -75,8 +79,8 @@ public class TransactionFileReader {
       String remark = row[6];
       return new RawAccountChange(utcTimestamp, accountType, operation, asset, change, remark);
     } catch (IOException e) {
-      System.err.println("Invalid row: " + String.join(",", row));
-      System.err.println(e.getMessage());
+      log.error("Invalid row: {}", String.join(",", row));
+      log.error(e.getMessage());
       throw e;
     }
   }
