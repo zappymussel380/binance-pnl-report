@@ -66,13 +66,19 @@ public class TransactionFileReader {
     if (row.length != 7) {
       throw new IOException("Invalid row format: " + String.join(",", row));
     }
-    long utcTimestamp = TimeConverter.stringToUtcTimestamp(row[1]);
-    AccountType accountType = AccountType.fromString(row[2]);
-    Operation operation = Operation.fromString(row[3]);
-    String asset = row[4];
-    Decimal change = new Decimal(TimeConverter.parseDecimalString(row[5]));
-    String remark = row[6];
-    return new RawAccountChange(utcTimestamp, accountType, operation, asset, change, remark);
+    try {
+      long utcTimestamp = TimeConverter.stringToUtcTimestamp(row[1]);
+      AccountType accountType = AccountType.fromString(row[2]);
+      Operation operation = Operation.fromString(row[3]);
+      String asset = row[4];
+      Decimal change = new Decimal(TimeConverter.parseDecimalString(row[5]));
+      String remark = row[6];
+      return new RawAccountChange(utcTimestamp, accountType, operation, asset, change, remark);
+    } catch (IOException e) {
+      System.err.println("Invalid row: " + String.join(",", row));
+      System.err.println(e.getMessage());
+      throw e;
+    }
   }
 
 }
