@@ -13,6 +13,7 @@ import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.BinanceApiClient;
 import no.strazdins.tool.ReportHelper;
 import no.strazdins.tool.TimeConverter;
+import no.strazdins.transaction.AutoInvestTransaction;
 import no.strazdins.transaction.SavingsRedemptionTransaction;
 import no.strazdins.transaction.SavingsSubscriptionTransaction;
 import no.strazdins.transaction.Transaction;
@@ -48,9 +49,15 @@ public class Report implements Iterable<WalletSnapshot> {
     WalletDiff snapshotDiff = newSnapshot.getDiffFrom(currentWalletSnapshot);
     WalletDiff rawOperationDiff = transaction.getOperationDiff();
     if (!snapshotDiff.equals(rawOperationDiff) && !isDiffDiscrepancyAllowed(transaction)) {
-      logger.warn("Wallet changes for {} differ from operation changes:", transaction);
-      logger.warn("   Operation diff: {}", rawOperationDiff);
-      logger.warn("   Snapshot  diff: {}", snapshotDiff);
+      if (transaction instanceof AutoInvestTransaction) {
+        logger.debug("Wallet changes for {} differ from operation changes:", transaction);
+        logger.debug("   Operation diff: {}", rawOperationDiff);
+        logger.debug("   Snapshot  diff: {}", snapshotDiff);
+      } else {
+        logger.warn("Wallet changes for {} differ from operation changes:", transaction);
+        logger.warn("   Operation diff: {}", rawOperationDiff);
+        logger.warn("   Snapshot  diff: {}", snapshotDiff);
+      }
     }
     walletSnapshots.add(newSnapshot);
     currentWalletSnapshot = newSnapshot;

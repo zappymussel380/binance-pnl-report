@@ -6,7 +6,7 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="no.strazdins" level="debug" additivity="false">
+        <Logger name="no.strazdins" level="warn" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
         <Root level="warn">

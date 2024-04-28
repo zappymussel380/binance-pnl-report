@@ -8,11 +8,14 @@ import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.TimeConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A transaction of receiving interest on savings.
  */
 public class SavingsInterestTransaction extends Transaction {
+  private static final Logger log = LogManager.getLogger(SavingsInterestTransaction.class);
   protected final RawAccountChange interest;
 
   /**
@@ -38,8 +41,8 @@ public class SavingsInterestTransaction extends Transaction {
    * @throws IllegalArgumentException When incorrect account type is used
    */
   protected void checkAccountType() throws IllegalArgumentException {
-    if (interest == null || !interest.getAccount().equals(AccountType.EARN)) {
-      throw new IllegalArgumentException("Interest must be added to earnings account");
+    if (!interest.getAccount().equals(AccountType.EARN)) {
+      log.debug("Interest transaction in {} account", interest.getAccount());
     }
   }
 
