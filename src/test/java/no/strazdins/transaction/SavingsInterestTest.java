@@ -21,10 +21,21 @@ class SavingsInterestTest {
     Transaction t = new Transaction(time);
     t.append(new RawAccountChange(time, AccountType.EARN, Operation.EARN_INTEREST,
         "USDT", new Decimal("1.38"), "Got 1.38 USD in interest"));
-    SavingsInterestTransaction interest = new SavingsInterestTransaction(t);
-    WalletSnapshot ws2 = interest.process(ws1, null);
+    SavingsInterestTransaction usdInterest = new SavingsInterestTransaction(t);
+    WalletSnapshot ws2 = usdInterest.process(ws1, null);
     assertNotNull(ws2);
     assertEquals(new Decimal("4175.25761154"), ws2.getWallet().getAssetAmount("USDT"));
     assertEquals(new Decimal("0.99966948"), ws2.getWallet().getAvgObtainPrice("USDT"));
+
+    Transaction t2 = new Transaction(time + 1000);
+    t2.append(new RawAccountChange(time, AccountType.SPOT, Operation.EARN_INTEREST,
+        "BTC", new Decimal("0.00000003"), "Got 3E-8 BTC in interest"));
+    SavingsInterestTransaction btcInterest = new SavingsInterestTransaction(t2);
+    WalletSnapshot ws3 = btcInterest.process(ws2, null);
+    assertNotNull(ws3);
+    assertEquals(new Decimal("4175.25761154"), ws3.getWallet().getAssetAmount("USDT"));
+    assertEquals(new Decimal("0.99966948"), ws3.getWallet().getAvgObtainPrice("USDT"));
+    assertEquals(new Decimal("0.00000003"), ws3.getWallet().getAssetAmount("BTC"));
+    assertEquals(new Decimal("0"), ws3.getWallet().getAvgObtainPrice("BTC"));
   }
 }
