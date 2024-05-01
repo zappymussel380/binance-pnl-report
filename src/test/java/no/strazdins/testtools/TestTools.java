@@ -25,6 +25,7 @@ import no.strazdins.process.AutoInvestSubscription;
 import no.strazdins.process.ReportLogic;
 import no.strazdins.transaction.AutoInvestTransaction;
 import no.strazdins.transaction.BuyTransaction;
+import no.strazdins.transaction.CurrencyExchangeTransaction;
 import no.strazdins.transaction.DepositTransaction;
 import no.strazdins.transaction.DistributionTransaction;
 import no.strazdins.transaction.SellTransaction;
@@ -351,6 +352,35 @@ public class TestTools {
     Transaction distribute = t.clarifyTransactionType();
     assertInstanceOf(DistributionTransaction.class, distribute);
     return distribute.process(startSnapshot, null);
+  }
+
+  /**
+   * Process a currency conversion transaction.
+   *
+   * @param startSnapshot Wallet snapshot before the transaction
+   * @param soldAmount    The amount of sold currency
+   * @param soldAsset     The sold asset
+   * @param boughtAmount  The amount of bought asset
+   * @param boughtAsset   The bought asset
+   * @return Wallet snapshot after processing the transaction
+   */
+  public static WalletSnapshot processConversion(WalletSnapshot startSnapshot,
+                                                 String soldAmount, String soldAsset,
+                                                 String boughtAmount, String boughtAsset) {
+    Decimal sold = new Decimal(soldAmount);
+    Decimal bought = new Decimal(boughtAmount);
+    if (!sold.isNegative() || !bought.isPositive()) {
+      throw new IllegalArgumentException("Must buy a positive amount and sell a negative amount");
+    }
+    transactionTime += 1000;
+    Transaction t = new Transaction(transactionTime);
+    t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.CONVERT, soldAsset,
+        new Decimal(soldAmount), "Exchange " + soldAmount + " " + soldAsset));
+    t.append(new RawAccountChange(transactionTime, AccountType.SPOT, Operation.CONVERT, boughtAsset,
+        new Decimal(boughtAmount), "Exchange " + boughtAmount + " " + boughtAsset));
+    Transaction exchange = t.clarifyTransactionType();
+    assertInstanceOf(CurrencyExchangeTransaction.class, exchange);
+    return exchange.process(startSnapshot, null);
   }
 
   /**

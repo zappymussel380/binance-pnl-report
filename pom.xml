@@ -9,7 +9,7 @@
     <description>Command-line tool for generating Profit/Loss (PNL) report from the Transaction log
         CSV files provided by Binance.
     </description>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
 
     <dependencies>
         <dependency>
@@ -38,14 +38,13 @@
             <version>2.10.1</version>
         </dependency>
 
-
     </dependencies>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <logger.version>2.20.0</logger.version>
+        <logger.version>2.23.1</logger.version>
     </properties>
 
 </project>

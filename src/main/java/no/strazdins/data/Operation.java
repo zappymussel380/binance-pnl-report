@@ -9,7 +9,7 @@ public enum Operation {
   BUY, SELL, FEE, DEPOSIT, WITHDRAW, DISTRIBUTION, SAVINGS_DISTRIBUTION,
   BNB_VAULT_REWARDS, BUY_CRYPTO, CASHBACK_VOUCHER, COMMISSION_REBATE, FIAT_DEPOSIT,
   EARN_SUBSCRIPTION, EARN_REDEMPTION, EARN_INTEREST,
-  SMALL_ASSETS_EXCHANGE_BNB, AUTO_INVEST;
+  SMALL_ASSETS_EXCHANGE_BNB, AUTO_INVEST, CONVERT;
 
   /**
    * Convert a capitalized string to a corresponding enum.
@@ -22,10 +22,10 @@ public enum Operation {
     return switch (s) {
       case "Buy", "Transaction Buy", "Transaction Revenue" -> BUY;
       case "Sell", "Transaction Sold", "Transaction Spend", "Transaction Related" -> SELL;
-      case "Fee" -> FEE;
+      case "Fee", "Transaction Fee" -> FEE;
       case "Deposit" -> DEPOSIT;
-      case "Withdraw" -> WITHDRAW;
-      case "Distribution" -> DISTRIBUTION;
+      case "Withdraw", "Fiat Withdraw" -> WITHDRAW;
+      case "Distribution", "Airdrop Assets" -> DISTRIBUTION;
       case "Savings Distribution" -> SAVINGS_DISTRIBUTION;
       case "BNB Vault Rewards" -> BNB_VAULT_REWARDS;
       case "Buy Crypto" -> BUY_CRYPTO;
@@ -37,6 +37,7 @@ public enum Operation {
       case "Simple Earn Flexible Interest" -> EARN_INTEREST;
       case "Small Assets Exchange BNB" -> SMALL_ASSETS_EXCHANGE_BNB;
       case "Auto-Invest Transaction" -> AUTO_INVEST;
+      case "Binance Convert" -> CONVERT;
       default -> throw new IOException("Invalid operation string: " + s);
     };
   }

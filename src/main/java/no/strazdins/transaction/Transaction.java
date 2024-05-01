@@ -1,8 +1,5 @@
 package no.strazdins.transaction;
 
-import static no.strazdins.data.Operation.BUY_CRYPTO;
-import static no.strazdins.data.Operation.EARN_SUBSCRIPTION;
-
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -20,6 +17,8 @@ import no.strazdins.data.Wallet;
 import no.strazdins.data.WalletDiff;
 import no.strazdins.data.WalletSnapshot;
 import no.strazdins.tool.TimeConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Contains one financial asset transaction, consisting of several AccountChanges.
@@ -31,6 +30,7 @@ public class Transaction {
 
   private static final Set<String> fiatCurrencies = new HashSet<>();
   private static final Set<String> usdCurrencies = new HashSet<>();
+  private static final Logger log = LogManager.getLogger(Transaction.class);
 
   Map<Operation, List<RawAccountChange>> atomicAccountChanges = new EnumMap<>(Operation.class);
   protected final long utcTime;
@@ -106,6 +106,9 @@ public class Transaction {
     if (t == null) {
       t = convertToCardPurchase();
     }
+    if (t == null) {
+      t = convertToCurrencyExchange();
+    }
     return t;
   }
 
@@ -116,10 +119,10 @@ public class Transaction {
 
   private Transaction convertToSavingsRelated() {
     Transaction t = null;
-    if (consistsOf(EARN_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
+    if (consistsOf(Operation.EARN_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
         || consistsOf(Operation.SAVINGS_DISTRIBUTION)
-        || consistsOf(EARN_SUBSCRIPTION)
-        || consistsOfMultiple(EARN_SUBSCRIPTION)) {
+        || consistsOf(Operation.EARN_SUBSCRIPTION)
+        || consistsOfMultiple(Operation.EARN_SUBSCRIPTION)) {
       t = new SavingsSubscriptionTransaction(this);
     } else if (consistsOf(Operation.EARN_REDEMPTION)
         || consistsOfMultiple(Operation.EARN_REDEMPTION)) {
@@ -168,8 +171,16 @@ public class Transaction {
 
   private CardPurchaseTransaction convertToCardPurchase() {
     CardPurchaseTransaction t = null;
-    if (consistsOfMultiple(BUY_CRYPTO)) {
+    if (consistsOfMultiple(Operation.BUY_CRYPTO)) {
       t = new CardPurchaseTransaction(this);
+    }
+    return t;
+  }
+
+  private CurrencyExchangeTransaction convertToCurrencyExchange() {
+    CurrencyExchangeTransaction t = null;
+    if (consistsOfTwoConversions()) {
+      t = new CurrencyExchangeTransaction(this);
     }
     return t;
   }
@@ -237,6 +248,12 @@ public class Transaction {
     int n = getCountOfOperationsWithType(operations[0]);
     return n > 1 && getOperationMultiSet().equals(new OperationMultiSet(n, operations));
   }
+
+  private boolean consistsOfTwoConversions() {
+    int n = getCountOfOperationsWithType(Operation.CONVERT);
+    return n == 2 && consistsOfMultiple(Operation.CONVERT);
+  }
+
 
   private int getCountOfOperationsWithType(Operation operation) {
     List<RawAccountChange> changes = atomicAccountChanges.get(operation);
@@ -331,6 +348,7 @@ public class Transaction {
    * @return The new wallet snapshot after processing this transaction
    */
   public WalletSnapshot process(WalletSnapshot walletSnapshot, ExtraInfoEntry extraInfo) {
+    log.error("Need to implement the process() method for {}", getClass().getSimpleName());
     throw new UnsupportedOperationException();
   }
 

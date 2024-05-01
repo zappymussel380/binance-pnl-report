@@ -232,7 +232,7 @@ Asset dividend means that the user gets a "free token" because of her holding a 
 the wallet for a specific amount of time. The algorithm for wallet updates is the same as for the
 savings interest, because we get an extra amount of asset (coin) for free.
 
-This is the same as `Asset Distribution` transaction.
+This is the same as `Asset Distribution` or `Airdrop Assets` transaction.
 
 #### Other transactions
 

@@ -8,12 +8,16 @@ import no.strazdins.data.Decimal;
 import no.strazdins.data.Operation;
 import no.strazdins.data.RawAccountChange;
 import no.strazdins.tool.TimeConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
  * Reads transactions from the Binance-generated CSV file.
  */
 public class TransactionFileReader {
+  private static final Logger log = LogManager.getLogger(TransactionFileReader.class);
+
   /**
    * Not allowed to create instances of the class.
    */
@@ -66,13 +70,19 @@ public class TransactionFileReader {
     if (row.length != 7) {
       throw new IOException("Invalid row format: " + String.join(",", row));
     }
-    long utcTimestamp = TimeConverter.stringToUtcTimestamp(row[1]);
-    AccountType accountType = AccountType.fromString(row[2]);
-    Operation operation = Operation.fromString(row[3]);
-    String asset = row[4];
-    Decimal change = new Decimal(TimeConverter.parseDecimalString(row[5]));
-    String remark = row[6];
-    return new RawAccountChange(utcTimestamp, accountType, operation, asset, change, remark);
+    try {
+      long utcTimestamp = TimeConverter.stringToUtcTimestamp(row[1]);
+      AccountType accountType = AccountType.fromString(row[2]);
+      Operation operation = Operation.fromString(row[3]);
+      String asset = row[4];
+      Decimal change = new Decimal(TimeConverter.parseDecimalString(row[5]));
+      String remark = row[6];
+      return new RawAccountChange(utcTimestamp, accountType, operation, asset, change, remark);
+    } catch (IOException e) {
+      log.error("Invalid row: {}", String.join(",", row));
+      log.error(e.getMessage());
+      throw e;
+    }
   }
 
 }
