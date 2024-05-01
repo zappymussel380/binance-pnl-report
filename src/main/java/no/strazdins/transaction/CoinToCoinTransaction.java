@@ -32,8 +32,13 @@ public class CoinToCoinTransaction extends BuyTransaction {
     // Base - the bought coin, quote - the sold coin
     Decimal usdUsed = quoteAmount.negate().multiply(newSnapshot.getAvgQuoteObtainPrice());
     usdUsed = usdUsed.add(feeInUsdt.negate());
-    Decimal avgBuyPrice = usdUsed.divide(baseCurrencyAmount);
-    newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, avgBuyPrice);
+    Decimal avgBuyPriceInUsdt = usdUsed.divide(baseCurrencyAmount);
+    newSnapshot.addAsset(baseCurrency, baseCurrencyAmount, avgBuyPriceInUsdt);
+
+    this.baseObtainPriceInUsdt = newSnapshot.getAvgBaseObtainPrice();
+    // Note: this is actually wrong naming, because in this case, the variable will contain
+    // coin-to-coin price, not coin price in USDT!
+    this.avgPriceInUsdt = baseCurrencyAmount.divide(quoteAmount.negate());
 
     try {
       newSnapshot.decreaseAsset(quoteCurrency, quoteAmount.negate());
