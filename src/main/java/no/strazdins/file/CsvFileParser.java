@@ -1,6 +1,8 @@
 package no.strazdins.file;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -10,6 +12,8 @@ import java.io.IOException;
  * Parses standard CSV files.
  */
 public class CsvFileParser {
+  private static final String COMMENT_CHARACTER = "#";
+  private static final Logger log = LogManager.getLogger(CsvFileParser.class);
   private final BufferedReader reader;
 
   private String nextRow = null;
@@ -52,10 +56,16 @@ public class CsvFileParser {
    * Fetch the next row from the file, buffer it in the nextRow variable.
    * If end of file is reached, store null in nextRow.
    * Also update the "isEndReached" state.
+   * Ignores commented-lines
    */
   private void fetchAndBufferNextRow() {
     try {
-      nextRow = reader.readLine();
+      do {
+        nextRow = reader.readLine();
+        if (nextRow != null && nextRow.startsWith(COMMENT_CHARACTER)) {
+          log.error("Commented out row: {}", nextRow);
+        }
+      } while (nextRow != null && nextRow.startsWith(COMMENT_CHARACTER));
     } catch (IOException e) {
       nextRow = null;
     }
