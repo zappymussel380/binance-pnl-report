@@ -45,7 +45,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <logger.version>2.20.0</logger.version>
+        <logger.version>2.23.1</logger.version>
     </properties>
 
 </project>
