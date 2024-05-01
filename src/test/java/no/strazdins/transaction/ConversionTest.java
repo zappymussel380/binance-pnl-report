@@ -1,6 +1,8 @@
 package no.strazdins.transaction;
 
-import static no.strazdins.testtools.TestTools.*;
+import static no.strazdins.testtools.TestTools.expectWalletState;
+import static no.strazdins.testtools.TestTools.processConversion;
+import static no.strazdins.testtools.TestTools.processDeposit;
 
 import no.strazdins.data.WalletSnapshot;
 import org.junit.jupiter.api.Test;

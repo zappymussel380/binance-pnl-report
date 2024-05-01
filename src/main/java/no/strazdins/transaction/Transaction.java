@@ -1,7 +1,5 @@
 package no.strazdins.transaction;
 
-import static no.strazdins.data.Operation.*;
-
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -121,10 +119,10 @@ public class Transaction {
 
   private Transaction convertToSavingsRelated() {
     Transaction t = null;
-    if (consistsOf(EARN_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
+    if (consistsOf(Operation.EARN_SUBSCRIPTION, Operation.SAVINGS_DISTRIBUTION)
         || consistsOf(Operation.SAVINGS_DISTRIBUTION)
-        || consistsOf(EARN_SUBSCRIPTION)
-        || consistsOfMultiple(EARN_SUBSCRIPTION)) {
+        || consistsOf(Operation.EARN_SUBSCRIPTION)
+        || consistsOfMultiple(Operation.EARN_SUBSCRIPTION)) {
       t = new SavingsSubscriptionTransaction(this);
     } else if (consistsOf(Operation.EARN_REDEMPTION)
         || consistsOfMultiple(Operation.EARN_REDEMPTION)) {
@@ -173,7 +171,7 @@ public class Transaction {
 
   private CardPurchaseTransaction convertToCardPurchase() {
     CardPurchaseTransaction t = null;
-    if (consistsOfMultiple(BUY_CRYPTO)) {
+    if (consistsOfMultiple(Operation.BUY_CRYPTO)) {
       t = new CardPurchaseTransaction(this);
     }
     return t;
@@ -252,8 +250,8 @@ public class Transaction {
   }
 
   private boolean consistsOfTwoConversions() {
-    int n = getCountOfOperationsWithType(CONVERT);
-    return n == 2 && consistsOfMultiple(CONVERT);
+    int n = getCountOfOperationsWithType(Operation.CONVERT);
+    return n == 2 && consistsOfMultiple(Operation.CONVERT);
   }
 
 
