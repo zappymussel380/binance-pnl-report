@@ -14,6 +14,7 @@ public class BinanceApiClient {
   private static final Logger logger = LogManager.getLogger(BinanceApiClient.class);
   private static final String API_BASE_URL = "https://api.binance.com/api/v3";
   private static final long DELAY_AFTER_REQUEST_MS = 500;
+  private static final String DEFAULT_QUOTE_CURR = "USDC";
 
   private final RestApiClient client = new RestApiClient(API_BASE_URL);
 
@@ -27,7 +28,7 @@ public class BinanceApiClient {
    * @return The daily close price of the requested price candle, or null if not found
    */
   public Decimal getDailyClosePrice(String asset, long timestamp) {
-    String requestUrl = "/klines?symbol=" + (asset + "USDT")
+    String requestUrl = "/klines?symbol=" + (asset + DEFAULT_QUOTE_CURR)
         + "&limit=1&interval=1d&startTime=" + TimeConverter.getDayStart(timestamp);
     List<List<Object>> rawResponse = client.get(requestUrl,
         new TypeToken<List<List<Object>>>() {
