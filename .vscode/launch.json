@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Runner",
+      "request": "launch",
+      "mainClass": "no.strazdins.Runner",
+      "projectName": "pnl-report-tool",
+      "args": "2025.csv NOK extra-info-usdt.csv",
+      "vmArgs": "-Dlog4j2.configurationFile=${workspaceFolder}/src/main/resources/log4j2.xml"
+    }
+  ]
+}
