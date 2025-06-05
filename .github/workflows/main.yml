@@ -1,15 +1,15 @@
 name: Build fat-jar
 
 on:
-  workflow_dispatch:  # let you trigger it manually
-  push:               # or when you push a commit
+  workflow_dispatch:
+  push:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Java 17
@@ -18,11 +18,18 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Build shaded JAR
+      - name: Build project (skip tests)
         run: mvn -DskipTests clean package
 
-      - name: Upload artifact
+      # ---- Show what has been produced -------------------------------
+      - name: List target directory
+        run: |
+          echo "===== Contents of target/ ====="
+          ls -l target
+
+      # ---- Upload every JAR we find ----------------------------------
+      - name: Upload JARs
         uses: actions/upload-artifact@v4
         with:
-          name: pnl-report-fat-jar
-          path: target/*jar-with-dependencies.jar
+          name: pnl-report-jars
+          path: target/*.jar
