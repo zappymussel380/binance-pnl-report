@@ -1,0 +1,19 @@
+name: Build fat-jar
+on:
+  workflow_dispatch:
+  push:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: mvn -pl cli -am -DskipTests clean package
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnl-report-fat-jar
+          path: cli/target/*jar-with-dependencies.jar
