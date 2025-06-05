@@ -73,7 +73,7 @@
                             <!-- change to the class that really contains main() if needed -->
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>no.strazdins.tool.ReportTool</mainClass>
+                                    <mainClass>no.strazdins.Runner</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
